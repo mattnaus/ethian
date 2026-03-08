@@ -17,6 +17,46 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 
 ---
 
+## Current Status
+
+> Last updated: 2026-03-08
+
+### What exists (foundation complete)
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Project scaffold | ✅ Done | Next.js 15, TS strict, Tailwind v4, all deps |
+| Database schema | ✅ Done | All tables defined; no migrations applied yet |
+| IMAP client | ✅ Done | `src/lib/imap/client.ts` — imapflow wrapper |
+| SMTP client | ✅ Done | `src/lib/smtp/client.ts` — nodemailer wrapper |
+| BullMQ queues | ✅ Done | `src/lib/queue/` — queues + sync worker with categorisation |
+| Password encryption | ✅ Done | `src/lib/crypto.ts` — AES-256-CBC |
+| Shared types | ✅ Done | `src/types/index.ts` — enums, Drizzle type re-exports |
+| README | ✅ Done | Setup guide, architecture overview, provider table |
+| CLAUDE.md | ✅ Done | This file |
+
+### What's not built yet
+
+| Area | Notes |
+|------|-------|
+| Auth | NextAuth.js v5 credentials flow; `/login`, `/register` routes |
+| Mail account management | Settings UI + Server Actions to add/edit/delete IMAP accounts |
+| Email views | Imbox, Feed, Paper Trail, Screener, Set Aside, Reply Later |
+| Screener UI | Approve/block decisions, re-categorisation trigger |
+| Email detail view | Thread view, body rendering, attachment download |
+| Compose / Reply | SMTP send flow wired to UI |
+| DB migrations | Schema written but `pnpm db:push` not yet run against a real DB |
+| Worker deployment | Worker process exists but hasn't been run |
+
+### Next logical steps
+1. Set up NextAuth.js v5 (credentials provider, session, middleware)
+2. Mail account CRUD (Server Actions + settings page)
+3. Trigger initial sync when an account is added
+4. Imbox view (list + detail)
+5. Screener view (approve/block UI)
+
+---
+
 ## Tech Stack
 
 | Layer | Technology | Rationale |
@@ -34,24 +74,28 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 
 ## Directory Structure
 
+Directories and files marked `[planned]` are intended but not yet created.
+
 ```
 ethian/
-├── drizzle/                 # Generated SQL migrations (git-tracked)
+├── .claude/
+│   └── work/                # Dated session work logs (YYYYMMDD.md)
+├── drizzle/                 # Generated SQL migrations [planned — run db:generate]
 ├── src/
 │   ├── app/                 # Next.js App Router
 │   │   ├── layout.tsx       # Root layout (Inter font, global CSS)
-│   │   ├── page.tsx         # Landing/placeholder page
+│   │   ├── page.tsx         # Placeholder page
 │   │   ├── globals.css      # Tailwind v4 + shadcn/ui CSS variables
-│   │   ├── (auth)/          # Auth routes: /login, /register
-│   │   ├── (app)/           # Authenticated app shell
-│   │   │   ├── imbox/       # Imbox view
-│   │   │   ├── feed/        # Feed view
-│   │   │   ├── paper-trail/ # Paper Trail view
-│   │   │   ├── screener/    # Screener view
-│   │   │   ├── set-aside/   # Set Aside view
-│   │   │   ├── reply-later/ # Reply Later view
-│   │   │   └── settings/    # Account management
-│   │   └── api/             # Route handlers (webhooks, auth callbacks)
+│   │   ├── (auth)/          # [planned] /login, /register
+│   │   ├── (app)/           # [planned] Authenticated app shell
+│   │   │   ├── imbox/       # [planned] Imbox view
+│   │   │   ├── feed/        # [planned] Feed view
+│   │   │   ├── paper-trail/ # [planned] Paper Trail view
+│   │   │   ├── screener/    # [planned] Screener view
+│   │   │   ├── set-aside/   # [planned] Set Aside view
+│   │   │   ├── reply-later/ # [planned] Reply Later view
+│   │   │   └── settings/    # [planned] Account management
+│   │   └── api/             # [planned] Route handlers (auth callbacks, etc.)
 │   ├── db/
 │   │   ├── schema/
 │   │   │   ├── accounts.ts  # users, mail_accounts tables
@@ -67,12 +111,14 @@ ethian/
 │   │   ├── queue/
 │   │   │   ├── index.ts     # BullMQ queue definitions + Redis connection
 │   │   │   └── workers/
-│   │   │       └── sync.worker.ts  # Background worker process
+│   │   │       └── sync.worker.ts  # Background worker: sync + categorise
 │   │   ├── crypto.ts        # AES-256-CBC encrypt/decrypt for passwords
 │   │   └── utils.ts         # cn() Tailwind class merging helper
 │   └── types/
 │       └── index.ts         # Shared TS types, enums, Drizzle type re-exports
 ├── .env.example             # Environment variable template
+├── CLAUDE.md                # This file — architecture & conventions
+├── README.md                # User-facing setup guide and overview
 ├── drizzle.config.ts        # Drizzle Kit configuration
 ├── next.config.ts           # Next.js config (serverExternalPackages)
 ├── package.json
