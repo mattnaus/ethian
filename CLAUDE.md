@@ -226,6 +226,12 @@ This means:
 - Long-running operations (IMAP sync, email processing) always go through BullMQ.
 - Never run IMAP operations in a Next.js Server Action directly — add a job.
 
+### Committing & Pushing
+- **Always commit and push after completing a task**, unless the user explicitly says otherwise.
+- Commit messages follow Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`.
+- Stage specific files by name — avoid `git add -A` or `git add .`.
+- Update `README.md` if the change affects setup, architecture, or user-facing behaviour.
+
 ### Password Storage
 - IMAP/SMTP passwords are encrypted with AES-256-CBC before DB insert.
 - Use `encrypt()` / `decrypt()` from `src/lib/crypto.ts`.
@@ -250,6 +256,36 @@ openssl rand -base64 32
 
 # ENCRYPTION_KEY
 openssl rand -hex 32
+```
+
+---
+
+## Work Log Convention
+
+Recent work is documented in [`.claude/work/`](.claude/work/) — see the dated files there for change history.
+
+For every feature, bug fix, or change session, maintain a dated work log:
+
+- **Location:** `.claude/work/YYYYMMDD.md` (e.g. `.claude/work/20260308.md`)
+- If a file for the current date does not exist, **create it**.
+- Append to the file if it already exists (multiple sessions on the same day).
+
+Each entry should document:
+1. **Request** — the feature, issue, or bug as described
+2. **Plan** — the approach and key decisions made
+3. **Changes** — files created/modified and what changed in each
+
+Example entry format:
+```markdown
+## [Brief title]
+
+**Request:** ...
+
+**Plan:** ...
+
+**Changes:**
+- `src/db/schema/accounts.ts` — added X column
+- `src/lib/imap/client.ts` — fixed Y
 ```
 
 ---
