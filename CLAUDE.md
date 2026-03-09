@@ -65,6 +65,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 - **shadcn/ui only** — use shadcn/ui components by default for all UI elements. Custom components require explicit user confirmation before building.
 - **Dark mode only** — no light mode; all CSS variables and Tailwind classes target dark backgrounds.
 - **Inspiration:** Linear (linear.app) and Superlist — clean, compact, high-contrast dark UI with strong typographic hierarchy.
+- **Consistency is non-negotiable** — spacing, heights, borders, and colors must align perfectly across the app. When in doubt, measure against an existing element rather than guessing. Pixel-level alignment (e.g. sidebar header height matching the main panel header height) is expected, not optional.
 
 ### Color palette
 | Role | Value | Usage |
@@ -83,6 +84,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 - **Nav items:** Icon (Lucide) + text label, always visible (no collapsed mode for now).
 - **Active state:** `orange-500` text + subtle `orange-500/10` background pill.
 - **Main content:** Fills remaining width, `zinc-950` background.
+- **Header height:** Both the sidebar logo bar and every main-panel top bar use `h-12` (48px) with `flex items-center`. This keeps the horizontal border line continuous across the full width of the app.
 
 ### Typography
 - **Font:** Inter (already configured)
