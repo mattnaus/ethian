@@ -1,39 +1,18 @@
 import type { Metadata } from "next";
-import { auth, signOut } from "@/auth";
 
 export const metadata: Metadata = { title: "Imbox" };
 
-export default async function ImboxPage() {
-  const session = await auth();
-
+export default function ImboxPage() {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border px-6 py-4 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-foreground">Imbox</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground">
-            {session?.user?.name ?? session?.user?.email}
-          </span>
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/login" });
-            }}
-          >
-            <button
-              type="submit"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            >
-              Sign out
-            </button>
-          </form>
-        </div>
+    <div className="flex flex-col h-full">
+      <header className="border-b border-zinc-800 px-6 py-4">
+        <h1 className="text-base font-semibold text-zinc-100">Imbox</h1>
       </header>
-      <main className="px-6 py-12 text-center">
-        <p className="text-muted-foreground text-sm">
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-sm text-zinc-500">
           Your Imbox is empty. Add a mail account in Settings to get started.
         </p>
-      </main>
+      </div>
     </div>
   );
 }

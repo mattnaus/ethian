@@ -125,6 +125,38 @@ export function createImapClient(account: MailAccount): ImapFlow {
 }
 
 // ---------------------------------------------------------------------------
+// Connection verification
+// ---------------------------------------------------------------------------
+
+/**
+ * Verify that we can authenticate with the IMAP server.
+ * Connects, opens INBOX, then immediately logs out.
+ * Returns { ok: true } on success or { ok: false, error: string } on failure.
+ */
+export async function verifyImapConnection(
+  account: MailAccount
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const client = createImapClient(account);
+  try {
+    await client.connect();
+    const lock = await client.getMailboxLock("INBOX");
+    lock.release();
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Unknown IMAP error",
+    };
+  } finally {
+    try {
+      await client.logout();
+    } catch {
+      // non-fatal
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Sync
 // ---------------------------------------------------------------------------
 

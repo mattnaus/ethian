@@ -2,88 +2,61 @@
 
 /* =============================================================================
    Ethian Design System — CSS custom properties for shadcn/ui
-   Follows the shadcn/ui v2 convention of HSL values without the hsl() wrapper.
+   Dark mode only. Zinc scale + orange-500 accent.
+   Follows shadcn/ui v2 convention: HSL values without the hsl() wrapper.
    ============================================================================= */
 
 @layer base {
   :root {
-    /* Background & foreground */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Background & foreground — zinc-950 / zinc-50 */
+    --background: 240 6% 4%;       /* zinc-950 #09090b */
+    --foreground: 0 0% 98%;        /* zinc-50  #fafafa */
 
-    /* Card */
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card — zinc-900 */
+    --card: 240 4% 10%;            /* zinc-900 #18181b */
+    --card-foreground: 0 0% 98%;
 
-    /* Popover */
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Popover — zinc-900 */
+    --popover: 240 4% 10%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Brand / Primary */
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary — orange-500 */
+    --primary: 25 95% 53%;         /* orange-500 #f97316 */
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary */
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary — zinc-800 */
+    --secondary: 240 4% 16%;       /* zinc-800 #27272a */
+    --secondary-foreground: 0 0% 98%;
 
-    /* Muted */
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted — zinc-800 */
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%; /* zinc-400 #a1a1aa */
 
-    /* Accent */
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent — orange-500/10 for backgrounds */
+    --accent: 240 4% 16%;
+    --accent-foreground: 0 0% 98%;
 
-    /* Destructive */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive — red-500 */
+    --destructive: 0 72% 51%;      /* red-500 #ef4444 */
+    --destructive-foreground: 0 0% 98%;
 
-    /* Border, input, ring */
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Border & input — zinc-800 */
+    --border: 240 4% 16%;          /* zinc-800 #27272a */
+    --input: 240 4% 16%;
+
+    /* Ring — orange-500 */
+    --ring: 25 95% 53%;
 
     /* Border radius */
     --radius: 0.5rem;
 
     /* Ethian category colors */
-    --color-inbox: 217 91% 60%;       /* blue — approved / Imbox */
-    --color-feed: 142 72% 45%;        /* green — newsletters */
-    --color-paper-trail: 38 92% 50%;  /* amber — receipts */
+    --color-inbox: 217 91% 60%;       /* blue   — approved / Imbox */
+    --color-feed: 142 72% 45%;        /* green  — newsletters */
+    --color-paper-trail: 38 92% 50%;  /* amber  — receipts */
     --color-screener: 262 80% 60%;    /* violet — unknown senders */
-    --color-set-aside: 199 89% 48%;   /* cyan — parked */
-    --color-reply-later: 0 72% 58%;   /* red — needs reply */
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --color-set-aside: 199 89% 48%;   /* cyan   — parked */
+    --color-reply-later: 0 72% 58%;   /* red    — needs reply */
   }
 }
 
@@ -97,12 +70,10 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Smooth scrolling throughout the app */
   html {
     scroll-behavior: smooth;
   }
 
-  /* Remove default focus outline in favour of custom ring */
   :focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
@@ -110,7 +81,6 @@
 
 /* =============================================================================
    Tailwind v4 theme extension via @theme
-   Maps CSS custom properties to Tailwind design tokens.
    ============================================================================= */
 
 @theme {

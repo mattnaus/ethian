@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { Sidebar } from "./_components/sidebar";
 
 export default async function AppLayout({
   children,
@@ -12,5 +13,12 @@ export default async function AppLayout({
     redirect("/login");
   }
 
-  return <>{children}</>;
+  return (
+    <div className="flex h-screen overflow-hidden bg-zinc-950">
+      <Sidebar />
+      <main className="flex flex-1 flex-col overflow-y-auto">
+        {children}
+      </main>
+    </div>
+  );
 }
