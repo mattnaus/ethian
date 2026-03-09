@@ -1,3 +1,7 @@
+// Load .env.local before anything else — this process runs outside Next.js.
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
 /**
  * BullMQ worker process.
  *

@@ -1,11 +1,6 @@
-import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { schema } from "./schema";
-
-// Load .env.local for non-Next.js processes (worker, scripts).
-// Next.js already loads this itself; dotenv won't override already-set vars.
-config({ path: ".env.local" });
 
 // ---------------------------------------------------------------------------
 // Connection
