@@ -17,12 +17,12 @@ export async function register(page: Page, creds: Credentials) {
   }
   await page.fill('input[name="email"]', creds.email);
   await page.fill('input[name="password"]', creds.password);
-  // Strip browser-native HTML constraints so the server action handles validation
+  // Disable browser-native constraint validation so the server action handles
+  // it. We set noValidate on the form rather than mutating individual inputs,
+  // which is a single DOM write and unaffected by React reconciliation.
   await page.evaluate(() => {
-    document.querySelectorAll("input").forEach((i) => {
-      i.removeAttribute("required");
-      i.removeAttribute("minLength");
-    });
+    const form = document.querySelector("form") as HTMLFormElement | null;
+    if (form) form.noValidate = true;
   });
   await page.click('button[type="submit"]');
 }
@@ -36,9 +36,8 @@ export async function login(page: Page, creds: Credentials) {
   await page.fill('input[name="email"]', creds.email);
   await page.fill('input[name="password"]', creds.password);
   await page.evaluate(() => {
-    document.querySelectorAll("input").forEach((i) => {
-      i.removeAttribute("required");
-    });
+    const form = document.querySelector("form") as HTMLFormElement | null;
+    if (form) form.noValidate = true;
   });
   await page.click('button[type="submit"]');
 }

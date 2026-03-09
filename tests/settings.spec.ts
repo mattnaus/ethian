@@ -8,19 +8,10 @@ const USER = {
   name: "Settings Test User",
 };
 
-// IMAP test credentials — sourced from env, all tests in this group are
-// skipped unless TEST_IMAP_HOST is set.
-const IMAP = {
-  host: process.env.TEST_IMAP_HOST ?? "",
-  port: process.env.TEST_IMAP_PORT ?? "993",
-  username: process.env.TEST_IMAP_USERNAME ?? "",
-  password: process.env.TEST_IMAP_PASSWORD ?? "",
-  smtpHost: process.env.TEST_SMTP_HOST ?? "",
-  smtpPort: process.env.TEST_SMTP_PORT ?? "465",
-};
-
 test.beforeEach(async ({ page }) => {
+  // Start each test with a clean slate: no user in DB and no session cookie
   await deleteUser(USER.email);
+  await page.context().clearCookies();
   // Register and log in before each test
   await register(page, USER);
   await expect(page).toHaveURL("/imbox");
@@ -65,20 +56,29 @@ test("settings: closing dialog returns to accounts list", async ({ page }) => {
 test("settings: add account with valid IMAP credentials succeeds", async ({
   page,
 }) => {
-  test.skip(!IMAP.host, "TEST_IMAP_HOST not set — skipping IMAP tests");
+  test.skip(!process.env.TEST_IMAP_HOST, "TEST_IMAP_HOST not set — skipping IMAP tests");
+  // Read credentials inside the test (after skip) so empty strings never reach form fills
+  const imap = {
+    host: process.env.TEST_IMAP_HOST!,
+    port: process.env.TEST_IMAP_PORT ?? "993",
+    username: process.env.TEST_IMAP_USERNAME!,
+    password: process.env.TEST_IMAP_PASSWORD!,
+    smtpHost: process.env.TEST_SMTP_HOST ?? process.env.TEST_IMAP_HOST!,
+    smtpPort: process.env.TEST_SMTP_PORT ?? "465",
+  };
 
   await page.goto("/settings");
   await page.getByRole("button", { name: "Add account" }).click();
 
   // Fill in the form
   await page.fill('input[name="name"]', "Test Account");
-  await page.fill('input[name="email"]', IMAP.username);
-  await page.fill('input[name="imapHost"]', IMAP.host);
-  await page.fill('input[name="imapPort"]', IMAP.port);
-  await page.fill('input[name="smtpHost"]', IMAP.smtpHost || IMAP.host);
-  await page.fill('input[name="smtpPort"]', IMAP.smtpPort);
-  await page.fill('input[name="username"]', IMAP.username);
-  await page.fill('input[name="password"]', IMAP.password);
+  await page.fill('input[name="email"]', imap.username);
+  await page.fill('input[name="imapHost"]', imap.host);
+  await page.fill('input[name="imapPort"]', imap.port);
+  await page.fill('input[name="smtpHost"]', imap.smtpHost);
+  await page.fill('input[name="smtpPort"]', imap.smtpPort);
+  await page.fill('input[name="username"]', imap.username);
+  await page.fill('input[name="password"]', imap.password);
 
   await page.getByRole("button", { name: "Add account" }).click();
 
@@ -90,18 +90,25 @@ test("settings: add account with valid IMAP credentials succeeds", async ({
 test("settings: add account with wrong IMAP credentials shows error", async ({
   page,
 }) => {
-  test.skip(!IMAP.host, "TEST_IMAP_HOST not set — skipping IMAP tests");
+  test.skip(!process.env.TEST_IMAP_HOST, "TEST_IMAP_HOST not set — skipping IMAP tests");
+  const imap = {
+    host: process.env.TEST_IMAP_HOST!,
+    port: process.env.TEST_IMAP_PORT ?? "993",
+    username: process.env.TEST_IMAP_USERNAME!,
+    smtpHost: process.env.TEST_SMTP_HOST ?? process.env.TEST_IMAP_HOST!,
+    smtpPort: process.env.TEST_SMTP_PORT ?? "465",
+  };
 
   await page.goto("/settings");
   await page.getByRole("button", { name: "Add account" }).click();
 
   await page.fill('input[name="name"]', "Bad Account");
-  await page.fill('input[name="email"]', IMAP.username);
-  await page.fill('input[name="imapHost"]', IMAP.host);
-  await page.fill('input[name="imapPort"]', IMAP.port);
-  await page.fill('input[name="smtpHost"]', IMAP.smtpHost || IMAP.host);
-  await page.fill('input[name="smtpPort"]', IMAP.smtpPort);
-  await page.fill('input[name="username"]', IMAP.username);
+  await page.fill('input[name="email"]', imap.username);
+  await page.fill('input[name="imapHost"]', imap.host);
+  await page.fill('input[name="imapPort"]', imap.port);
+  await page.fill('input[name="smtpHost"]', imap.smtpHost);
+  await page.fill('input[name="smtpPort"]', imap.smtpPort);
+  await page.fill('input[name="username"]', imap.username);
   await page.fill('input[name="password"]', "definitely-wrong-password");
 
   await page.getByRole("button", { name: "Add account" }).click();

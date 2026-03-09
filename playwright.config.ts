@@ -28,7 +28,13 @@ export default defineConfig({
 
   use: {
     baseURL: "http://localhost:3001",
-    trace: "on-first-retry",
+    // Retain traces for any failing test (on-first-retry is useless with retries: 0)
+    trace: "retain-on-failure",
+  },
+
+  expect: {
+    // Allow extra time for Next.js dev server round-trips
+    timeout: 10_000,
   },
 
   projects: [

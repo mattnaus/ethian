@@ -8,9 +8,10 @@ const USER = {
   name: "Test User",
 };
 
-test.beforeEach(async () => {
-  // Ensure the test user doesn't exist at the start of each test
+test.beforeEach(async ({ page }) => {
+  // Start each test with a clean slate: no user in DB and no session cookie
   await deleteUser(USER.email);
+  await page.context().clearCookies();
 });
 
 test.afterAll(async () => {
