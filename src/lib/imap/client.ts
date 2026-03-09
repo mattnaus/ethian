@@ -9,6 +9,7 @@
  */
 
 import { ImapFlow } from "imapflow";
+import { simpleParser } from "mailparser";
 import { decrypt } from "@/lib/crypto";
 import type { MailAccount } from "@/db/schema";
 
@@ -192,59 +193,34 @@ export async function syncMailbox(
           uid: true,
           flags: true,
           envelope: true,
-          bodyStructure: true,
           internalDate: true,
-          headers: true,
-          bodyParts: ["text", "html"],
+          source: true,
         }
       )) {
         try {
+          if (!message.envelope) {
+            errors.push({ uid: message.uid, error: "No envelope returned" });
+            continue;
+          }
           const envelope = message.envelope;
 
-          // Parse body parts
-          const bodyText = message.bodyParts?.get("text")
-            ? Buffer.from(message.bodyParts.get("text") as Buffer).toString(
-                "utf-8"
-              )
-            : undefined;
-          const bodyHtml = message.bodyParts?.get("html")
-            ? Buffer.from(message.bodyParts.get("html") as Buffer).toString(
-                "utf-8"
-              )
-            : undefined;
+          // Parse the full RFC 2822 source to extract body and headers
+          const parsed = await simpleParser(message.source as Buffer);
 
-          // Parse headers map
+          const bodyText = parsed.text ?? undefined;
+          const bodyHtml = parsed.html !== false ? (parsed.html ?? undefined) : undefined;
+
+          // Build a flat headers map from the parsed headers
           const headersMap: Record<string, string | string[]> = {};
-          if (message.headers) {
-            const headerText = Buffer.from(message.headers as Buffer).toString(
-              "utf-8"
-            );
-            for (const line of headerText.split("\r\n")) {
-              const colonIdx = line.indexOf(":");
-              if (colonIdx > 0) {
-                const key = line.slice(0, colonIdx).toLowerCase().trim();
-                const val = line.slice(colonIdx + 1).trim();
-                const existing = headersMap[key];
-                if (existing) {
-                  headersMap[key] = Array.isArray(existing)
-                    ? [...existing, val]
-                    : [existing, val];
-                } else {
-                  headersMap[key] = val;
-                }
-              }
-            }
-          }
+          parsed.headers.forEach((value, key) => {
+            headersMap[key] = Array.isArray(value) ? value.map(String) : String(value);
+          });
 
-          const rawInReplyTo = headersMap["in-reply-to"];
-          const inReplyTo = Array.isArray(rawInReplyTo)
-            ? rawInReplyTo[0]
-            : rawInReplyTo;
-
-          const rawReferences = headersMap["references"];
-          const referencesStr = Array.isArray(rawReferences)
-            ? rawReferences.join(" ")
-            : rawReferences;
+          const inReplyTo = parsed.inReplyTo ?? undefined;
+          const referencesStr = headersMap["references"];
+          const referencesRaw = Array.isArray(referencesStr)
+            ? referencesStr.join(" ")
+            : referencesStr;
 
           const fromParsed = parseAddresses(envelope.from ?? []);
           const replyToParsed = parseAddresses(envelope.replyTo ?? []);
@@ -263,15 +239,15 @@ export async function syncMailbox(
             bccAddresses: parseAddresses(envelope.bcc ?? []),
             replyTo: replyToParsed[0]?.address,
             inReplyTo,
-            references: parseReferences(referencesStr),
+            references: parseReferences(referencesRaw),
             headers: headersMap,
 
             bodyHtml,
             bodyText,
             snippet: buildSnippet(bodyHtml, bodyText),
 
-            sentAt: envelope.date ?? message.internalDate ?? new Date(),
-            receivedAt: message.internalDate ?? new Date(),
+            sentAt: parsed.date ?? (message.internalDate ? new Date(message.internalDate) : new Date()),
+            receivedAt: message.internalDate ? new Date(message.internalDate) : new Date(),
           };
 
           fetched.push(email);
