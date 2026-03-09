@@ -345,6 +345,7 @@ Every change — no matter how small — is only done when all of the following 
 - Commit messages follow Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`.
 - Stage specific files by name — avoid `git add -A` or `git add .`.
 - Update `README.md` if the change affects setup, architecture, or user-facing behaviour.
+- **All related files go in one commit.** The work log (`.claude/work/YYYYMMDD.md`), review files (`.claude/reviews/`), e2e spec files (`.claude/e2e_tests_to_make/`), and any lockfile changes (`package-lock.json`) must be staged and committed together with the code changes they document. Never leave these files uncommitted after a task is done.
 
 ### Password Storage
 - IMAP/SMTP passwords are encrypted with AES-256-CBC before DB insert.
