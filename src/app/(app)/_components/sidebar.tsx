@@ -20,14 +20,19 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: Array<{
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  dividerBefore?: boolean;
+}> = [
   { href: "/imbox", label: "Inbox", icon: Inbox },
   { href: "/saved", label: "Saved", icon: Bookmark },
   { href: "/snoozed", label: "Snoozed", icon: Clock },
   { href: "/sent", label: "Sent", icon: Send },
   { href: "/trash", label: "Trash", icon: Trash2 },
   { href: "/screener", label: "Screener", icon: ShieldQuestion, dividerBefore: true },
-] as const;
+];
 
 function NavItem({
   href,
