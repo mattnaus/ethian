@@ -11,7 +11,9 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "worker:dev": "node --env-file=.env.local --require tsx/cjs --watch src/lib/queue/workers/sync.worker.ts"
+    "worker:dev": "node --env-file=.env.local --require tsx/cjs --watch src/lib/queue/workers/sync.worker.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:imap": "TEST_IMAP_HOST=${TEST_IMAP_HOST} playwright test tests/settings.spec.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.0",
@@ -39,6 +41,7 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.0.0",
