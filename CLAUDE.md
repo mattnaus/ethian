@@ -59,6 +59,44 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 
 ---
 
+## UI & Design System
+
+### Principles
+- **shadcn/ui only** — use shadcn/ui components by default for all UI elements. Custom components require explicit user confirmation before building.
+- **Dark mode only** — no light mode; all CSS variables and Tailwind classes target dark backgrounds.
+- **Inspiration:** Linear (linear.app) and Superlist — clean, compact, high-contrast dark UI with strong typographic hierarchy.
+
+### Color palette
+| Role | Value | Usage |
+|------|-------|-------|
+| Background | `zinc-950` (#09090b) | App background, sidebar |
+| Surface | `zinc-900` (#18181b) | Cards, panels, inputs |
+| Border | `zinc-800` (#27272a) | Dividers, input borders |
+| Text primary | `zinc-50` (#fafafa) | Headlines, body |
+| Text muted | `zinc-400` (#a1a1aa) | Labels, secondary info |
+| Accent | `orange-500` (#f97316) | Active nav, primary buttons, focus rings |
+| Accent hover | `orange-400` (#fb923c) | Button hover states |
+| Destructive | `red-500` (#ef4444) | Delete, error states |
+
+### App shell layout
+- **Left sidebar:** Fixed width ~220px, `zinc-950` background, `zinc-800` right border.
+- **Nav items:** Icon (Lucide) + text label, always visible (no collapsed mode for now).
+- **Active state:** `orange-500` text + subtle `orange-500/10` background pill.
+- **Main content:** Fills remaining width, `zinc-950` background.
+
+### Typography
+- **Font:** Inter (already configured)
+- **Density:** Compact — tight line heights, small-to-medium text sizes (14px body)
+- **Hierarchy:** `text-sm` body, `text-xs` muted labels, `text-base` headings
+
+### Component conventions
+- Inputs: `zinc-900` background, `zinc-800` border, focus ring in `orange-500`
+- Buttons (primary): `orange-500` bg, white text; hover `orange-400`
+- Buttons (secondary/ghost): transparent bg, `zinc-400` text, hover `zinc-800` bg
+- Cards/panels: `zinc-900` bg, `zinc-800` border, `rounded-lg`
+
+---
+
 ## Tech Stack
 
 | Layer | Technology | Rationale |
