@@ -91,15 +91,6 @@ function buildSnippet(html?: string, text?: string): string {
   return stripped.slice(0, 200);
 }
 
-/**
- * Parse the References header string into an array of message IDs.
- */
-function parseReferences(raw?: string): string[] {
-  if (!raw) return [];
-  // References is a space/newline-separated list of message IDs enclosed in <>
-  return raw.match(/<[^>]+>/g) ?? [];
-}
-
 // ---------------------------------------------------------------------------
 // Factory
 // ---------------------------------------------------------------------------
@@ -204,23 +195,36 @@ export async function syncMailbox(
           }
           const envelope = message.envelope;
 
-          // Parse the full RFC 2822 source to extract body and headers
-          const parsed = await simpleParser(message.source as Buffer);
+          // source: true downloads the full RFC 2822 message (including attachments).
+          // This is the only correct way to get text/html bodies in imapflow — bodyParts
+          // takes IMAP section numbers (1, 2, 1.1), not content-type names. Fetching full
+          // source trades more bandwidth for correct multipart parsing via simpleParser.
+          // TODO: for large inboxes consider streaming or size-gating attachments.
+          if (!message.source) {
+            errors.push({ uid: message.uid, error: "No message source returned" });
+            continue;
+          }
+          const parsed = await simpleParser(message.source);
 
           const bodyText = parsed.text ?? undefined;
           const bodyHtml = parsed.html !== false ? (parsed.html ?? undefined) : undefined;
 
-          // Build a flat headers map from the parsed headers
+          // Build a flat headers map — only keep string-valued headers.
+          // Structured values (AddressObject, Date, etc.) would stringify to "[object Object]".
           const headersMap: Record<string, string | string[]> = {};
           parsed.headers.forEach((value, key) => {
-            headersMap[key] = Array.isArray(value) ? value.map(String) : String(value);
+            if (typeof value === "string") {
+              headersMap[key] = value;
+            } else if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
+              headersMap[key] = value as string[];
+            }
           });
 
           const inReplyTo = parsed.inReplyTo ?? undefined;
-          const referencesStr = headersMap["references"];
-          const referencesRaw = Array.isArray(referencesStr)
-            ? referencesStr.join(" ")
-            : referencesStr;
+          // Use simpleParser's already-parsed references array directly.
+          const references = parsed.references
+            ? (Array.isArray(parsed.references) ? parsed.references : [parsed.references])
+            : [];
 
           const fromParsed = parseAddresses(envelope.from ?? []);
           const replyToParsed = parseAddresses(envelope.replyTo ?? []);
@@ -239,7 +243,7 @@ export async function syncMailbox(
             bccAddresses: parseAddresses(envelope.bcc ?? []),
             replyTo: replyToParsed[0]?.address,
             inReplyTo,
-            references: parseReferences(referencesRaw),
+            references,
             headers: headersMap,
 
             bodyHtml,
@@ -303,60 +307,42 @@ export async function fetchEmailBody(
     const lock = await client.getMailboxLock(mailboxName);
 
     try {
-      let bodyHtml: string | undefined;
-      let bodyText: string | undefined;
-      const headersMap: Record<string, string | string[]> = {};
+      let result: EmailBodyData = {
+        snippet: "",
+        headers: {},
+      };
 
       for await (const message of client.fetch(
         { uid: uid.toString() },
-        {
-          uid: true,
-          headers: true,
-          bodyParts: ["text", "html"],
-        },
+        { uid: true, source: true },
         { uid: true }
       )) {
-        if (message.bodyParts?.get("text")) {
-          bodyText = Buffer.from(
-            message.bodyParts.get("text") as Buffer
-          ).toString("utf-8");
-        }
-        if (message.bodyParts?.get("html")) {
-          bodyHtml = Buffer.from(
-            message.bodyParts.get("html") as Buffer
-          ).toString("utf-8");
-        }
+        if (!message.source) break;
 
-        if (message.headers) {
-          const headerText = Buffer.from(message.headers as Buffer).toString(
-            "utf-8"
-          );
-          for (const line of headerText.split("\r\n")) {
-            const colonIdx = line.indexOf(":");
-            if (colonIdx > 0) {
-              const key = line.slice(0, colonIdx).toLowerCase().trim();
-              const val = line.slice(colonIdx + 1).trim();
-              const existing = headersMap[key];
-              if (existing) {
-                headersMap[key] = Array.isArray(existing)
-                  ? [...existing, val]
-                  : [existing, val];
-              } else {
-                headersMap[key] = val;
-              }
-            }
+        const parsed = await simpleParser(message.source);
+
+        const bodyText = parsed.text ?? undefined;
+        const bodyHtml = parsed.html !== false ? (parsed.html ?? undefined) : undefined;
+
+        const headersMap: Record<string, string | string[]> = {};
+        parsed.headers.forEach((value, key) => {
+          if (typeof value === "string") {
+            headersMap[key] = value;
+          } else if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
+            headersMap[key] = value as string[];
           }
-        }
+        });
 
+        result = {
+          bodyHtml,
+          bodyText,
+          snippet: buildSnippet(bodyHtml, bodyText),
+          headers: headersMap,
+        };
         break; // We only expect one message for a specific UID
       }
 
-      return {
-        bodyHtml,
-        bodyText,
-        snippet: buildSnippet(bodyHtml, bodyText),
-        headers: headersMap,
-      };
+      return result;
     } finally {
       lock.release();
     }
