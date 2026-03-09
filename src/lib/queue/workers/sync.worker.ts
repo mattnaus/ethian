@@ -141,7 +141,15 @@ async function handleSyncAccount(
     .limit(1);
 
   if (!account) {
-    throw new Error(`Mail account ${mailAccountId} not found`);
+    // Account was deleted after the job was enqueued — skip silently rather than
+    // retrying, since retries cannot resolve a missing row.
+    job.log(`Mail account ${mailAccountId} not found — skipping (likely deleted)`);
+    return {
+      mailAccountId,
+      emailsQueued: 0,
+      errors: 0,
+      syncedAt: new Date().toISOString(),
+    };
   }
 
   if (!account.isActive) {

@@ -181,6 +181,15 @@ export async function scheduleAccountSync(
 }
 
 /**
+ * Enqueue a one-time immediate sync for an account.
+ * Use this after adding or updating an account so the user doesn't have to
+ * wait for the next periodic sync interval.
+ */
+export async function triggerImmediateSync(mailAccountId: string): Promise<void> {
+  await emailSyncQueue.add("sync-account", { mailAccountId });
+}
+
+/**
  * Remove the repeatable sync job for an account (e.g. when account is deleted).
  */
 export async function cancelAccountSync(mailAccountId: string): Promise<void> {

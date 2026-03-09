@@ -7,7 +7,7 @@ import { db, mailAccounts } from "@/db";
 import { encrypt } from "@/lib/crypto";
 import { verifyImapConnection } from "@/lib/imap/client";
 import { verifySmtpConnection } from "@/lib/smtp/client";
-import { emailSyncQueue, scheduleAccountSync, cancelAccountSync } from "@/lib/queue";
+import { scheduleAccountSync, triggerImmediateSync, cancelAccountSync } from "@/lib/queue";
 import { eq, and } from "drizzle-orm";
 import type { MailAccount } from "@/db/schema";
 
@@ -147,8 +147,7 @@ export async function addMailAccountAction(
   await scheduleAccountSync(inserted.id).catch((err) =>
     console.error("[addMailAccount] Failed to schedule sync for", fields.email, err)
   );
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (emailSyncQueue.add as any)("sync-account", { mailAccountId: inserted.id }).catch((err: unknown) =>
+  await triggerImmediateSync(inserted.id).catch((err) =>
     console.error("[addMailAccount] Failed to enqueue immediate sync for", fields.email, err)
   );
 
@@ -238,6 +237,11 @@ export async function updateMailAccountAction(
       encryptedPassword,
     })
     .where(and(eq(mailAccounts.id, accountId), eq(mailAccounts.userId, userId)));
+
+  // Trigger an immediate re-sync so updated credentials are validated by the worker
+  await triggerImmediateSync(accountId).catch((err) =>
+    console.error("[updateMailAccount] Failed to enqueue re-sync for", fields.email, err)
+  );
 
   revalidatePath("/settings");
   return { success: true };
