@@ -45,7 +45,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | Screener UI | Approve/block decisions, re-categorisation trigger |
 | Email detail view | Thread view, body rendering, attachment download |
 | Compose / Reply | SMTP send flow wired to UI |
-| DB migrations | Schema written but `pnpm db:push` not yet run against a real DB |
+| DB migrations | Schema written but `npm run db:push` not yet run against a real DB |
 | Worker deployment | Worker process exists but hasn't been run |
 
 ### Next logical steps
@@ -262,7 +262,7 @@ This means:
 ### Database Access
 - All DB access goes through the Drizzle `db` instance from `src/db/index.ts`.
 - Use Drizzle's query builder (not raw SQL) for type safety.
-- Migrations: run `pnpm db:generate` then `pnpm db:migrate`.
+- Migrations: run `npm run db:generate` then `npm run db:migrate`.
 
 ### Server Actions
 - Use Next.js Server Actions for all mutations (form submissions, email operations).
@@ -347,31 +347,31 @@ cp .env.example .env.local
 #    (see .env.example for generation commands)
 
 # 3. Install dependencies
-pnpm install
+npm install
 
 # 4. Push DB schema (first time) or run migrations
-pnpm db:push          # Fast for development
+npm run db:push          # Fast for development
 # or
-pnpm db:generate      # Generate migration SQL
-pnpm db:migrate       # Apply migrations
+npm run db:generate      # Generate migration SQL
+npm run db:migrate       # Apply migrations
 
 # 5. Start Next.js dev server
-pnpm dev
+npm run dev
 
 # 6. Start background worker (separate terminal)
-pnpm worker:dev
+npm run worker:dev
 ```
 
 ### Database changes
 ```bash
 # 1. Edit schema files in src/db/schema/
 # 2. Generate migration
-pnpm db:generate
+npm run db:generate
 # 3. Review generated SQL in drizzle/
 # 4. Apply
-pnpm db:migrate
+npm run db:migrate
 # 5. Inspect data
-pnpm db:studio
+npm run db:studio
 ```
 
 ### Adding a new email provider

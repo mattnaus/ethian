@@ -96,7 +96,7 @@ See [`CLAUDE.md`](CLAUDE.md) for the full schema reference and column details.
 ## Prerequisites
 
 - Node.js 20+
-- pnpm (`npm i -g pnpm`)
+- npm (included with Node.js) or pnpm/yarn
 - PostgreSQL 15+
 - Redis 7+
 
@@ -109,7 +109,7 @@ See [`CLAUDE.md`](CLAUDE.md) for the full schema reference and column details.
 ```bash
 git clone https://github.com/mattnaus/ethian.git
 cd ethian
-pnpm install
+npm install
 ```
 
 ### 2. Configure environment
@@ -142,11 +142,11 @@ openssl rand -hex 32
 
 ```bash
 # Push schema directly (development)
-pnpm db:push
+npm run db:push
 
 # Or generate + apply migrations (production-style)
-pnpm db:generate
-pnpm db:migrate
+npm run db:generate
+npm run db:migrate
 ```
 
 ### 4. Run the app
@@ -155,10 +155,10 @@ In two terminals:
 
 ```bash
 # Terminal 1 — Next.js dev server
-pnpm dev
+npm run dev
 
 # Terminal 2 — Background email sync worker
-pnpm worker:dev
+npm run worker:dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -183,10 +183,10 @@ Ethian works with any IMAP/SMTP provider. Common settings:
 ## Database Management
 
 ```bash
-pnpm db:generate   # Generate SQL migration from schema changes
-pnpm db:migrate    # Apply pending migrations
-pnpm db:push       # Push schema directly (dev only, skips migrations)
-pnpm db:studio     # Open Drizzle Studio (visual DB browser)
+npm run db:generate   # Generate SQL migration from schema changes
+npm run db:migrate    # Apply pending migrations
+npm run db:push       # Push schema directly (dev only, skips migrations)
+npm run db:studio     # Open Drizzle Studio (visual DB browser)
 ```
 
 ---
