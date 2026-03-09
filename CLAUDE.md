@@ -315,14 +315,14 @@ This means:
 - Never run IMAP operations in a Next.js Server Action directly — add a job.
 
 ### Definition of Done
-Every feature or meaningful chunk of work is only done when all of the following are complete:
+Every change — no matter how small — is only done when all of the following are complete:
 1. Code is committed and pushed.
 2. The **reviewer sub-agent** has been invoked (`/reviewer` or via the Agent tool with `.claude/agents/reviewer.md`).
 3. Review findings are saved to `.claude/reviews/[feature]-[short-commit-hash].md`.
 4. The review file and any updated `.claude/work/` files are committed and pushed.
 5. **Wait for user approval** before implementing any reviewer suggestions — do not auto-fix Critical, Warning, or Suggestion findings. Present the review summary to the user and implement only what they explicitly approve.
 
-**Skip condition:** If the user's prompt ends with `- no review`, skip steps 2–4 entirely.
+**Skip condition:** Steps 2–4 are skipped **only** when the user's prompt explicitly ends with `- no review`.
 
 ### Committing & Pushing
 - **Always commit and push after completing a task**, unless the user explicitly says otherwise.
