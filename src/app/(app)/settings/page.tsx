@@ -7,11 +7,12 @@ import { AccountsList } from "./_components/accounts-list";
 export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id;
 
   const accounts = await db
     .select()
     .from(mailAccounts)
-    .where(eq(mailAccounts.userId, session.user.id))
+    .where(eq(mailAccounts.userId, userId))
     .orderBy(mailAccounts.createdAt);
 
   return (

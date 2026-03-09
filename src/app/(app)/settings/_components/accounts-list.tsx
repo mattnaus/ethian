@@ -15,7 +15,9 @@ interface AccountsListProps {
 export function AccountsList({ accounts }: AccountsListProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<MailAccount | undefined>();
-  const [isPending, startTransition] = useTransition();
+  // Track which account ID is being deleted to scope the pending state per-row
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
 
   function openAdd() {
     setEditTarget(undefined);
@@ -27,9 +29,12 @@ export function AccountsList({ accounts }: AccountsListProps) {
     setFormOpen(true);
   }
 
-  function handleDelete(accountId: string) {
+  function handleDelete(account: MailAccount) {
+    if (!confirm(`Delete "${account.name}"? This cannot be undone.`)) return;
+    setDeletingId(account.id);
     startTransition(async () => {
-      await deleteMailAccountAction(accountId);
+      await deleteMailAccountAction(account.id);
+      setDeletingId(null);
     });
   }
 
@@ -98,21 +103,21 @@ export function AccountsList({ accounts }: AccountsListProps) {
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label={`Edit ${account.name}`}
                   onClick={() => openEdit(account)}
                   className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
                 >
                   <Pencil className="h-3.5 w-3.5" />
-                  <span className="sr-only">Edit</span>
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => handleDelete(account.id)}
-                  disabled={isPending}
+                  aria-label={`Delete ${account.name}`}
+                  onClick={() => handleDelete(account)}
+                  disabled={deletingId === account.id}
                   className="h-8 w-8 text-zinc-400 hover:text-red-400 hover:bg-zinc-800"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  <span className="sr-only">Delete</span>
                 </Button>
               </div>
             </li>
@@ -120,7 +125,9 @@ export function AccountsList({ accounts }: AccountsListProps) {
         </ul>
       )}
 
+      {/* key forces remount when switching between add/edit so useActionState resets */}
       <AccountForm
+        key={editTarget?.id ?? "add"}
         open={formOpen}
         onOpenChange={setFormOpen}
         account={editTarget}

@@ -6,7 +6,6 @@ import { auth } from "@/auth";
 import { db, mailAccounts } from "@/db";
 import { encrypt } from "@/lib/crypto";
 import { verifyImapConnection } from "@/lib/imap/client";
-import { verifySmtpConnection } from "@/lib/smtp/client";
 import { eq, and } from "drizzle-orm";
 import type { MailAccount } from "@/db/schema";
 
@@ -92,6 +91,7 @@ export async function addMailAccountAction(
   }
 
   const { password, ...fields } = parsed.data;
+  const encryptedPassword = encrypt(password);
 
   // Test IMAP connection before saving
   const imapResult = await verifyImapConnection({
@@ -106,7 +106,7 @@ export async function addMailAccountAction(
     smtpPort: fields.smtpPort,
     smtpSecure: fields.smtpSecure,
     username: fields.username,
-    encryptedPassword: encrypt(password),
+    encryptedPassword,
     isActive: true,
     lastSyncedAt: null,
     syncStatus: "idle",
@@ -116,7 +116,8 @@ export async function addMailAccountAction(
   });
 
   if (!imapResult.ok) {
-    return { error: `IMAP connection failed: ${imapResult.error}` };
+    console.error("[addMailAccount] IMAP verification failed:", imapResult.error);
+    return { error: "Could not connect to IMAP server. Check your host, port, and credentials." };
   }
 
   await db.insert(mailAccounts).values({
@@ -130,7 +131,7 @@ export async function addMailAccountAction(
     smtpPort: fields.smtpPort,
     smtpSecure: fields.smtpSecure,
     username: fields.username,
-    encryptedPassword: encrypt(password),
+    encryptedPassword,
   });
 
   revalidatePath("/settings");

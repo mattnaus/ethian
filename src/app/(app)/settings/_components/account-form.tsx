@@ -120,6 +120,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
                   defaultValue={account?.imapPort ?? 993}
                   className="bg-zinc-800 border-zinc-700 text-zinc-100 focus-visible:ring-orange-500"
                 />
+                {field("imapPort") && <p className="text-xs text-red-400">{field("imapPort")}</p>}
               </div>
             </div>
 
@@ -163,6 +164,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
                   defaultValue={account?.smtpPort ?? 465}
                   className="bg-zinc-800 border-zinc-700 text-zinc-100 focus-visible:ring-orange-500"
                 />
+                {field("smtpPort") && <p className="text-xs text-red-400">{field("smtpPort")}</p>}
               </div>
             </div>
 
