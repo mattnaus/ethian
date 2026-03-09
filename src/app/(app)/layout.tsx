@@ -16,7 +16,8 @@ export default async function AppLayout({
   return (
     <div className="flex h-screen overflow-hidden bg-zinc-950">
       <Sidebar />
-      <main className="flex flex-1 flex-col overflow-y-auto">
+      {/* pb-16 on mobile reserves space for the fixed bottom tab bar */}
+      <main className="flex flex-1 flex-col overflow-y-auto pb-16 md:pb-0">
         {children}
       </main>
     </div>

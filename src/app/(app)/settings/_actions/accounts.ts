@@ -118,13 +118,13 @@ export async function addMailAccountAction(
 
   const imapResult = await verifyImapConnection(candidate);
   if (!imapResult.ok) {
-    console.error("[addMailAccount] IMAP verification failed:", imapResult.error);
+    console.error("[addMailAccount] IMAP verification failed for", fields.email);
     return { error: "Could not connect to IMAP server. Check your host, port, and credentials." };
   }
 
   const smtpResult = await verifySmtpConnection(candidate);
   if (!smtpResult.ok) {
-    console.error("[addMailAccount] SMTP verification failed:", smtpResult.error);
+    console.error("[addMailAccount] SMTP verification failed for", fields.email);
     return { error: "Could not connect to SMTP server. Check your SMTP host, port, and credentials." };
   }
 
@@ -178,6 +178,40 @@ export async function updateMailAccountAction(
 
   const { password, ...fields } = parsed.data;
   const encryptedPassword = password ? encrypt(password) : existing.encryptedPassword;
+
+  // Re-verify connections if any connection-relevant field changed
+  const candidate = {
+    id: existing.id,
+    userId,
+    name: fields.name,
+    email: fields.email,
+    imapHost: fields.imapHost,
+    imapPort: fields.imapPort,
+    imapSecure: fields.imapSecure,
+    smtpHost: fields.smtpHost,
+    smtpPort: fields.smtpPort,
+    smtpSecure: fields.smtpSecure,
+    username: fields.username,
+    encryptedPassword,
+    isActive: existing.isActive,
+    lastSyncedAt: existing.lastSyncedAt,
+    syncStatus: existing.syncStatus,
+    syncError: existing.syncError,
+    createdAt: existing.createdAt,
+    updatedAt: existing.updatedAt,
+  };
+
+  const imapResult = await verifyImapConnection(candidate);
+  if (!imapResult.ok) {
+    console.error("[updateMailAccount] IMAP verification failed for", fields.email);
+    return { error: "Could not connect to IMAP server. Check your host, port, and credentials." };
+  }
+
+  const smtpResult = await verifySmtpConnection(candidate);
+  if (!smtpResult.ok) {
+    console.error("[updateMailAccount] SMTP verification failed for", fields.email);
+    return { error: "Could not connect to SMTP server. Check your SMTP host, port, and credentials." };
+  }
 
   await db
     .update(mailAccounts)

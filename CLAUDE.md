@@ -81,9 +81,9 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | Destructive | `red-500` (#ef4444) | Delete, error states |
 
 ### App shell layout
-- **Left sidebar:** Fixed width ~220px, `zinc-950` background, `zinc-800` right border.
-- **Nav items:** Icon (Lucide) + text label, always visible (no collapsed mode for now).
-- **Active state:** `orange-500` text + subtle `orange-500/10` background pill.
+- **Left sidebar (desktop `≥ md`):** Fixed width 56px (`w-14`), icon-only rail, `zinc-950` background, `zinc-800` right border. Hidden on mobile.
+- **Nav items:** Icon only (Lucide, `h-5 w-5`). Label shown in a Radix tooltip on hover (side=right, no delay).
+- **Active state:** `orange-500` icon + `zinc-900` background pill (`bg-zinc-900`). Inactive hover: `bg-zinc-800/60`.
 - **Main content:** Fills remaining width, `zinc-950` background.
 - **Header height:** Both the sidebar logo bar and every main-panel top bar use `h-12` (48px) with `flex items-center`. This keeps the horizontal border line continuous across the full width of the app.
 - **Mobile layout:** On small screens (< `md`, i.e. < 768px), the sidebar collapses to a bottom tab bar. Main content fills the full screen width. The header shrinks or is hidden in favour of the tab bar.
