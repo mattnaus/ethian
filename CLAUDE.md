@@ -320,6 +320,8 @@ Every feature or meaningful chunk of work is only done when all of the following
 4. The review file and any updated `.claude/work/` files are committed and pushed.
 5. **Wait for user approval** before implementing any reviewer suggestions — do not auto-fix Critical, Warning, or Suggestion findings. Present the review summary to the user and implement only what they explicitly approve.
 
+**Skip condition:** If the user's prompt ends with `- no review`, skip steps 2–4 entirely.
+
 ### Committing & Pushing
 - **Always commit and push after completing a task**, unless the user explicitly says otherwise.
 - Commit messages follow Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`.
