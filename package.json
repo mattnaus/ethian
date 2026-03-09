@@ -11,7 +11,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "worker:dev": "tsx watch src/lib/queue/workers/sync.worker.ts"
+    "worker:dev": "node --env-file=.env.local --require tsx/cjs --watch src/lib/queue/workers/sync.worker.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.0",

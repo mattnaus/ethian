@@ -35,25 +35,27 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | README | ✅ Done | Setup guide, architecture overview, provider table |
 | CLAUDE.md | ✅ Done | This file |
 
+### What exists (complete)
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Auth | ✅ Done | NextAuth.js v5 credentials; `/login`, `/register`, middleware, session |
+
 ### What's not built yet
 
 | Area | Notes |
 |------|-------|
-| Auth | NextAuth.js v5 credentials flow; `/login`, `/register` routes |
 | Mail account management | Settings UI + Server Actions to add/edit/delete IMAP accounts |
 | Email views | Imbox, Feed, Paper Trail, Screener, Set Aside, Reply Later |
 | Screener UI | Approve/block decisions, re-categorisation trigger |
 | Email detail view | Thread view, body rendering, attachment download |
 | Compose / Reply | SMTP send flow wired to UI |
-| DB migrations | Schema written but `npm run db:push` not yet run against a real DB |
-| Worker deployment | Worker process exists but hasn't been run |
 
 ### Next logical steps
-1. Set up NextAuth.js v5 (credentials provider, session, middleware)
-2. Mail account CRUD (Server Actions + settings page)
-3. Trigger initial sync when an account is added
-4. Imbox view (list + detail)
-5. Screener view (approve/block UI)
+1. Mail account CRUD (Server Actions + settings page)
+2. Trigger initial sync when an account is added
+3. Imbox view (list + detail)
+4. Screener view (approve/block UI)
 
 ---
 
@@ -86,16 +88,16 @@ ethian/
 │   │   ├── layout.tsx       # Root layout (Inter font, global CSS)
 │   │   ├── page.tsx         # Placeholder page
 │   │   ├── globals.css      # Tailwind v4 + shadcn/ui CSS variables
-│   │   ├── (auth)/          # [planned] /login, /register
-│   │   ├── (app)/           # [planned] Authenticated app shell
-│   │   │   ├── imbox/       # [planned] Imbox view
-│   │   │   ├── feed/        # [planned] Feed view
-│   │   │   ├── paper-trail/ # [planned] Paper Trail view
-│   │   │   ├── screener/    # [planned] Screener view
-│   │   │   ├── set-aside/   # [planned] Set Aside view
-│   │   │   ├── reply-later/ # [planned] Reply Later view
-│   │   │   └── settings/    # [planned] Account management
-│   │   └── api/             # [planned] Route handlers (auth callbacks, etc.)
+│   │   ├── (auth)/          # /login, /register + Server Actions
+│   │   ├── (app)/           # Authenticated app shell
+│   │   │   ├── imbox/       # Imbox view [planned]
+│   │   │   ├── feed/        # Feed view [planned]
+│   │   │   ├── paper-trail/ # Paper Trail view [planned]
+│   │   │   ├── screener/    # Screener view [planned]
+│   │   │   ├── set-aside/   # Set Aside view [planned]
+│   │   │   ├── reply-later/ # Reply Later view [planned]
+│   │   │   └── settings/    # Account management [planned]
+│   │   └── api/             # Route handlers (auth callbacks)
 │   ├── db/
 │   │   ├── schema/
 │   │   │   ├── accounts.ts  # users, mail_accounts tables
