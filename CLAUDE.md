@@ -66,6 +66,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 - **Dark mode only** — no light mode; all CSS variables and Tailwind classes target dark backgrounds.
 - **Inspiration:** Linear (linear.app) and Superlist — clean, compact, high-contrast dark UI with strong typographic hierarchy.
 - **Consistency is non-negotiable** — spacing, heights, borders, and colors must align perfectly across the app. When in doubt, measure against an existing element rather than guessing. Pixel-level alignment (e.g. sidebar header height matching the main panel header height) is expected, not optional.
+- **PWA — desktop and mobile** — the app is a Progressive Web App, installable and usable on both desktop browsers and mobile devices (iOS/Android). Every UI decision must work well in both contexts. Mobile is not an afterthought.
 
 ### Color palette
 | Role | Value | Usage |
@@ -85,6 +86,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 - **Active state:** `orange-500` text + subtle `orange-500/10` background pill.
 - **Main content:** Fills remaining width, `zinc-950` background.
 - **Header height:** Both the sidebar logo bar and every main-panel top bar use `h-12` (48px) with `flex items-center`. This keeps the horizontal border line continuous across the full width of the app.
+- **Mobile layout:** On small screens (< `md`, i.e. < 768px), the sidebar collapses to a bottom tab bar. Main content fills the full screen width. The header shrinks or is hidden in favour of the tab bar.
 
 ### Typography
 - **Font:** Inter (already configured)
@@ -96,6 +98,19 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 - Buttons (primary): `orange-500` bg, white text; hover `orange-400`
 - Buttons (secondary/ghost): transparent bg, `zinc-400` text, hover `zinc-800` bg
 - Cards/panels: `zinc-900` bg, `zinc-800` border, `rounded-lg`
+
+### Responsiveness & touch
+- **Mobile-first** — build for small screens first, then enhance for larger ones with `md:` / `lg:` variants.
+- **Touch targets** — interactive elements must be at least 44×44px on mobile (use `min-h-11 min-w-11` / `p-3` where needed).
+- **No hover-only interactions** — anything triggered by `:hover` must also be accessible via tap/focus. Don't hide critical affordances behind hover.
+- **No fixed pixel widths** that would cause horizontal scroll on mobile. Use `max-w-*` + `w-full` patterns.
+- **Safe areas** — account for iOS home indicator and notch using `pb-safe` / `env(safe-area-inset-*)` where relevant (bottom nav, modals).
+
+### PWA requirements
+- **Web app manifest** (`/public/manifest.json`) — name, icons, `display: standalone`, `theme_color`, `background_color`. Planned; not yet implemented.
+- **Service worker** — planned for offline shell caching. Use Next.js PWA tooling (e.g. `next-pwa`) when ready.
+- **Installable** — the app must meet browser installability criteria on both iOS Safari (Add to Home Screen) and Android Chrome.
+- **Standalone mode** — when launched from home screen, the browser chrome is hidden. Layouts must not rely on browser navigation (back button). Provide in-app back navigation where needed.
 
 ---
 
@@ -111,6 +126,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | Queue | BullMQ + Redis | Reliable background processing; retries, rate limiting |
 | Auth | NextAuth.js v5 (beta) | App Router compatible; credentials + OAuth ready |
 | Encryption | Node.js crypto (AES-256-CBC) | Secure storage of IMAP/SMTP passwords in DB |
+| PWA | Web app manifest + service worker (planned) | Installable on iOS/Android/desktop; standalone mode |
 
 ---
 
