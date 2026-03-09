@@ -53,3 +53,23 @@ Related commit: `f9c701e`
 - Both actions return success to the user (account appears in / disappears from the settings list).
 - No error is surfaced to the user in the UI.
 - Server logs contain `[addMailAccount] Failed to schedule sync for ...` and `[deleteMailAccount] Failed to cancel sync for ...` entries.
+
+---
+
+## Test 4: Immediate re-sync fires after account update (added in d1be503)
+
+**Scenario:** After a user edits a mail account (e.g. rotates the password), a `sync-account` job should appear in the BullMQ queue for that account without waiting for the 5-minute periodic interval, and the worker should process it using the updated credentials.
+
+**Steps:**
+1. Add a mail account and wait for the initial immediate sync to complete (account `syncStatus` returns to `idle`).
+2. Navigate to Settings → Accounts → Edit for that account.
+3. Change the password field to a new valid credential on the test IMAP server.
+4. Submit the form.
+5. Inspect the BullMQ `email-sync` queue (e.g. via `emailSyncQueue.getJobs(["waiting", "active"])`).
+
+**Expected outcome:**
+- A new `sync-account` job with `data.mailAccountId === accountId` appears in the queue within 1 second of form submission.
+- The job completes successfully — the worker connects using the updated encrypted password fetched from the DB.
+- `mail_accounts.lastSyncedAt` is updated to a timestamp after the form was submitted.
+- `mail_accounts.syncStatus` returns to `idle` after the job completes.
+- No error is surfaced to the user in the UI.
