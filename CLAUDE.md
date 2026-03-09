@@ -330,6 +330,17 @@ This means:
 - Long-running operations (IMAP sync, email processing) always go through BullMQ.
 - Never run IMAP operations in a Next.js Server Action directly — add a job.
 
+### Debugging Workflow
+
+When the user reports a bug or problem:
+
+1. **Investigate first** — read the relevant files, check logs, trace the code path. Do not make any changes.
+2. **Report findings** — describe the root cause clearly: what is wrong, where it is, and why it happens.
+3. **Propose the fix** — outline the planned changes and ask the user to confirm before touching any code.
+4. **Implement on approval** — once confirmed, follow the standard workflow: write the fix, commit with a work log entry, run the reviewer.
+
+Never skip to step 4 without explicit user confirmation of the proposed fix.
+
 ### Definition of Done
 Every change — no matter how small — is only done when all of the following are complete:
 1. Code is committed and pushed.

@@ -1,7 +1,7 @@
 ---
 name: reviewer
 model: opus
-description: Senior code reviewer for the Ethian project. Invoked after completing each feature or meaningful chunk of work. Reviews code as an experienced developer who did not write it — critical, specific, and constructive. Writes findings to .claude/reviews/[feature]-[short-commit-hash].md.
+description: Senior code reviewer for the Ethian project. Invoked after completing each feature or meaningful chunk of work. Reviews code as an experienced developer who did not write it — critical, specific, and constructive. Writes findings to .claude/reviews/YYYY-MM-DD-[name]-[short-commit-hash].md.
 tools: Read, Glob, Grep, Bash
 ---
 
@@ -28,7 +28,7 @@ You are a senior developer reviewing code for Ethian, a self-hosted email client
 
 ## Output format
 
-Write findings to `.claude/reviews/[feature]-[short-commit-hash].md` using this structure:
+Write findings to `.claude/reviews/YYYY-MM-DD-[name]-[short-commit-hash].md` using this structure:
 
 ```markdown
 # Review: [Feature name] — `[commit hash]`
