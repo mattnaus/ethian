@@ -357,13 +357,14 @@ For every feature, bug fix, or change session, maintain a dated work log:
 - Append to the file if it already exists (multiple sessions on the same day).
 
 Each entry should document:
-1. **Request** — the feature, issue, or bug as described
-2. **Plan** — the approach and key decisions made
-3. **Changes** — files created/modified and what changed in each
+1. **Commit** — the short commit hash (first 8 chars) of the resulting commit
+2. **Request** — the feature, issue, or bug as described
+3. **Plan** — the approach and key decisions made
+4. **Changes** — files created/modified and what changed in each
 
 Example entry format:
 ```markdown
-## [Brief title]
+## [Brief title] — `a1b2c3d4`
 
 **Request:** ...
 
