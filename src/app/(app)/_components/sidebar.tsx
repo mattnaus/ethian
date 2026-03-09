@@ -4,85 +4,110 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Inbox,
-  Rss,
-  Receipt,
+  Bookmark,
+  Clock,
+  Send,
+  Trash2,
   ShieldQuestion,
-  BookmarkCheck,
-  Reply,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const NAV_ITEMS = [
-  { href: "/imbox", label: "Imbox", icon: Inbox },
-  { href: "/feed", label: "Feed", icon: Rss },
-  { href: "/paper-trail", label: "Paper Trail", icon: Receipt },
-  { href: "/screener", label: "Screener", icon: ShieldQuestion },
-  { href: "/set-aside", label: "Set Aside", icon: BookmarkCheck },
-  { href: "/reply-later", label: "Reply Later", icon: Reply },
+  { href: "/imbox", label: "Inbox", icon: Inbox },
+  { href: "/saved", label: "Saved", icon: Bookmark },
+  { href: "/snoozed", label: "Snoozed", icon: Clock },
+  { href: "/sent", label: "Sent", icon: Send },
+  { href: "/trash", label: "Trash", icon: Trash2 },
+  { href: "/screener", label: "Screener", icon: ShieldQuestion, dividerBefore: true },
 ] as const;
+
+function NavItem({
+  href,
+  label,
+  icon: Icon,
+}: {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+}) {
+  const pathname = usePathname();
+  const active = pathname === href || pathname.startsWith(href + "/");
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Link
+          href={href}
+          className={cn(
+            "flex items-center justify-center rounded-md px-3 py-2 transition-colors",
+            active
+              ? "bg-zinc-900 text-orange-500"
+              : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
+          )}
+        >
+          <Icon className="h-5 w-5 shrink-0" />
+        </Link>
+      </TooltipTrigger>
+      <TooltipContent side="right" sideOffset={8}>
+        {label}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 export function Sidebar() {
   const pathname = usePathname();
+  const settingsActive =
+    pathname === "/settings" || pathname.startsWith("/settings/");
 
   return (
-    <aside className="flex h-screen w-[220px] shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
-      {/* Logo */}
-      <div className="flex h-12 items-center px-4 border-b border-zinc-800">
-        <span className="text-sm font-semibold tracking-tight text-zinc-50">
-          Ethian
-        </span>
-      </div>
+    <TooltipProvider delayDuration={0}>
+      <aside className="flex h-screen w-14 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
+        {/* Logo mark */}
+        <div className="flex h-12 items-center justify-center border-b border-zinc-800">
+          <span className="text-sm font-bold text-orange-500">E</span>
+        </div>
 
-      {/* Main nav */}
-      <nav className="flex flex-1 flex-col gap-0.5 p-2 pt-3">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + "/");
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
-                active
-                  ? "bg-orange-500/10 text-orange-500"
-                  : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-50"
-              )}
-            >
-              <Icon
+        {/* Main nav */}
+        <nav className="flex flex-1 flex-col gap-0.5 p-2 pt-3">
+          {NAV_ITEMS.map(({ href, label, icon, dividerBefore }) => (
+            <div key={href}>
+              {dividerBefore && <Separator className="my-2 bg-zinc-800" />}
+              <NavItem href={href} label={label} icon={icon} />
+            </div>
+          ))}
+        </nav>
+
+        {/* Bottom: Settings */}
+        <div className="border-t border-zinc-800 p-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href="/settings"
                 className={cn(
-                  "h-4 w-4 shrink-0",
-                  active ? "text-orange-500" : "text-zinc-500"
+                  "flex items-center justify-center rounded-md px-3 py-2 transition-colors",
+                  settingsActive
+                    ? "bg-zinc-900 text-orange-500"
+                    : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
                 )}
-              />
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Bottom: Settings */}
-      <div className="border-t border-zinc-800 p-2">
-        <Link
-          href="/settings"
-          className={cn(
-            "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors",
-            pathname === "/settings" || pathname.startsWith("/settings/")
-              ? "bg-orange-500/10 text-orange-500"
-              : "text-zinc-400 hover:bg-zinc-800 hover:text-zinc-50"
-          )}
-        >
-          <Settings
-            className={cn(
-              "h-4 w-4 shrink-0",
-              pathname === "/settings" || pathname.startsWith("/settings/")
-                ? "text-orange-500"
-                : "text-zinc-500"
-            )}
-          />
-          Settings
-        </Link>
-      </div>
-    </aside>
+              >
+                <Settings className="h-5 w-5 shrink-0" />
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={8}>
+              Settings
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </aside>
+    </TooltipProvider>
   );
 }
