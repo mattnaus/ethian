@@ -367,9 +367,10 @@ For every feature, bug fix, or change session, maintain a dated work log:
 - **Location:** `.claude/work/YYYYMMDD.md` (e.g. `.claude/work/20260308.md`)
 - If a file for the current date does not exist, **create it**.
 - Append to the file if it already exists (multiple sessions on the same day).
+- **Write the entry after committing**, not before — so the real commit hash is always available. Never use `(pending commit)` or placeholder text.
 
 Each entry should document:
-1. **Commit** — the short commit hash (first 8 chars) of the resulting commit
+1. **Commit** — the short commit hash (first 8 chars) of the resulting commit, filled in immediately after `git commit`
 2. **Request** — the feature, issue, or bug as described
 3. **Plan** — the approach and key decisions made
 4. **Changes** — files created/modified and what changed in each
