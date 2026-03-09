@@ -186,7 +186,9 @@ export async function scheduleAccountSync(
  * wait for the next periodic sync interval.
  */
 export async function triggerImmediateSync(mailAccountId: string): Promise<void> {
-  await emailSyncQueue.add("sync-account", { mailAccountId });
+  await emailSyncQueue.add("sync-account", { mailAccountId }, {
+    jobId: `immediate-sync-${mailAccountId}`,
+  });
 }
 
 /**
