@@ -7,6 +7,7 @@ import { db, mailAccounts } from "@/db";
 import { encrypt } from "@/lib/crypto";
 import { verifyImapConnection } from "@/lib/imap/client";
 import { verifySmtpConnection } from "@/lib/smtp/client";
+import { emailSyncQueue, scheduleAccountSync, cancelAccountSync } from "@/lib/queue";
 import { eq, and } from "drizzle-orm";
 import type { MailAccount } from "@/db/schema";
 
@@ -128,7 +129,7 @@ export async function addMailAccountAction(
     return { error: "Could not connect to SMTP server. Check your SMTP host, port, and credentials." };
   }
 
-  await db.insert(mailAccounts).values({
+  const [inserted] = await db.insert(mailAccounts).values({
     userId,
     name: fields.name,
     email: fields.email,
@@ -140,7 +141,16 @@ export async function addMailAccountAction(
     smtpSecure: fields.smtpSecure,
     username: fields.username,
     encryptedPassword,
-  });
+  }).returning({ id: mailAccounts.id });
+
+  // Schedule repeatable 5-minute sync and trigger an immediate first sync
+  await scheduleAccountSync(inserted.id).catch((err) =>
+    console.error("[addMailAccount] Failed to schedule sync for", fields.email, err)
+  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (emailSyncQueue.add as any)("sync-account", { mailAccountId: inserted.id }).catch((err: unknown) =>
+    console.error("[addMailAccount] Failed to enqueue immediate sync for", fields.email, err)
+  );
 
   revalidatePath("/settings");
   return { success: true };
@@ -240,6 +250,11 @@ export async function updateMailAccountAction(
 export async function deleteMailAccountAction(accountId: string): Promise<void> {
   const userId = await requireSession();
   await verifyOwnership(accountId, userId);
+
+  // Cancel the repeatable sync job before deleting the account
+  await cancelAccountSync(accountId).catch((err) =>
+    console.error("[deleteMailAccount] Failed to cancel sync for", accountId, err)
+  );
 
   await db
     .delete(mailAccounts)
