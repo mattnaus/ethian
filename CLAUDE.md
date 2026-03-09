@@ -312,6 +312,13 @@ This means:
 - Long-running operations (IMAP sync, email processing) always go through BullMQ.
 - Never run IMAP operations in a Next.js Server Action directly — add a job.
 
+### Definition of Done
+Every feature or meaningful chunk of work is only done when all of the following are complete:
+1. Code is committed and pushed.
+2. The **reviewer sub-agent** has been invoked (`/reviewer` or via the Agent tool with `.claude/agents/reviewer.md`).
+3. Any **Critical** issues found by the reviewer are fixed before moving to the next task.
+4. Review findings are saved to `.claude/reviews/[feature]-[short-commit-hash].md`.
+
 ### Committing & Pushing
 - **Always commit and push after completing a task**, unless the user explicitly says otherwise.
 - Commit messages follow Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`.
