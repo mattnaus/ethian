@@ -191,6 +191,49 @@ npm run db:studio     # Open Drizzle Studio (visual DB browser)
 
 ---
 
+## Testing
+
+Ethian uses [Playwright](https://playwright.dev) for end-to-end tests.
+
+### Setup
+
+Create a separate test database and add it to `.env.local`:
+
+```bash
+createdb ethian_test
+```
+
+```env
+# .env.local
+DATABASE_URL_TEST=postgresql://user:password@localhost:5432/ethian_test
+```
+
+The test suite starts its own Next.js server on port 3001 and pushes the schema to `ethian_test` automatically before running.
+
+### Run
+
+```bash
+npm run test:e2e          # Run all tests (IMAP tests skipped)
+npm run test:e2e:imap     # Run all tests including IMAP-dependent ones
+```
+
+### IMAP tests
+
+Tests that add a mail account require a real IMAP server. Set these vars in `.env.local` to enable them:
+
+```env
+TEST_IMAP_HOST=imap.example.com
+TEST_IMAP_PORT=993           # optional, default 993
+TEST_IMAP_USERNAME=you@example.com
+TEST_IMAP_PASSWORD=yourpassword
+TEST_SMTP_HOST=smtp.example.com   # optional, defaults to TEST_IMAP_HOST
+TEST_SMTP_PORT=465                # optional, default 465
+```
+
+A dedicated Gmail account with an [App Password](https://support.google.com/accounts/answer/185833) works well for this.
+
+---
+
 ## Project Structure
 
 ```
@@ -210,6 +253,10 @@ ethian/
 │   │   ├── crypto.ts           # Password encryption
 │   │   └── utils.ts            # cn() helper
 │   └── types/index.ts          # Shared TypeScript types
+├── tests/                      # Playwright e2e tests
+│   ├── helpers/                # Shared test utilities (auth, db)
+│   ├── auth.spec.ts            # Auth flow tests
+│   └── settings.spec.ts        # Settings page tests
 ├── drizzle/                    # Generated SQL migrations
 ├── .claude/work/               # Dated session work logs
 ├── CLAUDE.md                   # Architecture & conventions (for Claude Code)
