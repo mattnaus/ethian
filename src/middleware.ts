@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { routing } from "./i18n/routing";
 import { NextResponse } from "next/server";
 
 export default auth((req) => {
@@ -17,7 +18,7 @@ export default auth((req) => {
 
   // Set locale header so next-intl server functions (getLocale, getMessages, getTranslations) work
   const headers = new Headers(req.headers);
-  headers.set("X-NEXT-INTL-LOCALE", "en");
+  headers.set("X-NEXT-INTL-LOCALE", routing.defaultLocale);
   return NextResponse.next({ request: { headers } });
 });
 
