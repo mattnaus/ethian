@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -125,12 +125,10 @@ function TabItem({
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("sidebar-expanded");
-    if (stored !== null) setExpanded(stored === "true");
-  }, []);
+  const [expanded, setExpanded] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("sidebar-expanded") === "true";
+  });
 
   function toggle() {
     setExpanded((prev) => {
@@ -180,6 +178,7 @@ export function Sidebar() {
           </span>
           {expanded && (
             <button
+              type="button"
               onClick={toggle}
               aria-label="Collapse sidebar"
               className="flex items-center justify-center rounded-md p-1.5 text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300 transition-colors"
@@ -203,31 +202,26 @@ export function Sidebar() {
             </div>
           ))}
 
-          {/* Sidebar toggle — below Screener */}
-          <Separator className="my-2 bg-zinc-800" />
-          {expanded ? (
-            <button
-              onClick={toggle}
-              className="flex items-center gap-3 rounded-md px-3 py-2 w-full transition-colors text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
-            >
-              <PanelLeftClose className="h-5 w-5 shrink-0" />
-              <span className="text-sm whitespace-nowrap">Collapse</span>
-            </button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={toggle}
-                  aria-label="Expand sidebar"
-                  className="flex items-center justify-center rounded-md px-3 py-2 w-full transition-colors text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
-                >
-                  <PanelLeftOpen className="h-5 w-5 shrink-0" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={8}>
-                Expand
-              </TooltipContent>
-            </Tooltip>
+          {/* Expand toggle — only shown in thin mode */}
+          {!expanded && (
+            <>
+              <Separator className="my-2 bg-zinc-800" />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={toggle}
+                    aria-label="Expand sidebar"
+                    className="flex items-center justify-center rounded-md px-3 py-2 w-full transition-colors text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
+                  >
+                    <PanelLeftOpen className="h-5 w-5 shrink-0" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" sideOffset={8}>
+                  Expand
+                </TooltipContent>
+              </Tooltip>
+            </>
           )}
         </nav>
 
