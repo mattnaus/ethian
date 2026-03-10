@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,6 +11,8 @@ import {
   Trash2,
   ShieldQuestion,
   Settings,
+  PanelLeftOpen,
+  PanelLeftClose,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -34,43 +37,49 @@ const NAV_ITEMS: Array<{
   { href: "/screener", label: "Screener", icon: ShieldQuestion, dividerBefore: true },
 ];
 
-// Items shown in the mobile bottom tab bar (subset — most important ones)
-const MOBILE_TAB_ITEMS = NAV_ITEMS.filter(({ href }) =>
-  ["/imbox", "/screener", "/sent", "/settings"].includes(href)
-).concat([{ href: "/settings", label: "Settings", icon: Settings }]);
-
 function useIsActive(href: string) {
   const pathname = usePathname();
   return pathname === href || pathname.startsWith(href + "/");
 }
 
 // ---------------------------------------------------------------------------
-// Desktop rail nav item
+// Desktop nav item — adapts to thin / wide mode
 // ---------------------------------------------------------------------------
 
-function RailNavItem({
+function DesktopNavItem({
   href,
   label,
   icon: Icon,
+  expanded,
 }: {
   href: string;
   label: string;
   icon: React.ElementType;
+  expanded: boolean;
 }) {
   const active = useIsActive(href);
+
+  const linkClass = cn(
+    "flex items-center rounded-md px-3 py-2 transition-colors w-full",
+    expanded ? "gap-3" : "justify-center",
+    active
+      ? "bg-zinc-900 text-orange-500"
+      : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
+  );
+
+  if (expanded) {
+    return (
+      <Link href={href} className={linkClass}>
+        <Icon className="h-5 w-5 shrink-0" />
+        <span className="text-sm truncate">{label}</span>
+      </Link>
+    );
+  }
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Link
-          href={href}
-          className={cn(
-            "flex items-center justify-center rounded-md px-3 py-2 transition-colors",
-            active
-              ? "bg-zinc-900 text-orange-500"
-              : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
-          )}
-        >
+        <Link href={href} className={linkClass}>
           <Icon className="h-5 w-5 shrink-0" />
         </Link>
       </TooltipTrigger>
@@ -116,10 +125,32 @@ function TabItem({
 
 export function Sidebar() {
   const pathname = usePathname();
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("sidebar-expanded");
+    if (stored !== null) setExpanded(stored === "true");
+  }, []);
+
+  function toggle() {
+    setExpanded((prev) => {
+      const next = !prev;
+      localStorage.setItem("sidebar-expanded", String(next));
+      return next;
+    });
+  }
+
   const settingsActive =
     pathname === "/settings" || pathname.startsWith("/settings/");
 
-  // Mobile tab items: Inbox, Screener, Sent, Settings
+  const settingsLinkClass = cn(
+    "flex items-center rounded-md px-3 py-2 transition-colors w-full",
+    expanded ? "gap-3" : "justify-center",
+    settingsActive
+      ? "bg-zinc-900 text-orange-500"
+      : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
+  );
+
   const mobileItems = [
     { href: "/imbox", label: "Inbox", icon: Inbox },
     { href: "/screener", label: "Screener", icon: ShieldQuestion },
@@ -129,43 +160,96 @@ export function Sidebar() {
 
   return (
     <TooltipProvider delayDuration={0}>
-      {/* ── Desktop: icon-only rail (hidden on mobile) ── */}
-      <aside className="hidden md:flex h-screen w-14 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
-        {/* Logo mark */}
-        <div className="flex h-12 items-center justify-center border-b border-zinc-800">
-          <span className="text-sm font-bold text-orange-500">E</span>
+      {/* ── Desktop: sidebar (hidden on mobile) ── */}
+      <aside
+        className={cn(
+          "hidden md:flex h-screen shrink-0 flex-col border-r border-zinc-800 bg-zinc-950 overflow-hidden",
+          "transition-[width] duration-200 ease-in-out",
+          expanded ? "w-56" : "w-14"
+        )}
+      >
+        {/* Header */}
+        <div
+          className={cn(
+            "flex h-12 shrink-0 items-center border-b border-zinc-800",
+            expanded ? "px-3 justify-between" : "justify-center"
+          )}
+        >
+          <span className="text-sm font-bold text-orange-500">
+            {expanded ? "Ethian" : "E"}
+          </span>
+          {expanded && (
+            <button
+              onClick={toggle}
+              aria-label="Collapse sidebar"
+              className="flex items-center justify-center rounded-md p-1.5 text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300 transition-colors"
+            >
+              <PanelLeftClose className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         {/* Main nav */}
-        <nav className="flex flex-1 flex-col gap-0.5 p-2 pt-3">
+        <nav className="flex flex-1 flex-col gap-0.5 p-2 pt-3 overflow-hidden">
           {NAV_ITEMS.map(({ href, label, icon, dividerBefore }) => (
             <div key={href}>
               {dividerBefore && <Separator className="my-2 bg-zinc-800" />}
-              <RailNavItem href={href} label={label} icon={icon} />
+              <DesktopNavItem
+                href={href}
+                label={label}
+                icon={icon}
+                expanded={expanded}
+              />
             </div>
           ))}
+
+          {/* Sidebar toggle — below Screener */}
+          <Separator className="my-2 bg-zinc-800" />
+          {expanded ? (
+            <button
+              onClick={toggle}
+              className="flex items-center gap-3 rounded-md px-3 py-2 w-full transition-colors text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
+            >
+              <PanelLeftClose className="h-5 w-5 shrink-0" />
+              <span className="text-sm whitespace-nowrap">Collapse</span>
+            </button>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={toggle}
+                  aria-label="Expand sidebar"
+                  className="flex items-center justify-center rounded-md px-3 py-2 w-full transition-colors text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
+                >
+                  <PanelLeftOpen className="h-5 w-5 shrink-0" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>
+                Expand
+              </TooltipContent>
+            </Tooltip>
+          )}
         </nav>
 
         {/* Bottom: Settings */}
-        <div className="border-t border-zinc-800 p-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href="/settings"
-                className={cn(
-                  "flex items-center justify-center rounded-md px-3 py-2 transition-colors",
-                  settingsActive
-                    ? "bg-zinc-900 text-orange-500"
-                    : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
-                )}
-              >
-                <Settings className="h-5 w-5 shrink-0" />
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={8}>
-              Settings
-            </TooltipContent>
-          </Tooltip>
+        <div className="border-t border-zinc-800 p-2 shrink-0">
+          {expanded ? (
+            <Link href="/settings" className={settingsLinkClass}>
+              <Settings className="h-5 w-5 shrink-0" />
+              <span className="text-sm truncate">Settings</span>
+            </Link>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href="/settings" className={settingsLinkClass}>
+                  <Settings className="h-5 w-5 shrink-0" />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>
+                Settings
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </aside>
 
