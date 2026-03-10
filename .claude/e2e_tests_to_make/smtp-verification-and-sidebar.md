@@ -80,7 +80,7 @@ These four tests cover the new user-visible flows introduced in commits `0fe5a34
 
 | Label | href | Expected tooltip text |
 |---|---|---|
-| Inbox | `/imbox` | `"Inbox"` |
+| Inbox | `/inbox` | `"Inbox"` |
 | Saved | `/saved` | `"Saved"` |
 | Snoozed | `/snoozed` | `"Snoozed"` |
 | Sent | `/sent` | `"Sent"` |
@@ -90,7 +90,7 @@ These four tests cover the new user-visible flows introduced in commits `0fe5a34
 
 **Steps (run for each nav item in the table above):**
 
-1. Navigate to `/imbox` (or any app page — the sidebar is present on all `(app)` layout routes).
+1. Navigate to `/inbox` (or any app page — the sidebar is present on all `(app)` layout routes).
 2. Locate the sidebar `aside` element.
 3. Within the sidebar, find the link whose `href` attribute equals the target path (e.g. `page.locator('aside a[href="/saved"]')`).
 4. Hover over the link.

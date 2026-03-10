@@ -9,7 +9,7 @@ Feature introduced in commit `e921f38`.
 **Scenario:** User clicks the expand/collapse toggle button inside the sidebar nav area.
 
 **Steps:**
-1. Log in and navigate to `/imbox`.
+1. Log in and navigate to `/inbox`.
 2. Assert the sidebar is in thin mode: `aside` has class `w-14` and nav item labels are not visible.
 3. Click the `PanelLeftOpen` toggle button (aria-label "Expand sidebar").
 4. Assert the sidebar transitions to wide mode: `aside` has class `w-56` and nav item labels (e.g. "Inbox") are visible.
@@ -25,7 +25,7 @@ Feature introduced in commit `e921f38`.
 **Scenario:** Expanded state is saved to `localStorage` and restored on reload.
 
 **Steps:**
-1. Log in and navigate to `/imbox`.
+1. Log in and navigate to `/inbox`.
 2. Expand the sidebar using the toggle button.
 3. Reload the page (hard refresh).
 4. Assert the sidebar is still in wide mode (`w-56`) immediately on load.
@@ -41,7 +41,7 @@ Feature introduced in commit `e921f38`.
 **Scenario:** Hovering a nav item in thin mode shows a tooltip with the item label.
 
 **Steps:**
-1. Log in and navigate to `/imbox`.
+1. Log in and navigate to `/inbox`.
 2. Ensure sidebar is in thin mode (collapse it if needed).
 3. Hover over the Screener nav icon.
 4. Assert a tooltip with text "Screener" appears to the right of the icon.
@@ -56,7 +56,7 @@ Feature introduced in commit `e921f38`.
 
 **Steps:**
 1. Set viewport to 375×812 (iPhone-size).
-2. Log in and navigate to `/imbox`.
+2. Log in and navigate to `/inbox`.
 3. Assert the desktop `aside` sidebar is not visible (`hidden md:flex` means it should be hidden).
 4. Assert the mobile `nav` bottom tab bar is visible and contains four items: Inbox, Screener, Sent, Settings.
 5. Tap "Screener" in the bottom tab bar.

@@ -77,14 +77,14 @@ test.use({ viewport: { width: 375, height: 812 } });
 
 | Label | href |
 |-------|------|
-| Inbox | `/imbox` |
+| Inbox | `/inbox` |
 | Screener | `/screener` |
 | Sent | `/sent` |
 | Settings | `/settings` |
 
 **Steps:**
 
-1. Navigate to `/imbox` (any `(app)` layout route).
+1. Navigate to `/inbox` (any `(app)` layout route).
 2. Assert the desktop `aside` element is **not visible**: `await expect(page.locator('aside')).not.toBeVisible()`.
 3. Assert the mobile `nav` element is visible: `await expect(page.locator('nav.fixed')).toBeVisible()`. Alternatively locate it by its `border-t` class or a `data-testid` if one is added.
 4. For each tab item in the table above:

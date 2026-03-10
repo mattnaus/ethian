@@ -241,7 +241,7 @@ ethian/
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── (auth)/             # /login, /register
-│   │   ├── (app)/              # Authenticated views (imbox, feed, etc.)
+│   │   ├── (app)/              # Authenticated views (inbox, feed, etc.)
 │   │   └── api/                # Route handlers
 │   ├── db/
 │   │   ├── schema/             # Drizzle table definitions
