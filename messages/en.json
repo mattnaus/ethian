@@ -47,7 +47,7 @@
     "snoozed": "Snoozed",
     "sent": "Sent",
     "trash": "Trash",
-    "screener": "Screener",
+    "gatekeeper": "Gatekeeper",
     "settings": "Settings",
     "brandName": "Ethian",
     "collapseSidebar": "Collapse sidebar",
@@ -131,8 +131,11 @@
       "empty": "Your inbox is empty. Add a mail account in Settings to get started.",
       "showingOf": "Showing {shown} of {total} emails"
     },
-    "screener": {
-      "comingSoon": "Screener \u2014 coming soon"
+    "gatekeeper": {
+      "title": "Gatekeeper",
+      "empty": "No unknown senders. Everyone here is either approved or blocked.",
+      "showingOf": "Showing {shown} of {total} senders",
+      "messageCount": "{count, plural, one {# email} other {# emails}}"
     },
     "saved": {
       "comingSoon": "Saved \u2014 coming soon"

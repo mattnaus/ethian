@@ -132,7 +132,7 @@ export function Sidebar() {
     { href: "/snoozed", label: t("snoozed"), icon: Clock },
     { href: "/sent", label: t("sent"), icon: Send },
     { href: "/trash", label: t("trash"), icon: Trash2 },
-    { href: "/screener", label: t("screener"), icon: ShieldQuestion, dividerBefore: true },
+    { href: "/gatekeeper", label: t("gatekeeper"), icon: ShieldQuestion, dividerBefore: true },
   ];
 
   const settingsActive =
@@ -148,7 +148,7 @@ export function Sidebar() {
 
   const mobileItems = [
     { href: "/inbox", label: t("inbox"), icon: Inbox },
-    { href: "/screener", label: t("screener"), icon: ShieldQuestion },
+    { href: "/gatekeeper", label: t("gatekeeper"), icon: ShieldQuestion },
     { href: "/sent", label: t("sent"), icon: Send },
     { href: "/settings", label: t("settings"), icon: Settings },
   ];

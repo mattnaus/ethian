@@ -11,7 +11,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | **Imbox** | The Imbox | Approved senders. Emails here need your attention. |
 | **Feed** | The Feed | Newsletters, digests. Read when you feel like it. |
 | **Paper Trail** | Paper Trail | Receipts, confirmations, order updates. Auto-filed. |
-| **Screener** | The Screener | Emails from unknown senders. Approve or block. |
+| **Gatekeeper** | The Screener | Emails from unknown senders. Approve or block. |
 | **Set Aside** | Set Aside | Manually parked emails you'll return to later. |
 | **Reply Later** | Reply Later | Emails flagged for follow-up. |
 
@@ -45,21 +45,24 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | Email sync wiring | ✅ Done | Adding an account schedules repeatable BullMQ sync + immediate first sync |
 | E2E tests | ✅ Done | Playwright: auth flows, settings/account CRUD |
 | i18n / translations | ✅ Done | next-intl v4, `localePrefix: 'never'`, all UI strings in `messages/en.json` |
+| Inbox list view | ✅ Done | Server-rendered list; account dot, avatar, sender, subject, snippet, attachment, date |
+| Gatekeeper list view | ✅ Done | Lists unknown senders from `screener_queue`; sender, domain, subject, count, date |
 
 ### What's not built yet
 
 | Area | Notes |
 |------|-------|
-| Email list views | Inbox, Feed, Paper Trail, Screener, Set Aside, Reply Later — placeholder pages only |
+| Email list views | Feed, Paper Trail, Set Aside, Reply Later — placeholder pages only |
 | Email detail view | Thread view, body rendering, attachment download |
 | Screener UI | Approve/block decisions, re-categorisation trigger |
 | Compose / Reply | SMTP send flow wired to UI |
 
 ### Next logical steps
-1. Inbox email list view (fetch from DB, render list + detail panel)
-2. Screener view (approve/block UI, sender rule creation)
+1. ~~Inbox email list view~~ ✅
+2. ~~Gatekeeper list view~~ ✅
 3. Email detail view (thread, body rendering, attachments)
-4. Compose / Reply (SMTP send wired to UI)
+4. Gatekeeper approve/block UI (sender rule creation, re-categorisation trigger)
+5. Compose / Reply (SMTP send wired to UI)
 
 ---
 
@@ -166,7 +169,7 @@ ethian/
 │   │   │   ├── inbox/       # Inbox view (placeholder)
 │   │   │   ├── feed/        # Feed view [planned]
 │   │   │   ├── paper-trail/ # Paper Trail view [planned]
-│   │   │   ├── screener/    # Screener view (placeholder)
+│   │   │   ├── gatekeeper/  # Gatekeeper view (unknown senders from screener_queue)
 │   │   │   ├── saved/       # Set Aside view (placeholder)
 │   │   │   ├── snoozed/     # Reply Later view (placeholder)
 │   │   │   ├── sent/        # Sent view (placeholder)
@@ -306,19 +309,21 @@ sync.worker.ts → handleProcessEmail()
 
 ---
 
-## Screener Logic
+## Gatekeeper Logic
 
-The Screener is the heart of Ethian's value proposition:
+The Gatekeeper (internally `screener`) is the heart of Ethian's value proposition:
 
 1. **Every new email** goes through `categorizeSender()`.
 2. If the sender's email address has a rule → use that rule's decision.
 3. Else if the sender's domain has a rule → use the domain rule.
 4. Else → category is `"screener"` and a `screener_queue` entry is created.
-5. The user sees the Screener view, which shows one entry per unknown sender.
+5. The user sees the Gatekeeper view (`/gatekeeper`), which shows one entry per unknown sender from `screener_queue`.
 6. User can **Approve** (→ creates an `approved` sender rule, re-categorizes emails to `inbox`), **Feed** (→ `feed` rule), **Paper Trail** (→ `paper_trail` rule), or **Block** (→ `blocked` rule, trashes emails).
 7. Future emails from that sender/domain are automatically categorized.
 
 Sender rules are **user-level** (not per mail account) so approving a sender on one account covers all your accounts.
+
+> **Naming note:** The UI calls this feature "Gatekeeper". Internally, the DB enum value, table name (`screener_queue`), and category (`"screener"`) retain the original name to avoid unnecessary migrations.
 
 ---
 
