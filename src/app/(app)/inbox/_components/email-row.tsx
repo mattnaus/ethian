@@ -23,10 +23,12 @@ export function EmailRow({ email, locale }: { email: InboxEmail; locale: string 
 
   return (
     <div
+      tabIndex={0}
       className={cn(
         "bg-zinc-900 rounded-lg border border-zinc-800/50",
         "flex items-center gap-3 px-4 py-3",
         "hover:bg-zinc-800/60 transition-colors cursor-default",
+        "focus:outline-none focus:ring-2 focus:ring-orange-500/50",
       )}
     >
       {/* Account color dot */}

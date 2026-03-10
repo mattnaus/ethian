@@ -10,6 +10,7 @@ export type GatekeeperEntry = {
   subject: string;
   snippet: string;
   lastSeenAt: string; // ISO 8601
+  messageCount: number;
   accountColor: string;
   hasAttachments: boolean;
 };
@@ -29,10 +30,12 @@ export function GatekeeperRow({
 
   return (
     <div
+      tabIndex={0}
       className={cn(
         "bg-zinc-900 rounded-lg border border-zinc-800/50",
         "flex items-center gap-3 px-4 py-3",
         "hover:bg-zinc-800/60 transition-colors cursor-default",
+        "focus:outline-none focus:ring-2 focus:ring-orange-500/50",
       )}
     >
       {/* Account color dot */}
@@ -59,6 +62,11 @@ export function GatekeeperRow({
         </div>
         <div className="flex items-center gap-1.5">
           <p className="text-xs text-zinc-300 truncate">{entry.subject}</p>
+          {entry.messageCount > 1 && (
+            <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-zinc-800 text-xs text-zinc-400 shrink-0 tabular-nums">
+              {entry.messageCount}
+            </span>
+          )}
           {entry.hasAttachments && (
             <Paperclip className="h-3 w-3 text-zinc-500 shrink-0" aria-label="Has attachment" />
           )}
@@ -77,6 +85,13 @@ export function GatekeeperRow({
           <p className="text-xs text-zinc-500 truncate">{entry.snippet}</p>
         )}
       </div>
+
+      {/* Message count (desktop) */}
+      {entry.messageCount > 1 && (
+        <span className="hidden md:inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-zinc-800 text-xs text-zinc-400 shrink-0 tabular-nums">
+          {entry.messageCount}
+        </span>
+      )}
 
       {/* Attachment indicator (desktop) */}
       {entry.hasAttachments && (

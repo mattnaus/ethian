@@ -42,6 +42,7 @@ export default async function GatekeeperPage() {
         subject: emails.subject,
         snippet: emails.snippet,
         lastSeenAt: screenerQueue.lastSeenAt,
+        messageCount: screenerQueue.messageCount,
         accountColor: mailAccounts.color,
         hasAttachments: sql<boolean>`EXISTS (${attachmentSubquery})`,
       })
