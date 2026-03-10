@@ -18,6 +18,7 @@ import type { MailAccount } from "@/db/schema";
 const accountSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   email: z.string().email("Invalid email address"),
+  color: z.string().regex(/^#[0-9a-f]{6}$/i, "Invalid color").default("#3b82f6"),
   imapHost: z.string().min(1, "IMAP host is required"),
   imapPort: z.coerce.number().int().min(1).max(65535).default(993),
   imapSecure: z.boolean().default(true),
@@ -77,6 +78,7 @@ export async function addMailAccountAction(
   const raw = {
     name: formData.get("name"),
     email: formData.get("email"),
+    color: formData.get("color"),
     imapHost: formData.get("imapHost"),
     imapPort: formData.get("imapPort"),
     imapSecure: formData.get("imapSecure") === "true",
@@ -101,6 +103,7 @@ export async function addMailAccountAction(
     userId,
     name: fields.name,
     email: fields.email,
+    color: fields.color,
     imapHost: fields.imapHost,
     imapPort: fields.imapPort,
     imapSecure: fields.imapSecure,
@@ -133,6 +136,7 @@ export async function addMailAccountAction(
     userId,
     name: fields.name,
     email: fields.email,
+    color: fields.color,
     imapHost: fields.imapHost,
     imapPort: fields.imapPort,
     imapSecure: fields.imapSecure,
@@ -170,6 +174,7 @@ export async function updateMailAccountAction(
   const raw = {
     name: formData.get("name"),
     email: formData.get("email"),
+    color: formData.get("color"),
     imapHost: formData.get("imapHost"),
     imapPort: formData.get("imapPort"),
     imapSecure: formData.get("imapSecure") === "true",
@@ -194,6 +199,7 @@ export async function updateMailAccountAction(
     userId,
     name: fields.name,
     email: fields.email,
+    color: fields.color,
     imapHost: fields.imapHost,
     imapPort: fields.imapPort,
     imapSecure: fields.imapSecure,
@@ -227,6 +233,7 @@ export async function updateMailAccountAction(
     .set({
       name: fields.name,
       email: fields.email,
+      color: fields.color,
       imapHost: fields.imapHost,
       imapPort: fields.imapPort,
       imapSecure: fields.imapSecure,

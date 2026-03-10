@@ -55,6 +55,7 @@ export const mailAccounts = pgTable("mail_accounts", {
   // Display
   name: text("name").notNull(), // e.g. "Personal Gmail", "Work"
   email: text("email").notNull(), // the actual email address for this account
+  color: text("color").notNull().default("#3b82f6"), // hex color for UI identification
 
   // IMAP settings
   imapHost: text("imap_host").notNull(),

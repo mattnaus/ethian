@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,21 @@ interface AccountFormProps {
   account?: MailAccount; // undefined = add mode
 }
 
+const ACCOUNT_COLORS = [
+  "#ef4444", // red
+  "#f97316", // orange
+  "#f59e0b", // amber
+  "#10b981", // emerald
+  "#14b8a6", // teal
+  "#3b82f6", // blue
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+];
+
+function randomColor() {
+  return ACCOUNT_COLORS[Math.floor(Math.random() * ACCOUNT_COLORS.length)];
+}
+
 const initialState: AccountFormState = {};
 
 export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
@@ -35,6 +50,9 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
     : addMailAccountAction;
 
   const [state, formAction, isPending] = useActionState(action, initialState);
+  const [selectedColor, setSelectedColor] = useState<string>(
+    account?.color ?? randomColor()
+  );
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -44,12 +62,21 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
     }
   }, [state.success, onOpenChange]);
 
-  // Reset form when dialog opens/closes
+  // Reset form and pick a new random color when the dialog opens for add mode
   useEffect(() => {
     if (!open) {
       formRef.current?.reset();
+    } else if (!isEdit) {
+      setSelectedColor(randomColor());
     }
-  }, [open]);
+  }, [open, isEdit]);
+
+  // Sync color when switching edit targets
+  useEffect(() => {
+    if (account?.color) {
+      setSelectedColor(account.color);
+    }
+  }, [account?.color]);
 
   function field(name: string) {
     return state.fieldErrors?.[name]?.[0];
@@ -65,6 +92,9 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
         </DialogHeader>
 
         <form ref={formRef} action={formAction} className="space-y-4">
+          {/* Hidden color input submitted with the form */}
+          <input type="hidden" name="color" value={selectedColor} />
+
           {/* General */}
           <div className="space-y-3">
             <div className="space-y-1.5">
@@ -90,6 +120,29 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
                 className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-orange-500"
               />
               {field("email") && <p className="text-xs text-red-400">{field("email")}</p>}
+            </div>
+
+            {/* Color picker */}
+            <div className="space-y-1.5">
+              <Label className="text-zinc-300">Account color</Label>
+              <div className="flex items-center gap-2">
+                {ACCOUNT_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    aria-label={`Select color ${color}`}
+                    onClick={() => setSelectedColor(color)}
+                    className="h-6 w-6 rounded-full shrink-0 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
+                    style={{
+                      backgroundColor: color,
+                      boxShadow: selectedColor === color
+                        ? `0 0 0 2px #18181b, 0 0 0 4px ${color}`
+                        : undefined,
+                      transform: selectedColor === color ? "scale(1.15)" : undefined,
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
