@@ -12,7 +12,7 @@ export default auth((req) => {
   }
 
   if (isLoggedIn && isAuthPage) {
-    return NextResponse.redirect(new URL("/imbox", req.url));
+    return NextResponse.redirect(new URL("/inbox", req.url));
   }
 });
 

@@ -14,7 +14,7 @@ test.beforeEach(async ({ page }) => {
   await page.context().clearCookies();
   // Register and log in before each test
   await register(page, USER);
-  await expect(page).toHaveURL("/imbox");
+  await expect(page).toHaveURL("/inbox");
 });
 
 test.afterAll(async () => {

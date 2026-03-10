@@ -8,7 +8,7 @@ interface Credentials {
 
 /**
  * Fill in and submit the register form.
- * Waits for navigation to complete (success → /imbox, error → stays on page).
+ * Waits for navigation to complete (success → /inbox, error → stays on page).
  */
 export async function register(page: Page, creds: Credentials) {
   await page.goto("/register");
@@ -29,7 +29,7 @@ export async function register(page: Page, creds: Credentials) {
 
 /**
  * Fill in and submit the login form.
- * Waits for navigation to complete (success → /imbox, error → stays on page).
+ * Waits for navigation to complete (success → /inbox, error → stays on page).
  */
 export async function login(page: Page, creds: Credentials) {
   await page.goto("/login");

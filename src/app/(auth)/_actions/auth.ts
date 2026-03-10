@@ -21,7 +21,7 @@ export async function loginAction(
   }
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/imbox" });
+    await signIn("credentials", { email, password, redirectTo: "/inbox" });
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Invalid email or password." };
@@ -66,7 +66,7 @@ export async function registerAction(
   });
 
   try {
-    await signIn("credentials", { email, password, redirectTo: "/imbox" });
+    await signIn("credentials", { email, password, redirectTo: "/inbox" });
   } catch (error) {
     if (error instanceof AuthError) {
       return {

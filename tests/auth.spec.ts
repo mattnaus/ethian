@@ -23,10 +23,10 @@ test.afterAll(async () => {
 // Unauthenticated access
 // ---------------------------------------------------------------------------
 
-test("redirects unauthenticated user from /imbox to /login", async ({
+test("redirects unauthenticated user from /inbox to /login", async ({
   page,
 }) => {
-  await page.goto("/imbox");
+  await page.goto("/inbox");
   await expect(page).toHaveURL(/\/login/);
 });
 
@@ -41,15 +41,15 @@ test("redirects unauthenticated user from /settings to /login", async ({
 // Registration
 // ---------------------------------------------------------------------------
 
-test("register: creates account and redirects to /imbox", async ({ page }) => {
+test("register: creates account and redirects to /inbox", async ({ page }) => {
   await register(page, USER);
-  await expect(page).toHaveURL("/imbox");
+  await expect(page).toHaveURL("/inbox");
 });
 
 test("register: shows error for duplicate email", async ({ page }) => {
   // Create the user first
   await register(page, USER);
-  await expect(page).toHaveURL("/imbox");
+  await expect(page).toHaveURL("/inbox");
 
   // Try to register again — need a fresh context (no auth cookie)
   await page.context().clearCookies();
@@ -71,13 +71,13 @@ test("register: shows error for short password", async ({ page }) => {
 // Login
 // ---------------------------------------------------------------------------
 
-test("login: valid credentials redirect to /imbox", async ({ page }) => {
+test("login: valid credentials redirect to /inbox", async ({ page }) => {
   // Create the user first, then clear cookies and log in manually
   await register(page, USER);
   await page.context().clearCookies();
 
   await login(page, USER);
-  await expect(page).toHaveURL("/imbox");
+  await expect(page).toHaveURL("/inbox");
 });
 
 test("login: wrong password shows error", async ({ page }) => {
@@ -97,12 +97,12 @@ test("login: unknown email shows error", async ({ page }) => {
 // Authenticated redirects
 // ---------------------------------------------------------------------------
 
-test("logged-in user visiting /login is redirected to /imbox", async ({
+test("logged-in user visiting /login is redirected to /inbox", async ({
   page,
 }) => {
   await register(page, USER);
-  await expect(page).toHaveURL("/imbox"); // wait for registration to complete
+  await expect(page).toHaveURL("/inbox"); // wait for registration to complete
   // Already logged in — visiting /login should redirect away
   await page.goto("/login");
-  await expect(page).toHaveURL("/imbox");
+  await expect(page).toHaveURL("/inbox");
 });

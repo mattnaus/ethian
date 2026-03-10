@@ -29,7 +29,7 @@ const NAV_ITEMS: Array<{
   icon: React.ElementType;
   dividerBefore?: boolean;
 }> = [
-  { href: "/imbox", label: "Inbox", icon: Inbox },
+  { href: "/inbox", label: "Inbox", icon: Inbox },
   { href: "/saved", label: "Saved", icon: Bookmark },
   { href: "/snoozed", label: "Snoozed", icon: Clock },
   { href: "/sent", label: "Sent", icon: Send },
@@ -150,7 +150,7 @@ export function Sidebar() {
   );
 
   const mobileItems = [
-    { href: "/imbox", label: "Inbox", icon: Inbox },
+    { href: "/inbox", label: "Inbox", icon: Inbox },
     { href: "/screener", label: "Screener", icon: ShieldQuestion },
     { href: "/sent", label: "Sent", icon: Send },
     { href: "/settings", label: "Settings", icon: Settings },

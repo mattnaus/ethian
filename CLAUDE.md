@@ -146,7 +146,7 @@ ethian/
 │   │   ├── globals.css      # Tailwind v4 + shadcn/ui CSS variables
 │   │   ├── (auth)/          # /login, /register + Server Actions
 │   │   ├── (app)/           # Authenticated app shell
-│   │   │   ├── imbox/       # Imbox view [planned]
+│   │   │   ├── inbox/       # Inbox view
 │   │   │   ├── feed/        # Feed view [planned]
 │   │   │   ├── paper-trail/ # Paper Trail view [planned]
 │   │   │   ├── screener/    # Screener view [planned]
