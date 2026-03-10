@@ -54,7 +54,7 @@
     --color-inbox: 217 91% 60%;       /* blue   — approved / Imbox */
     --color-feed: 142 72% 45%;        /* green  — newsletters */
     --color-paper-trail: 38 92% 50%;  /* amber  — receipts */
-    --color-screener: 262 80% 60%;    /* violet — unknown senders */
+    --color-gatekeeper: 262 80% 60%;  /* violet — unknown senders */
     --color-set-aside: 199 89% 48%;   /* cyan   — parked */
     --color-reply-later: 0 72% 58%;   /* red    — needs reply */
   }
