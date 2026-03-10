@@ -86,9 +86,9 @@ export function AccountsList({ accounts }: AccountsListProps) {
                     </span>
                     <Badge
                       variant={syncBadgeVariant(account.syncStatus)}
-                      className="text-xs capitalize"
+                      className="text-xs"
                     >
-                      {account.syncStatus}
+                      {t(`syncStatus.${account.syncStatus}`)}
                     </Badge>
                     {!account.isActive && (
                       <Badge variant="outline" className="text-xs text-zinc-500">

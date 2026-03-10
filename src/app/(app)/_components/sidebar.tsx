@@ -171,7 +171,7 @@ export function Sidebar() {
           )}
         >
           <span className="text-sm font-bold text-orange-500">
-            {expanded ? "Ethian" : "E"}
+            {expanded ? t("brandName") : t("brandName").charAt(0)}
           </span>
           {expanded && (
             <button

@@ -48,6 +48,7 @@ export type AccountFormState = {
 async function requireSession() {
   const session = await auth();
   if (!session?.user?.id) {
+    // Developer-facing error — should never reach the UI under normal operation
     throw new Error("Not authenticated");
   }
   return session.user.id;
@@ -61,6 +62,7 @@ async function verifyOwnership(accountId: string, userId: string): Promise<MailA
     .limit(1);
 
   if (!account) {
+    // Developer-facing error — indicates unauthorized access or stale client state
     throw new Error("Account not found");
   }
   return account;
@@ -81,7 +83,9 @@ async function translateFieldErrors(
   if (zodErrors.email?.length) result.email = [t("invalidEmail")];
   if (zodErrors.color?.length) result.color = [t("invalidColor")];
   if (zodErrors.imapHost?.length) result.imapHost = [t("imapHostRequired")];
+  if (zodErrors.imapPort?.length) result.imapPort = [t("imapPortInvalid")];
   if (zodErrors.smtpHost?.length) result.smtpHost = [t("smtpHostRequired")];
+  if (zodErrors.smtpPort?.length) result.smtpPort = [t("smtpPortInvalid")];
   if (zodErrors.username?.length) result.username = [t("usernameRequired")];
   if (!isUpdate && zodErrors.password?.length) result.password = [t("passwordRequired")];
 

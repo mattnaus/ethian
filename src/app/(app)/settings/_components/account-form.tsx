@@ -291,7 +291,9 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
               disabled={isPending}
               className="bg-orange-500 hover:bg-orange-600 text-white"
             >
-              {isPending ? t("form.savingButton") : isEdit ? t("form.saveButton") : t("form.addButton")}
+              {isPending
+                ? isEdit ? t("form.savingButton") : t("form.addingButton")
+                : isEdit ? t("form.saveButton") : t("form.addButton")}
             </Button>
           </DialogFooter>
         </form>

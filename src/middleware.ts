@@ -15,11 +15,15 @@ export default auth((req) => {
   const isAuthPage = pathname === "/login" || pathname === "/register";
 
   if (!isLoggedIn && !isAuthPage && pathname !== "/") {
-    return NextResponse.redirect(new URL("/login", req.url));
+    const redirect = NextResponse.redirect(new URL("/login", req.url));
+    intlResponse.cookies.getAll().forEach((c) => redirect.cookies.set(c));
+    return redirect;
   }
 
   if (isLoggedIn && isAuthPage) {
-    return NextResponse.redirect(new URL("/inbox", req.url));
+    const redirect = NextResponse.redirect(new URL("/inbox", req.url));
+    intlResponse.cookies.getAll().forEach((c) => redirect.cookies.set(c));
+    return redirect;
   }
 
   return intlResponse;

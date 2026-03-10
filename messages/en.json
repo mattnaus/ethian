@@ -1,4 +1,7 @@
 {
+  "meta": {
+    "description": "Ethian \u2014 a calm, intentional email client inspired by Hey.com. Take back control of your inbox with Screener, Imbox, Feed, and Paper Trail."
+  },
   "auth": {
     "brandName": "Ethian",
     "brandTagline": "Intentional email",
@@ -46,6 +49,7 @@
     "trash": "Trash",
     "screener": "Screener",
     "settings": "Settings",
+    "brandName": "Ethian",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
     "expand": "Expand"
@@ -59,6 +63,11 @@
       "addAccount": "Add account",
       "noAccounts": "No accounts yet. Add one to get started.",
       "disabled": "Disabled",
+      "syncStatus": {
+        "idle": "Idle",
+        "syncing": "Syncing",
+        "error": "Error"
+      },
       "deleteConfirm": "Delete \"{name}\"? This cannot be undone.",
       "editAriaLabel": "Edit {name}",
       "deleteAriaLabel": "Delete {name}"
@@ -87,7 +96,8 @@
       "cancelButton": "Cancel",
       "saveButton": "Save changes",
       "savingButton": "Saving\u2026",
-      "addButton": "Add account"
+      "addButton": "Add account",
+      "addingButton": "Adding\u2026"
     },
     "errors": {
       "imapConnectionFailed": "Could not connect to IMAP server. Check your host, port, and credentials.",
@@ -100,7 +110,9 @@
       "imapHostRequired": "IMAP host is required",
       "smtpHostRequired": "SMTP host is required",
       "usernameRequired": "Username is required",
-      "passwordRequired": "Password is required"
+      "passwordRequired": "Password is required",
+      "imapPortInvalid": "IMAP port must be a number between 1 and 65535",
+      "smtpPortInvalid": "SMTP port must be a number between 1 and 65535"
     }
   },
   "colors": {
