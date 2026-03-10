@@ -71,7 +71,6 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
     }
   }, [open, isEdit]);
 
-
   function field(name: string) {
     return state.fieldErrors?.[name]?.[0];
   }
@@ -119,14 +118,14 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
             {/* Color picker */}
             <div className="space-y-1.5">
               <Label className="text-zinc-300">Account color</Label>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 flex-wrap">
                 {ACCOUNT_COLORS.map(({ hex, label }) => (
                   <button
                     key={hex}
                     type="button"
                     aria-label={`Select ${label}`}
                     onClick={() => setSelectedColor(hex)}
-                    className="flex items-center justify-center h-11 w-11 rounded-md shrink-0 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
+                    className="flex items-center justify-center h-11 w-11 rounded-md shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
                   >
                     <span
                       className="h-5 w-5 rounded-full"
