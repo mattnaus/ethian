@@ -19,14 +19,14 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 
 ## Current Status
 
-> Last updated: 2026-03-08
+> Last updated: 2026-03-10
 
 ### What exists (foundation complete)
 
 | Area | Status | Notes |
 |------|--------|-------|
 | Project scaffold | ✅ Done | Next.js 15, TS strict, Tailwind v4, all deps |
-| Database schema | ✅ Done | All tables defined; no migrations applied yet |
+| Database schema | ✅ Done | All tables defined; migrations applied via drizzle-kit |
 | IMAP client | ✅ Done | `src/lib/imap/client.ts` — imapflow wrapper |
 | SMTP client | ✅ Done | `src/lib/smtp/client.ts` — nodemailer wrapper |
 | BullMQ queues | ✅ Done | `src/lib/queue/` — queues + sync worker with categorisation |
@@ -39,23 +39,26 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Auth | ✅ Done | NextAuth.js v5 credentials; `/login`, `/register`, middleware, session |
+| Auth | ✅ Done | NextAuth.js v5 credentials; `/login`, `/register`, middleware, session, `trustHost` |
+| Mail account management | ✅ Done | Settings page: add/edit/delete accounts, IMAP verification, color picker |
+| App shell & sidebar | ✅ Done | Collapsible sidebar (thin/wide), mobile bottom tab bar, localStorage persistence |
+| Email sync wiring | ✅ Done | Adding an account schedules repeatable BullMQ sync + immediate first sync |
+| E2E tests | ✅ Done | Playwright: auth flows, settings/account CRUD |
 
 ### What's not built yet
 
 | Area | Notes |
 |------|-------|
-| Mail account management | Settings UI + Server Actions to add/edit/delete IMAP accounts |
-| Email views | Imbox, Feed, Paper Trail, Screener, Set Aside, Reply Later |
-| Screener UI | Approve/block decisions, re-categorisation trigger |
+| Email list views | Inbox, Feed, Paper Trail, Screener, Set Aside, Reply Later — placeholder pages only |
 | Email detail view | Thread view, body rendering, attachment download |
+| Screener UI | Approve/block decisions, re-categorisation trigger |
 | Compose / Reply | SMTP send flow wired to UI |
 
 ### Next logical steps
-1. Mail account CRUD (Server Actions + settings page)
-2. Trigger initial sync when an account is added
-3. Imbox view (list + detail)
-4. Screener view (approve/block UI)
+1. Inbox email list view (fetch from DB, render list + detail panel)
+2. Screener view (approve/block UI, sender rule creation)
+3. Email detail view (thread, body rendering, attachments)
+4. Compose / Reply (SMTP send wired to UI)
 
 ---
 
@@ -81,12 +84,13 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | Destructive | `red-500` (#ef4444) | Delete, error states |
 
 ### App shell layout
-- **Left sidebar (desktop `≥ md`):** Fixed width 56px (`w-14`), icon-only rail, `zinc-950` background, `zinc-800` right border. Hidden on mobile.
-- **Nav items:** Icon only (Lucide, `h-5 w-5`). Label shown in a Radix tooltip on hover (side=right, no delay).
+- **Left sidebar (desktop `≥ md`):** Collapsible between thin (`w-14`, 56px, icon-only) and wide (`w-56`, 224px, icon + label) modes. `zinc-950` background, `zinc-800` right border. Smooth `transition-[width] duration-200` animation. State persisted to `localStorage` (`sidebar-expanded`). Hidden on mobile.
+- **Thin mode:** Icons only (Lucide, `h-5 w-5`). Labels in Radix tooltips on hover (side=right, no delay). Expand button (`PanelLeftOpen`) below Screener divider.
+- **Wide mode:** Icons + text labels side by side. Header shows "Ethian" + collapse button (`PanelLeftClose`) top-right. No tooltips needed.
 - **Active state:** `orange-500` icon + `zinc-900` background pill (`bg-zinc-900`). Inactive hover: `bg-zinc-800/60`.
-- **Main content:** Fills remaining width, `zinc-950` background.
+- **Main content:** Fills remaining width (`flex-1`), `zinc-950` background.
 - **Header height:** Both the sidebar logo bar and every main-panel top bar use `h-12` (48px) with `flex items-center`. This keeps the horizontal border line continuous across the full width of the app.
-- **Mobile layout:** On small screens (< `md`, i.e. < 768px), the sidebar collapses to a bottom tab bar. Main content fills the full screen width. The header shrinks or is hidden in favour of the tab bar.
+- **Mobile layout:** On small screens (< `md`, i.e. < 768px), the sidebar is replaced by a fixed bottom tab bar (4 items: Inbox, Screener, Sent, Settings). Main content fills the full screen width.
 
 ### Typography
 - **Font:** Inter (already configured)
@@ -126,6 +130,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | Queue | BullMQ + Redis | Reliable background processing; retries, rate limiting |
 | Auth | NextAuth.js v5 (beta) | App Router compatible; credentials + OAuth ready |
 | Encryption | Node.js crypto (AES-256-CBC) | Secure storage of IMAP/SMTP passwords in DB |
+| Testing | Playwright | E2E test automation for auth and settings flows |
 | PWA | Web app manifest + service worker (planned) | Installable on iOS/Android/desktop; standalone mode |
 
 ---
@@ -137,23 +142,37 @@ Directories and files marked `[planned]` are intended but not yet created.
 ```
 ethian/
 ├── .claude/
+│   ├── agents/              # Sub-agent definitions (reviewer.md)
+│   ├── e2e_tests_to_make/   # Suggested e2e test specs from reviews
+│   ├── reviews/             # Code review findings (YYYY-MM-DD/ subfolders)
 │   └── work/                # Dated session work logs (YYYYMMDD.md)
-├── drizzle/                 # Generated SQL migrations [planned — run db:generate]
+├── drizzle/                 # Generated SQL migrations
+├── tests/                   # Playwright e2e tests
+│   ├── helpers/             # Shared test utilities (auth, db)
+│   ├── auth.spec.ts
+│   └── settings.spec.ts
 ├── src/
 │   ├── app/                 # Next.js App Router
 │   │   ├── layout.tsx       # Root layout (Inter font, global CSS)
-│   │   ├── page.tsx         # Placeholder page
+│   │   ├── page.tsx         # Root redirect: /inbox or /login
 │   │   ├── globals.css      # Tailwind v4 + shadcn/ui CSS variables
 │   │   ├── (auth)/          # /login, /register + Server Actions
 │   │   ├── (app)/           # Authenticated app shell
-│   │   │   ├── inbox/       # Inbox view
+│   │   │   ├── _components/ # Shared app components (sidebar.tsx)
+│   │   │   ├── inbox/       # Inbox view (placeholder)
 │   │   │   ├── feed/        # Feed view [planned]
 │   │   │   ├── paper-trail/ # Paper Trail view [planned]
-│   │   │   ├── screener/    # Screener view [planned]
-│   │   │   ├── set-aside/   # Set Aside view [planned]
-│   │   │   ├── reply-later/ # Reply Later view [planned]
-│   │   │   └── settings/    # Account management [planned]
+│   │   │   ├── screener/    # Screener view (placeholder)
+│   │   │   ├── saved/       # Set Aside view (placeholder)
+│   │   │   ├── snoozed/     # Reply Later view (placeholder)
+│   │   │   ├── sent/        # Sent view (placeholder)
+│   │   │   ├── trash/       # Trash view (placeholder)
+│   │   │   └── settings/    # Account management (CRUD, color picker)
+│   │   │       ├── _actions/ # Server Actions (accounts.ts)
+│   │   │       └── _components/ # AccountForm, AccountsList
 │   │   └── api/             # Route handlers (auth callbacks)
+│   ├── components/
+│   │   └── ui/              # shadcn/ui components (button, input, dialog, etc.)
 │   ├── db/
 │   │   ├── schema/
 │   │   │   ├── accounts.ts  # users, mail_accounts tables
@@ -179,6 +198,7 @@ ethian/
 ├── README.md                # User-facing setup guide and overview
 ├── drizzle.config.ts        # Drizzle Kit configuration
 ├── next.config.ts           # Next.js config (serverExternalPackages)
+├── playwright.config.ts     # Playwright test configuration
 ├── package.json
 ├── postcss.config.mjs       # PostCSS with @tailwindcss/postcss
 ├── tailwind.config.ts       # Tailwind v4 config (minimal)
@@ -198,6 +218,7 @@ Stores encrypted IMAP and SMTP credentials. Tracks sync state.
 
 | Column | Notes |
 |--------|-------|
+| `color` | Hex color for UI identification (e.g. `#3b82f6`), user-selectable |
 | `encrypted_password` | AES-256-CBC encrypted, see `src/lib/crypto.ts` |
 | `sync_status` | `idle` / `syncing` / `error` |
 | `last_synced_at` | Used as the IMAP `SINCE` search boundary |
@@ -345,7 +366,7 @@ Never skip to step 4 without explicit user confirmation of the proposed fix.
 Every change — no matter how small — is only done when all of the following are complete:
 1. Code is committed and pushed.
 2. The **reviewer sub-agent** has been invoked (`/reviewer` or via the Agent tool with `.claude/agents/reviewer.md`).
-3. Review findings are saved to `.claude/reviews/[feature]-[short-commit-hash].md`.
+3. Review findings are saved to `.claude/reviews/YYYY-MM-DD/[name]-[short-commit-hash].md`.
 4. The review file and any updated `.claude/work/` files are committed and pushed.
 5. **Wait for user approval** before implementing any reviewer suggestions — do not auto-fix Critical, Warning, or Suggestion findings. Present the review summary to the user and implement only what they explicitly approve.
 
@@ -374,6 +395,7 @@ Every change — no matter how small — is only done when all of the following 
 | `NEXTAUTH_SECRET` | Yes | NextAuth.js signing secret |
 | `NEXTAUTH_URL` | Yes | Canonical app URL |
 | `ENCRYPTION_KEY` | Yes | 64 hex chars (32 bytes) for AES-256-CBC |
+| `DATABASE_URL_TEST` | For tests | Separate PostgreSQL DB for Playwright e2e tests |
 
 Generate secrets:
 ```bash
@@ -442,6 +464,13 @@ npm run dev
 
 # 6. Start background worker (separate terminal)
 npm run worker:dev
+
+# 7. (Optional) Set up test database for e2e tests
+createdb ethian_test
+# Set DATABASE_URL_TEST in .env.local
+
+# 8. Run e2e tests
+npm run test:e2e
 ```
 
 ### Database changes
