@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
 import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { mailAccounts, screenerQueue } from "@/db/schema";
+import { emailAttachments, emails, mailAccounts, screenerQueue } from "@/db/schema";
 import { GatekeeperList } from "./_components/gatekeeper-list";
 
 const GATEKEEPER_LIMIT = 100;
@@ -20,6 +20,17 @@ export default async function GatekeeperPage() {
 
   const userId = session.user.id;
 
+  // Correlated subquery — checks if the linked email has non-inline attachments
+  const attachmentSubquery = db
+    .select({ _: sql`1` })
+    .from(emailAttachments)
+    .where(
+      and(
+        eq(emailAttachments.emailId, emails.id),
+        isNull(emailAttachments.contentId),
+      ),
+    );
+
   const [rows, [{ total }]] = await Promise.all([
     db
       .select({
@@ -27,13 +38,16 @@ export default async function GatekeeperPage() {
         fromAddress: screenerQueue.fromAddress,
         fromName: screenerQueue.fromName,
         fromDomain: screenerQueue.fromDomain,
-        subject: screenerQueue.subject,
-        messageCount: screenerQueue.messageCount,
+        // Use the most recent email's subject and snippet (emailId → emails join)
+        subject: emails.subject,
+        snippet: emails.snippet,
         lastSeenAt: screenerQueue.lastSeenAt,
         accountColor: mailAccounts.color,
+        hasAttachments: sql<boolean>`EXISTS (${attachmentSubquery})`,
       })
       .from(screenerQueue)
       .innerJoin(mailAccounts, eq(screenerQueue.mailAccountId, mailAccounts.id))
+      .innerJoin(emails, eq(screenerQueue.emailId, emails.id))
       .where(eq(screenerQueue.userId, userId))
       .orderBy(desc(screenerQueue.lastSeenAt))
       .limit(GATEKEEPER_LIMIT),
@@ -52,7 +66,6 @@ export default async function GatekeeperPage() {
   const entries = rows.map((row) => ({
     ...row,
     lastSeenAt: row.lastSeenAt.toISOString(),
-    countLabel: t("messageCount", { count: row.messageCount }),
   }));
 
   const showingMessage =

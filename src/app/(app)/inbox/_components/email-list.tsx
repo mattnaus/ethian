@@ -3,7 +3,7 @@ import { EmailRow, type InboxEmail } from "./email-row";
 interface EmailListProps {
   emails: InboxEmail[];
   emptyMessage: string;
-  showingMessage: string | null; // "Showing 100 of 347" — null when all shown
+  showingMessage: string | null;
   locale: string;
 }
 
@@ -17,17 +17,19 @@ export function EmailList({ emails, emptyMessage, showingMessage, locale }: Emai
   }
 
   return (
-    <div className="flex-1 overflow-y-auto flex flex-col">
-      <div>
-        {emails.map((email) => (
-          <EmailRow key={email.id} email={email} locale={locale} />
-        ))}
+    <div className="flex-1 overflow-y-auto">
+      <div className="px-4 md:px-10 py-4">
+        <div className="flex flex-col gap-0.5">
+          {emails.map((email) => (
+            <EmailRow key={email.id} email={email} locale={locale} />
+          ))}
+        </div>
+        {showingMessage && (
+          <p className="text-xs text-zinc-600 text-center pt-3 mt-0.5">
+            {showingMessage}
+          </p>
+        )}
       </div>
-      {showingMessage && (
-        <p className="text-xs text-zinc-600 text-center py-3 border-t border-zinc-800/50 shrink-0">
-          {showingMessage}
-        </p>
-      )}
     </div>
   );
 }

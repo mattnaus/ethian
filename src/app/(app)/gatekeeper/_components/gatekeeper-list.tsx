@@ -1,9 +1,7 @@
 import { GatekeeperRow, type GatekeeperEntry } from "./gatekeeper-row";
 
-export type GatekeeperEntryWithLabel = GatekeeperEntry & { countLabel: string };
-
 interface GatekeeperListProps {
-  entries: GatekeeperEntryWithLabel[];
+  entries: GatekeeperEntry[];
   emptyMessage: string;
   showingMessage: string | null;
   locale: string;
@@ -24,22 +22,19 @@ export function GatekeeperList({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto flex flex-col">
-      <div>
-        {entries.map((entry) => (
-          <GatekeeperRow
-            key={entry.id}
-            entry={entry}
-            locale={locale}
-            countLabel={entry.countLabel}
-          />
-        ))}
+    <div className="flex-1 overflow-y-auto">
+      <div className="px-4 md:px-10 py-4">
+        <div className="flex flex-col gap-0.5">
+          {entries.map((entry) => (
+            <GatekeeperRow key={entry.id} entry={entry} locale={locale} />
+          ))}
+        </div>
+        {showingMessage && (
+          <p className="text-xs text-zinc-600 text-center pt-3 mt-0.5">
+            {showingMessage}
+          </p>
+        )}
       </div>
-      {showingMessage && (
-        <p className="text-xs text-zinc-600 text-center py-3 border-t border-zinc-800/50 shrink-0">
-          {showingMessage}
-        </p>
-      )}
     </div>
   );
 }
