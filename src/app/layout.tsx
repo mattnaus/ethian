@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: "%s | Ethian",
     },
     description: t("description"),
-    keywords: ["email", "inbox", "hey", "imbox", "screener"],
+    keywords: ["email", "inbox", "hey", "imbox", "gatekeeper"],
   };
 }
 

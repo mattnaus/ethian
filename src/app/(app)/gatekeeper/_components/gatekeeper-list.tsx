@@ -1,21 +1,20 @@
-import { getTranslations } from "next-intl/server";
 import { GatekeeperRow, type GatekeeperEntry } from "./gatekeeper-row";
 
+export type GatekeeperEntryWithLabel = GatekeeperEntry & { countLabel: string };
+
 interface GatekeeperListProps {
-  entries: GatekeeperEntry[];
+  entries: GatekeeperEntryWithLabel[];
   emptyMessage: string;
   showingMessage: string | null;
   locale: string;
 }
 
-export async function GatekeeperList({
+export function GatekeeperList({
   entries,
   emptyMessage,
   showingMessage,
   locale,
 }: GatekeeperListProps) {
-  const t = await getTranslations("pages.gatekeeper");
-
   if (entries.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -32,7 +31,7 @@ export async function GatekeeperList({
             key={entry.id}
             entry={entry}
             locale={locale}
-            countLabel={t("messageCount", { count: entry.messageCount })}
+            countLabel={entry.countLabel}
           />
         ))}
       </div>

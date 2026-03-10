@@ -52,6 +52,7 @@ export default async function GatekeeperPage() {
   const entries = rows.map((row) => ({
     ...row,
     lastSeenAt: row.lastSeenAt.toISOString(),
+    countLabel: t("messageCount", { count: row.messageCount }),
   }));
 
   const showingMessage =
