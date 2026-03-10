@@ -128,7 +128,8 @@
   "pages": {
     "inbox": {
       "title": "Inbox",
-      "empty": "Your inbox is empty. Add a mail account in Settings to get started."
+      "empty": "Your inbox is empty. Add a mail account in Settings to get started.",
+      "showingOf": "Showing {shown} of {total} emails"
     },
     "screener": {
       "comingSoon": "Screener \u2014 coming soon"

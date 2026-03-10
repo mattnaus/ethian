@@ -7,7 +7,7 @@ export type InboxEmail = {
   fromName: string | null;
   fromAddress: string;
   snippet: string;
-  sentAt: Date;
+  sentAt: string; // ISO 8601 — serialization-safe for future Client Component promotion
   isRead: boolean;
   accountColor: string;
   hasAttachments: boolean;
@@ -16,6 +16,12 @@ export type InboxEmail = {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+
+function safeColor(color: string, fallback = "#3b82f6"): string {
+  return HEX_COLOR_RE.test(color) ? color : fallback;
+}
 
 const AVATAR_COLORS = [
   "#2563eb", // blue-600
@@ -37,39 +43,40 @@ function avatarBgColor(email: string): string {
 }
 
 function getInitials(name: string | null, email: string): string {
-  if (name?.trim()) {
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-    return parts[0][0].toUpperCase();
+  const source = name?.trim() || email.trim();
+  if (!source) return "?";
+  const parts = source.split(/\s+/);
+  if (parts.length >= 2) {
+    return ((parts[0][0] ?? "") + (parts[parts.length - 1][0] ?? "")).toUpperCase();
   }
-  return email[0].toUpperCase();
+  return (parts[0][0] ?? "?").toUpperCase();
 }
 
-function formatDate(date: Date): string {
+function formatDate(isoString: string, locale: string): string {
+  const date = new Date(isoString);
   const now = new Date();
   const isToday = date.toDateString() === now.toDateString();
   const isThisYear = date.getFullYear() === now.getFullYear();
 
   if (isToday) {
-    return date.toLocaleTimeString("en", { hour: "numeric", minute: "2-digit" });
+    return new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit" }).format(date);
   }
   if (isThisYear) {
-    return date.toLocaleDateString("en", { month: "short", day: "numeric" });
+    return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(date);
   }
-  return date.toLocaleDateString("en", { month: "short", day: "numeric", year: "2-digit" });
+  return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "2-digit" }).format(date);
 }
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function EmailRow({ email }: { email: InboxEmail }) {
+export function EmailRow({ email, locale }: { email: InboxEmail; locale: string }) {
   const initials = getInitials(email.fromName, email.fromAddress);
   const bgColor = avatarBgColor(email.fromAddress);
   const senderDisplay = email.fromName ?? email.fromAddress;
-  const formattedDate = formatDate(email.sentAt);
+  const formattedDate = formatDate(email.sentAt, locale);
+  const dotColor = safeColor(email.accountColor);
 
   return (
     <div
@@ -80,13 +87,13 @@ export function EmailRow({ email }: { email: InboxEmail }) {
         "py-3 md:py-0 md:h-14",
       )}
     >
-      {/* Account color dot */}
+      {/* Account color dot — validated hex only */}
       <div
         className="h-1.5 w-1.5 rounded-full shrink-0 self-start mt-[7px] md:self-auto md:mt-0"
-        style={{ backgroundColor: email.accountColor }}
+        style={{ backgroundColor: dotColor }}
       />
 
-      {/* Avatar */}
+      {/* Avatar — color from controlled array, not user input */}
       <div
         className="h-8 w-8 rounded-full shrink-0 self-start md:self-auto flex items-center justify-center text-xs font-semibold text-white select-none"
         style={{ backgroundColor: bgColor }}
@@ -141,7 +148,7 @@ export function EmailRow({ email }: { email: InboxEmail }) {
         <div className="flex-1 min-w-0 flex items-center gap-1.5 overflow-hidden">
           <span
             className={cn(
-              "text-sm shrink-0 max-w-[280px] truncate",
+              "text-sm shrink-0 max-w-[40%] truncate",
               email.isRead ? "text-zinc-400" : "font-medium text-zinc-100",
             )}
           >
