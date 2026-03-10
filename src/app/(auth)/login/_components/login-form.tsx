@@ -1,12 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { loginAction } from "../../_actions/auth";
 
 const inputClass =
   "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
 export function LoginForm() {
+  const t = useTranslations("auth.login");
   const [state, action, isPending] = useActionState(loginAction, undefined);
 
   return (
@@ -22,7 +24,7 @@ export function LoginForm() {
           htmlFor="email"
           className="block text-sm font-medium text-foreground mb-1.5"
         >
-          Email
+          {t("emailLabel")}
         </label>
         <input
           id="email"
@@ -31,7 +33,7 @@ export function LoginForm() {
           autoComplete="email"
           required
           className={inputClass}
-          placeholder="you@example.com"
+          placeholder={t("emailPlaceholder")}
         />
       </div>
 
@@ -40,7 +42,7 @@ export function LoginForm() {
           htmlFor="password"
           className="block text-sm font-medium text-foreground mb-1.5"
         >
-          Password
+          {t("passwordLabel")}
         </label>
         <input
           id="password"
@@ -57,7 +59,7 @@ export function LoginForm() {
         disabled={isPending}
         className="w-full py-2 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer"
       >
-        {isPending ? "Signing in…" : "Sign in"}
+        {isPending ? t("submittingButton") : t("submitButton")}
       </button>
     </form>
   );

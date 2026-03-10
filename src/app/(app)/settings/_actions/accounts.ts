@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { db, mailAccounts } from "@/db";
 import { encrypt } from "@/lib/crypto";
@@ -12,21 +13,21 @@ import { eq, and } from "drizzle-orm";
 import type { MailAccount } from "@/db/schema";
 
 // ---------------------------------------------------------------------------
-// Validation schema
+// Validation schema (no custom messages — errors are translated at action time)
 // ---------------------------------------------------------------------------
 
 const accountSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100),
-  email: z.string().email("Invalid email address"),
-  color: z.string().regex(/^#[0-9a-f]{6}$/i, "Invalid color").default("#3b82f6"),
-  imapHost: z.string().min(1, "IMAP host is required"),
+  name: z.string().min(1).max(100),
+  email: z.string().email(),
+  color: z.string().regex(/^#[0-9a-f]{6}$/i).default("#3b82f6"),
+  imapHost: z.string().min(1),
   imapPort: z.coerce.number().int().min(1).max(65535).default(993),
   imapSecure: z.boolean().default(true),
-  smtpHost: z.string().min(1, "SMTP host is required"),
+  smtpHost: z.string().min(1),
   smtpPort: z.coerce.number().int().min(1).max(65535).default(465),
   smtpSecure: z.boolean().default(true),
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
+  username: z.string().min(1),
+  password: z.string().min(1),
 });
 
 const updateSchema = accountSchema.extend({
@@ -65,6 +66,28 @@ async function verifyOwnership(accountId: string, userId: string): Promise<MailA
   return account;
 }
 
+/**
+ * Maps Zod field errors to translated validation messages.
+ * Zod schemas have no custom messages — we translate based on field name + error type.
+ */
+async function translateFieldErrors(
+  zodErrors: Partial<Record<string, string[] | undefined>>,
+  isUpdate = false
+): Promise<Partial<Record<string, string[]>>> {
+  const t = await getTranslations("settings.validation");
+  const result: Partial<Record<string, string[]>> = {};
+
+  if (zodErrors.name?.length) result.name = [t("nameRequired")];
+  if (zodErrors.email?.length) result.email = [t("invalidEmail")];
+  if (zodErrors.color?.length) result.color = [t("invalidColor")];
+  if (zodErrors.imapHost?.length) result.imapHost = [t("imapHostRequired")];
+  if (zodErrors.smtpHost?.length) result.smtpHost = [t("smtpHostRequired")];
+  if (zodErrors.username?.length) result.username = [t("usernameRequired")];
+  if (!isUpdate && zodErrors.password?.length) result.password = [t("passwordRequired")];
+
+  return result;
+}
+
 // ---------------------------------------------------------------------------
 // Add account
 // ---------------------------------------------------------------------------
@@ -91,9 +114,11 @@ export async function addMailAccountAction(
 
   const parsed = accountSchema.safeParse(raw);
   if (!parsed.success) {
-    return { fieldErrors: parsed.error.flatten().fieldErrors };
+    const fieldErrors = await translateFieldErrors(parsed.error.flatten().fieldErrors);
+    return { fieldErrors };
   }
 
+  const t = await getTranslations("settings.errors");
   const { password, ...fields } = parsed.data;
   const encryptedPassword = encrypt(password);
 
@@ -123,13 +148,13 @@ export async function addMailAccountAction(
   const imapResult = await verifyImapConnection(candidate);
   if (!imapResult.ok) {
     console.error("[addMailAccount] IMAP verification failed for", fields.email);
-    return { error: "Could not connect to IMAP server. Check your host, port, and credentials." };
+    return { error: t("imapConnectionFailed") };
   }
 
   const smtpResult = await verifySmtpConnection(candidate);
   if (!smtpResult.ok) {
     console.error("[addMailAccount] SMTP verification failed for", fields.email);
-    return { error: "Could not connect to SMTP server. Check your SMTP host, port, and credentials." };
+    return { error: t("smtpConnectionFailed") };
   }
 
   const [inserted] = await db.insert(mailAccounts).values({
@@ -187,9 +212,11 @@ export async function updateMailAccountAction(
 
   const parsed = updateSchema.safeParse(raw);
   if (!parsed.success) {
-    return { fieldErrors: parsed.error.flatten().fieldErrors };
+    const fieldErrors = await translateFieldErrors(parsed.error.flatten().fieldErrors, true);
+    return { fieldErrors };
   }
 
+  const t = await getTranslations("settings.errors");
   const { password, ...fields } = parsed.data;
   const encryptedPassword = password ? encrypt(password) : existing.encryptedPassword;
 
@@ -219,13 +246,13 @@ export async function updateMailAccountAction(
   const imapResult = await verifyImapConnection(candidate);
   if (!imapResult.ok) {
     console.error("[updateMailAccount] IMAP verification failed for", fields.email);
-    return { error: "Could not connect to IMAP server. Check your host, port, and credentials." };
+    return { error: t("imapConnectionFailed") };
   }
 
   const smtpResult = await verifySmtpConnection(candidate);
   if (!smtpResult.ok) {
     console.error("[updateMailAccount] SMTP verification failed for", fields.email);
-    return { error: "Could not connect to SMTP server. Check your SMTP host, port, and credentials." };
+    return { error: t("smtpConnectionFailed") };
   }
 
   await db

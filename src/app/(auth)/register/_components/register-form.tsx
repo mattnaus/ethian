@@ -1,12 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { registerAction } from "../../_actions/auth";
 
 const inputClass =
   "w-full px-3 py-2 rounded-md border border-border bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
 
 export function RegisterForm() {
+  const t = useTranslations("auth.register");
   const [state, action, isPending] = useActionState(registerAction, undefined);
 
   return (
@@ -22,8 +24,8 @@ export function RegisterForm() {
           htmlFor="name"
           className="block text-sm font-medium text-foreground mb-1.5"
         >
-          Name{" "}
-          <span className="text-muted-foreground font-normal">(optional)</span>
+          {t("nameLabel")}{" "}
+          <span className="text-muted-foreground font-normal">{t("nameOptional")}</span>
         </label>
         <input
           id="name"
@@ -31,7 +33,7 @@ export function RegisterForm() {
           type="text"
           autoComplete="name"
           className={inputClass}
-          placeholder="Jane Smith"
+          placeholder={t("namePlaceholder")}
         />
       </div>
 
@@ -40,7 +42,7 @@ export function RegisterForm() {
           htmlFor="email"
           className="block text-sm font-medium text-foreground mb-1.5"
         >
-          Email
+          {t("emailLabel")}
         </label>
         <input
           id="email"
@@ -49,7 +51,7 @@ export function RegisterForm() {
           autoComplete="email"
           required
           className={inputClass}
-          placeholder="you@example.com"
+          placeholder={t("emailPlaceholder")}
         />
       </div>
 
@@ -58,7 +60,7 @@ export function RegisterForm() {
           htmlFor="password"
           className="block text-sm font-medium text-foreground mb-1.5"
         >
-          Password
+          {t("passwordLabel")}
         </label>
         <input
           id="password"
@@ -68,7 +70,7 @@ export function RegisterForm() {
           required
           minLength={8}
           className={inputClass}
-          placeholder="At least 8 characters"
+          placeholder={t("passwordPlaceholder")}
         />
       </div>
 
@@ -77,7 +79,7 @@ export function RegisterForm() {
         disabled={isPending}
         className="w-full py-2 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity cursor-pointer"
       >
-        {isPending ? "Creating account…" : "Create account"}
+        {isPending ? t("submittingButton") : t("submitButton")}
       </button>
     </form>
   );

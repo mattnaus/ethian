@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,15 +26,17 @@ interface AccountFormProps {
   account?: MailAccount; // undefined = add mode
 }
 
-const ACCOUNT_COLORS: Array<{ hex: string; label: string }> = [
-  { hex: "#ef4444", label: "Red" },
-  { hex: "#f97316", label: "Orange" },
-  { hex: "#f59e0b", label: "Amber" },
-  { hex: "#10b981", label: "Emerald" },
-  { hex: "#14b8a6", label: "Teal" },
-  { hex: "#3b82f6", label: "Blue" },
-  { hex: "#8b5cf6", label: "Violet" },
-  { hex: "#ec4899", label: "Pink" },
+type ColorKey = "Red" | "Orange" | "Amber" | "Emerald" | "Teal" | "Blue" | "Violet" | "Pink";
+
+const ACCOUNT_COLORS: Array<{ hex: string; labelKey: ColorKey }> = [
+  { hex: "#ef4444", labelKey: "Red" },
+  { hex: "#f97316", labelKey: "Orange" },
+  { hex: "#f59e0b", labelKey: "Amber" },
+  { hex: "#10b981", labelKey: "Emerald" },
+  { hex: "#14b8a6", labelKey: "Teal" },
+  { hex: "#3b82f6", labelKey: "Blue" },
+  { hex: "#8b5cf6", labelKey: "Violet" },
+  { hex: "#ec4899", labelKey: "Pink" },
 ];
 
 function randomColor() {
@@ -44,6 +47,8 @@ const initialState: AccountFormState = {};
 
 export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
   const isEdit = !!account;
+  const t = useTranslations("settings");
+  const tColors = useTranslations("colors");
 
   const action = isEdit
     ? updateMailAccountAction.bind(null, account.id)
@@ -80,7 +85,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
       <DialogContent className="max-w-lg bg-zinc-900 border-zinc-800 text-zinc-100">
         <DialogHeader>
           <DialogTitle className="text-zinc-100">
-            {isEdit ? "Edit mail account" : "Add mail account"}
+            {isEdit ? t("form.editTitle") : t("form.addTitle")}
           </DialogTitle>
         </DialogHeader>
 
@@ -91,11 +96,11 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
           {/* General */}
           <div className="space-y-3">
             <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-zinc-300">Display name</Label>
+              <Label htmlFor="name" className="text-zinc-300">{t("form.displayNameLabel")}</Label>
               <Input
                 id="name"
                 name="name"
-                placeholder="Personal Gmail"
+                placeholder={t("form.displayNamePlaceholder")}
                 defaultValue={account?.name}
                 className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-orange-500"
               />
@@ -103,12 +108,12 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-zinc-300">Email address</Label>
+              <Label htmlFor="email" className="text-zinc-300">{t("form.emailLabel")}</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={t("form.emailPlaceholder")}
                 defaultValue={account?.email}
                 className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-orange-500"
               />
@@ -117,13 +122,13 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
 
             {/* Color picker */}
             <div className="space-y-1.5">
-              <Label className="text-zinc-300">Account color</Label>
+              <Label className="text-zinc-300">{t("form.colorLabel")}</Label>
               <div className="flex items-center gap-1 flex-wrap">
-                {ACCOUNT_COLORS.map(({ hex, label }) => (
+                {ACCOUNT_COLORS.map(({ hex, labelKey }) => (
                   <button
                     key={hex}
                     type="button"
-                    aria-label={`Select ${label}`}
+                    aria-label={t("form.colorSelectAriaLabel", { color: tColors(labelKey) })}
                     onClick={() => setSelectedColor(hex)}
                     className="flex items-center justify-center h-11 w-11 rounded-md shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
                   >
@@ -149,22 +154,22 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
 
           {/* IMAP */}
           <div className="space-y-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">IMAP (incoming)</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">{t("form.imapSection")}</p>
 
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="imapHost" className="text-zinc-300">Host</Label>
+                <Label htmlFor="imapHost" className="text-zinc-300">{t("form.hostLabel")}</Label>
                 <Input
                   id="imapHost"
                   name="imapHost"
-                  placeholder="imap.gmail.com"
+                  placeholder={t("form.imapHostPlaceholder")}
                   defaultValue={account?.imapHost}
                   className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-orange-500"
                 />
                 {field("imapHost") && <p className="text-xs text-red-400">{field("imapHost")}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="imapPort" className="text-zinc-300">Port</Label>
+                <Label htmlFor="imapPort" className="text-zinc-300">{t("form.portLabel")}</Label>
                 <Input
                   id="imapPort"
                   name="imapPort"
@@ -185,7 +190,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
                 value="true"
                 className="accent-orange-500"
               />
-              <Label htmlFor="imapSecure" className="text-zinc-300 font-normal">Use TLS/SSL</Label>
+              <Label htmlFor="imapSecure" className="text-zinc-300 font-normal">{t("form.tlsLabel")}</Label>
             </div>
           </div>
 
@@ -193,22 +198,22 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
 
           {/* SMTP */}
           <div className="space-y-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">SMTP (outgoing)</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">{t("form.smtpSection")}</p>
 
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2 space-y-1.5">
-                <Label htmlFor="smtpHost" className="text-zinc-300">Host</Label>
+                <Label htmlFor="smtpHost" className="text-zinc-300">{t("form.hostLabel")}</Label>
                 <Input
                   id="smtpHost"
                   name="smtpHost"
-                  placeholder="smtp.gmail.com"
+                  placeholder={t("form.smtpHostPlaceholder")}
                   defaultValue={account?.smtpHost}
                   className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-orange-500"
                 />
                 {field("smtpHost") && <p className="text-xs text-red-400">{field("smtpHost")}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="smtpPort" className="text-zinc-300">Port</Label>
+                <Label htmlFor="smtpPort" className="text-zinc-300">{t("form.portLabel")}</Label>
                 <Input
                   id="smtpPort"
                   name="smtpPort"
@@ -229,7 +234,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
                 value="true"
                 className="accent-orange-500"
               />
-              <Label htmlFor="smtpSecure" className="text-zinc-300 font-normal">Use TLS/SSL</Label>
+              <Label htmlFor="smtpSecure" className="text-zinc-300 font-normal">{t("form.tlsLabel")}</Label>
             </div>
           </div>
 
@@ -237,14 +242,14 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
 
           {/* Credentials */}
           <div className="space-y-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Credentials</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">{t("form.credentialsSection")}</p>
 
             <div className="space-y-1.5">
-              <Label htmlFor="username" className="text-zinc-300">Username</Label>
+              <Label htmlFor="username" className="text-zinc-300">{t("form.usernameLabel")}</Label>
               <Input
                 id="username"
                 name="username"
-                placeholder="you@example.com"
+                placeholder={t("form.usernamePlaceholder")}
                 defaultValue={account?.username}
                 className="bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-orange-500"
               />
@@ -253,7 +258,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
 
             <div className="space-y-1.5">
               <Label htmlFor="password" className="text-zinc-300">
-                {isEdit ? "Password (leave blank to keep current)" : "Password"}
+                {isEdit ? t("form.passwordEditLabel") : t("form.passwordLabel")}
               </Label>
               <Input
                 id="password"
@@ -279,14 +284,14 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
               onClick={() => onOpenChange(false)}
               className="text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
             >
-              Cancel
+              {t("form.cancelButton")}
             </Button>
             <Button
               type="submit"
               disabled={isPending}
               className="bg-orange-500 hover:bg-orange-600 text-white"
             >
-              {isPending ? "Saving…" : isEdit ? "Save changes" : "Add account"}
+              {isPending ? t("form.savingButton") : isEdit ? t("form.saveButton") : t("form.addButton")}
             </Button>
           </DialogFooter>
         </form>

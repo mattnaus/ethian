@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Inbox,
   Bookmark,
@@ -22,20 +23,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-const NAV_ITEMS: Array<{
-  href: string;
-  label: string;
-  icon: React.ElementType;
-  dividerBefore?: boolean;
-}> = [
-  { href: "/inbox", label: "Inbox", icon: Inbox },
-  { href: "/saved", label: "Saved", icon: Bookmark },
-  { href: "/snoozed", label: "Snoozed", icon: Clock },
-  { href: "/sent", label: "Sent", icon: Send },
-  { href: "/trash", label: "Trash", icon: Trash2 },
-  { href: "/screener", label: "Screener", icon: ShieldQuestion, dividerBefore: true },
-];
 
 function useIsActive(href: string) {
   const pathname = usePathname();
@@ -125,6 +112,7 @@ function TabItem({
 
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations("nav");
   const [expanded, setExpanded] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("sidebar-expanded") === "true";
@@ -138,6 +126,15 @@ export function Sidebar() {
     });
   }
 
+  const navItems = [
+    { href: "/inbox", label: t("inbox"), icon: Inbox },
+    { href: "/saved", label: t("saved"), icon: Bookmark },
+    { href: "/snoozed", label: t("snoozed"), icon: Clock },
+    { href: "/sent", label: t("sent"), icon: Send },
+    { href: "/trash", label: t("trash"), icon: Trash2 },
+    { href: "/screener", label: t("screener"), icon: ShieldQuestion, dividerBefore: true },
+  ];
+
   const settingsActive =
     pathname === "/settings" || pathname.startsWith("/settings/");
 
@@ -150,10 +147,10 @@ export function Sidebar() {
   );
 
   const mobileItems = [
-    { href: "/inbox", label: "Inbox", icon: Inbox },
-    { href: "/screener", label: "Screener", icon: ShieldQuestion },
-    { href: "/sent", label: "Sent", icon: Send },
-    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/inbox", label: t("inbox"), icon: Inbox },
+    { href: "/screener", label: t("screener"), icon: ShieldQuestion },
+    { href: "/sent", label: t("sent"), icon: Send },
+    { href: "/settings", label: t("settings"), icon: Settings },
   ];
 
   return (
@@ -180,7 +177,7 @@ export function Sidebar() {
             <button
               type="button"
               onClick={toggle}
-              aria-label="Collapse sidebar"
+              aria-label={t("collapseSidebar")}
               className="flex items-center justify-center rounded-md p-1.5 text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300 transition-colors"
             >
               <PanelLeftClose className="h-4 w-4" />
@@ -190,7 +187,7 @@ export function Sidebar() {
 
         {/* Main nav */}
         <nav className="flex flex-1 flex-col gap-0.5 p-2 pt-3 overflow-hidden">
-          {NAV_ITEMS.map(({ href, label, icon, dividerBefore }) => (
+          {navItems.map(({ href, label, icon, dividerBefore }) => (
             <div key={href}>
               {dividerBefore && <Separator className="my-2 bg-zinc-800" />}
               <DesktopNavItem
@@ -211,14 +208,14 @@ export function Sidebar() {
                   <button
                     type="button"
                     onClick={toggle}
-                    aria-label="Expand sidebar"
+                    aria-label={t("expandSidebar")}
                     className="flex items-center justify-center rounded-md px-3 py-2 w-full transition-colors text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
                   >
                     <PanelLeftOpen className="h-5 w-5 shrink-0" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="right" sideOffset={8}>
-                  Expand
+                  {t("expand")}
                 </TooltipContent>
               </Tooltip>
             </>
@@ -230,7 +227,7 @@ export function Sidebar() {
           {expanded ? (
             <Link href="/settings" className={settingsLinkClass}>
               <Settings className="h-5 w-5 shrink-0" />
-              <span className="text-sm truncate">Settings</span>
+              <span className="text-sm truncate">{t("settings")}</span>
             </Link>
           ) : (
             <Tooltip>
@@ -240,7 +237,7 @@ export function Sidebar() {
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="right" sideOffset={8}>
-                Settings
+                {t("settings")}
               </TooltipContent>
             </Tooltip>
           )}

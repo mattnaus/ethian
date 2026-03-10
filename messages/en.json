@@ -1,0 +1,137 @@
+{
+  "auth": {
+    "brandName": "Ethian",
+    "brandTagline": "Intentional email",
+    "login": {
+      "pageTitle": "Sign in",
+      "heading": "Sign in",
+      "subheading": "Enter your email and password to continue.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "submitButton": "Sign in",
+      "submittingButton": "Signing in\u2026",
+      "noAccount": "Don\u2019t have an account?",
+      "createOne": "Create one"
+    },
+    "register": {
+      "pageTitle": "Create account",
+      "heading": "Create an account",
+      "subheading": "Start managing your email the intentional way.",
+      "nameLabel": "Name",
+      "nameOptional": "(optional)",
+      "namePlaceholder": "Jane Smith",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "submitButton": "Create account",
+      "submittingButton": "Creating account\u2026",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    },
+    "errors": {
+      "emailPasswordRequired": "Email and password are required.",
+      "invalidCredentials": "Invalid email or password.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "emailAlreadyExists": "An account with this email already exists.",
+      "accountCreatedSignInFailed": "Account created but sign-in failed. Please log in manually."
+    }
+  },
+  "nav": {
+    "inbox": "Inbox",
+    "saved": "Saved",
+    "snoozed": "Snoozed",
+    "sent": "Sent",
+    "trash": "Trash",
+    "screener": "Screener",
+    "settings": "Settings",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "expand": "Expand"
+  },
+  "settings": {
+    "heading": "Settings",
+    "subheading": "Manage your Ethian configuration.",
+    "accounts": {
+      "heading": "Mail accounts",
+      "subheading": "Connect your IMAP/SMTP accounts to start syncing email.",
+      "addAccount": "Add account",
+      "noAccounts": "No accounts yet. Add one to get started.",
+      "disabled": "Disabled",
+      "deleteConfirm": "Delete \"{name}\"? This cannot be undone.",
+      "editAriaLabel": "Edit {name}",
+      "deleteAriaLabel": "Delete {name}"
+    },
+    "form": {
+      "addTitle": "Add mail account",
+      "editTitle": "Edit mail account",
+      "displayNameLabel": "Display name",
+      "displayNamePlaceholder": "Personal Gmail",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "you@example.com",
+      "colorLabel": "Account color",
+      "colorSelectAriaLabel": "Select {color}",
+      "imapSection": "IMAP (incoming)",
+      "smtpSection": "SMTP (outgoing)",
+      "credentialsSection": "Credentials",
+      "hostLabel": "Host",
+      "portLabel": "Port",
+      "imapHostPlaceholder": "imap.gmail.com",
+      "smtpHostPlaceholder": "smtp.gmail.com",
+      "tlsLabel": "Use TLS/SSL",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordEditLabel": "Password (leave blank to keep current)",
+      "cancelButton": "Cancel",
+      "saveButton": "Save changes",
+      "savingButton": "Saving\u2026",
+      "addButton": "Add account"
+    },
+    "errors": {
+      "imapConnectionFailed": "Could not connect to IMAP server. Check your host, port, and credentials.",
+      "smtpConnectionFailed": "Could not connect to SMTP server. Check your SMTP host, port, and credentials."
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "invalidEmail": "Invalid email address",
+      "invalidColor": "Invalid color",
+      "imapHostRequired": "IMAP host is required",
+      "smtpHostRequired": "SMTP host is required",
+      "usernameRequired": "Username is required",
+      "passwordRequired": "Password is required"
+    }
+  },
+  "colors": {
+    "Red": "Red",
+    "Orange": "Orange",
+    "Amber": "Amber",
+    "Emerald": "Emerald",
+    "Teal": "Teal",
+    "Blue": "Blue",
+    "Violet": "Violet",
+    "Pink": "Pink"
+  },
+  "pages": {
+    "inbox": {
+      "title": "Inbox",
+      "empty": "Your inbox is empty. Add a mail account in Settings to get started."
+    },
+    "screener": {
+      "comingSoon": "Screener \u2014 coming soon"
+    },
+    "saved": {
+      "comingSoon": "Saved \u2014 coming soon"
+    },
+    "snoozed": {
+      "comingSoon": "Snoozed \u2014 coming soon"
+    },
+    "sent": {
+      "comingSoon": "Sent \u2014 coming soon"
+    },
+    "trash": {
+      "comingSoon": "Trash \u2014 coming soon"
+    }
+  }
+}

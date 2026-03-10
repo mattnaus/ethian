@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Plus } from "lucide-react";
@@ -13,6 +14,7 @@ interface AccountsListProps {
 }
 
 export function AccountsList({ accounts }: AccountsListProps) {
+  const t = useTranslations("settings.accounts");
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<MailAccount | undefined>();
   // Track which account ID is being deleted to scope the pending state per-row
@@ -30,7 +32,7 @@ export function AccountsList({ accounts }: AccountsListProps) {
   }
 
   function handleDelete(account: MailAccount) {
-    if (!confirm(`Delete "${account.name}"? This cannot be undone.`)) return;
+    if (!confirm(t("deleteConfirm", { name: account.name }))) return;
     setDeletingId(account.id);
     startTransition(async () => {
       await deleteMailAccountAction(account.id);
@@ -48,10 +50,8 @@ export function AccountsList({ accounts }: AccountsListProps) {
     <>
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold text-zinc-100">Mail accounts</h2>
-          <p className="text-sm text-zinc-400">
-            Connect your IMAP/SMTP accounts to start syncing email.
-          </p>
+          <h2 className="text-base font-semibold text-zinc-100">{t("heading")}</h2>
+          <p className="text-sm text-zinc-400">{t("subheading")}</p>
         </div>
         <Button
           onClick={openAdd}
@@ -59,13 +59,13 @@ export function AccountsList({ accounts }: AccountsListProps) {
           size="sm"
         >
           <Plus className="h-4 w-4 mr-1.5" />
-          Add account
+          {t("addAccount")}
         </Button>
       </div>
 
       {accounts.length === 0 ? (
         <div className="mt-6 rounded-lg border border-dashed border-zinc-800 px-6 py-12 text-center">
-          <p className="text-sm text-zinc-500">No accounts yet. Add one to get started.</p>
+          <p className="text-sm text-zinc-500">{t("noAccounts")}</p>
         </div>
       ) : (
         <ul className="mt-4 divide-y divide-zinc-800 rounded-lg border border-zinc-800">
@@ -92,7 +92,7 @@ export function AccountsList({ accounts }: AccountsListProps) {
                     </Badge>
                     {!account.isActive && (
                       <Badge variant="outline" className="text-xs text-zinc-500">
-                        Disabled
+                        {t("disabled")}
                       </Badge>
                     )}
                   </div>
@@ -109,7 +109,7 @@ export function AccountsList({ accounts }: AccountsListProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label={`Edit ${account.name}`}
+                  aria-label={t("editAriaLabel", { name: account.name })}
                   onClick={() => openEdit(account)}
                   className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
                 >
@@ -118,7 +118,7 @@ export function AccountsList({ accounts }: AccountsListProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label={`Delete ${account.name}`}
+                  aria-label={t("deleteAriaLabel", { name: account.name })}
                   onClick={() => handleDelete(account)}
                   disabled={deletingId === account.id}
                   className="h-8 w-8 text-zinc-400 hover:text-red-400 hover:bg-zinc-800"

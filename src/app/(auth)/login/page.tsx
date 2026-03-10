@@ -1,24 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { LoginForm } from "./_components/login-form";
 
-export const metadata: Metadata = { title: "Sign in" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth.login");
+  return { title: t("pageTitle") };
+}
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const t = await getTranslations("auth.login");
+
   return (
     <>
-      <h2 className="text-xl font-semibold text-foreground mb-1">Sign in</h2>
-      <p className="text-sm text-muted-foreground mb-6">
-        Enter your email and password to continue.
-      </p>
+      <h2 className="text-xl font-semibold text-foreground mb-1">{t("heading")}</h2>
+      <p className="text-sm text-muted-foreground mb-6">{t("subheading")}</p>
       <LoginForm />
       <p className="text-center text-sm text-muted-foreground mt-6">
-        Don&apos;t have an account?{" "}
+        {t("noAccount")}{" "}
         <Link
           href="/register"
           className="text-foreground underline underline-offset-4 hover:opacity-75"
         >
-          Create one
+          {t("createOne")}
         </Link>
       </p>
     </>
