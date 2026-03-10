@@ -38,6 +38,7 @@ Add as many IMAP/SMTP accounts as you like (Gmail, Fastmail, Outlook, any IMAP s
 | SMTP | [nodemailer](https://nodemailer.com) |
 | Queue | [BullMQ](https://bullmq.io) + Redis |
 | Auth | [NextAuth.js v5](https://authjs.dev) (credentials) |
+| i18n | [next-intl v4](https://next-intl.dev) (`localePrefix: 'never'`) |
 
 ---
 
@@ -238,11 +239,16 @@ A dedicated Gmail account with an [App Password](https://support.google.com/acco
 
 ```
 ethian/
+├── messages/
+│   └── en.json                 # All English UI strings (namespaced)
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── (auth)/             # /login, /register
 │   │   ├── (app)/              # Authenticated views (inbox, feed, etc.)
 │   │   └── api/                # Route handlers
+│   ├── i18n/
+│   │   ├── routing.ts          # next-intl locale config
+│   │   └── request.ts          # next-intl request config
 │   ├── db/
 │   │   ├── schema/             # Drizzle table definitions
 │   │   └── index.ts            # db instance
@@ -252,7 +258,9 @@ ethian/
 │   │   ├── queue/              # BullMQ queues + worker
 │   │   ├── crypto.ts           # Password encryption
 │   │   └── utils.ts            # cn() helper
-│   └── types/index.ts          # Shared TypeScript types
+│   └── types/
+│       ├── index.ts            # Shared TypeScript types
+│       └── next-intl.d.ts      # Typed i18n message keys
 ├── tests/                      # Playwright e2e tests
 │   ├── helpers/                # Shared test utilities (auth, db)
 │   ├── auth.spec.ts            # Auth flow tests

@@ -44,6 +44,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | App shell & sidebar | ✅ Done | Collapsible sidebar (thin/wide), mobile bottom tab bar, localStorage persistence |
 | Email sync wiring | ✅ Done | Adding an account schedules repeatable BullMQ sync + immediate first sync |
 | E2E tests | ✅ Done | Playwright: auth flows, settings/account CRUD |
+| i18n / translations | ✅ Done | next-intl v4, `localePrefix: 'never'`, all UI strings in `messages/en.json` |
 
 ### What's not built yet
 
@@ -129,6 +130,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 | SMTP | nodemailer | Battle-tested; supports all major providers |
 | Queue | BullMQ + Redis | Reliable background processing; retries, rate limiting |
 | Auth | NextAuth.js v5 (beta) | App Router compatible; credentials + OAuth ready |
+| i18n | next-intl v4 | Translation infrastructure; `localePrefix: 'never'`; typed message keys |
 | Encryption | Node.js crypto (AES-256-CBC) | Secure storage of IMAP/SMTP passwords in DB |
 | Testing | Playwright | E2E test automation for auth and settings flows |
 | PWA | Web app manifest + service worker (planned) | Installable on iOS/Android/desktop; standalone mode |
@@ -151,9 +153,11 @@ ethian/
 │   ├── helpers/             # Shared test utilities (auth, db)
 │   ├── auth.spec.ts
 │   └── settings.spec.ts
+├── messages/
+│   └── en.json              # All English UI strings, organised by namespace
 ├── src/
 │   ├── app/                 # Next.js App Router
-│   │   ├── layout.tsx       # Root layout (Inter font, global CSS)
+│   │   ├── layout.tsx       # Root layout (Inter font, global CSS, NextIntlClientProvider)
 │   │   ├── page.tsx         # Root redirect: /inbox or /login
 │   │   ├── globals.css      # Tailwind v4 + shadcn/ui CSS variables
 │   │   ├── (auth)/          # /login, /register + Server Actions
@@ -180,6 +184,9 @@ ethian/
 │   │   │   ├── senders.ts   # sender_rules, screener_queue tables
 │   │   │   └── index.ts     # Re-exports + combined schema object
 │   │   └── index.ts         # Drizzle db instance + connection pool
+│   ├── i18n/
+│   │   ├── routing.ts       # next-intl routing config (locales, defaultLocale, localePrefix: 'never')
+│   │   └── request.ts       # next-intl request config; loads messages per locale
 │   ├── lib/
 │   │   ├── imap/
 │   │   │   └── client.ts    # imapflow wrapper: createImapClient, syncMailbox
@@ -192,7 +199,8 @@ ethian/
 │   │   ├── crypto.ts        # AES-256-CBC encrypt/decrypt for passwords
 │   │   └── utils.ts         # cn() Tailwind class merging helper
 │   └── types/
-│       └── index.ts         # Shared TS types, enums, Drizzle type re-exports
+│       ├── index.ts         # Shared TS types, enums, Drizzle type re-exports
+│       └── next-intl.d.ts   # Typed message keys via use-intl AppConfig augmentation
 ├── .env.example             # Environment variable template
 ├── CLAUDE.md                # This file — architecture & conventions
 ├── README.md                # User-facing setup guide and overview
@@ -379,6 +387,16 @@ Every change — no matter how small — is only done when all of the following 
 - Update `README.md` if the change affects setup, architecture, or user-facing behaviour.
 - **All related files go in one commit.** The work log (`.claude/work/YYYYMMDD.md`), review files (`.claude/reviews/`), e2e spec files (`.claude/e2e_tests_to_make/`), and any lockfile changes (`package-lock.json`) must be staged and committed together with the code changes they document. Never leave these files uncommitted after a task is done.
 
+### Internationalisation (i18n)
+- **Library:** next-intl v4 with `localePrefix: 'never'` — URLs never contain a locale segment (e.g. `/inbox`, not `/en/inbox`).
+- **Messages:** All UI strings live in `messages/en.json`, organised by namespace (e.g. `auth`, `nav`, `settings`, `pages`, `colors`).
+- **Typed keys:** `src/types/next-intl.d.ts` augments `use-intl`'s `AppConfig` so TypeScript checks message keys at compile time.
+- **Client Components:** use `useTranslations("namespace")` hook.
+- **Server Components & Server Actions:** use `await getTranslations("namespace")`.
+- **Middleware:** locale is detected and forwarded via the `X-NEXT-INTL-LOCALE` request header. `createIntlMiddleware` is intentionally **not** used — it rewrites URLs to `/en/[path]` internally, which 404s because the app has no `[locale]` route segments.
+- **Adding a new string:** add the key to `messages/en.json` under the appropriate namespace, then reference it via `t("key")`. Never hardcode UI strings in components.
+- **Adding a new locale:** add to `routing.locales` in `src/i18n/routing.ts` and create `messages/<locale>.json`.
+
 ### Password Storage
 - IMAP/SMTP passwords are encrypted with AES-256-CBC before DB insert.
 - Use `encrypt()` / `decrypt()` from `src/lib/crypto.ts`.
@@ -513,6 +531,9 @@ Drizzle generates zero runtime overhead — queries are plain SQL under the hood
 
 ### Why per-user sender rules (not per-account)?
 A sender is a person or service, not a mailbox. If you approve Stripe on your personal account, you want Stripe receipts to go to Paper Trail on your work account too. User-level rules make this automatic.
+
+### Why next-intl with `localePrefix: 'never'`?
+Ethian doesn't need locale-prefixed URLs (`/en/inbox`) — it's a single-user app and locale switching is not a planned feature. `localePrefix: 'never'` keeps URLs clean. `createIntlMiddleware` is bypassed because it internally rewrites requests to `/en/[path]`, causing 404s without a `[locale]` route segment. Instead, we manually set the `X-NEXT-INTL-LOCALE` header, which is what `getLocale()` / `getTranslations()` actually read.
 
 ### Why AES-256-CBC for password storage?
 We need to decrypt passwords at runtime to authenticate with IMAP/SMTP servers. Hashing (like bcrypt) is one-way and can't be used here. AES-256-CBC with a fresh IV per encryption gives strong symmetric encryption. For production, rotate to a KMS-backed approach.
