@@ -25,19 +25,19 @@ interface AccountFormProps {
   account?: MailAccount; // undefined = add mode
 }
 
-const ACCOUNT_COLORS = [
-  "#ef4444", // red
-  "#f97316", // orange
-  "#f59e0b", // amber
-  "#10b981", // emerald
-  "#14b8a6", // teal
-  "#3b82f6", // blue
-  "#8b5cf6", // violet
-  "#ec4899", // pink
+const ACCOUNT_COLORS: Array<{ hex: string; label: string }> = [
+  { hex: "#ef4444", label: "Red" },
+  { hex: "#f97316", label: "Orange" },
+  { hex: "#f59e0b", label: "Amber" },
+  { hex: "#10b981", label: "Emerald" },
+  { hex: "#14b8a6", label: "Teal" },
+  { hex: "#3b82f6", label: "Blue" },
+  { hex: "#8b5cf6", label: "Violet" },
+  { hex: "#ec4899", label: "Pink" },
 ];
 
 function randomColor() {
-  return ACCOUNT_COLORS[Math.floor(Math.random() * ACCOUNT_COLORS.length)];
+  return ACCOUNT_COLORS[Math.floor(Math.random() * ACCOUNT_COLORS.length)].hex;
 }
 
 const initialState: AccountFormState = {};
@@ -71,12 +71,6 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
     }
   }, [open, isEdit]);
 
-  // Sync color when switching edit targets
-  useEffect(() => {
-    if (account?.color) {
-      setSelectedColor(account.color);
-    }
-  }, [account?.color]);
 
   function field(name: string) {
     return state.fieldErrors?.[name]?.[0];
@@ -125,22 +119,28 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
             {/* Color picker */}
             <div className="space-y-1.5">
               <Label className="text-zinc-300">Account color</Label>
-              <div className="flex items-center gap-2">
-                {ACCOUNT_COLORS.map((color) => (
+              <div className="flex items-center gap-1">
+                {ACCOUNT_COLORS.map(({ hex, label }) => (
                   <button
-                    key={color}
+                    key={hex}
                     type="button"
-                    aria-label={`Select color ${color}`}
-                    onClick={() => setSelectedColor(color)}
-                    className="h-6 w-6 rounded-full shrink-0 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
-                    style={{
-                      backgroundColor: color,
-                      boxShadow: selectedColor === color
-                        ? `0 0 0 2px #18181b, 0 0 0 4px ${color}`
-                        : undefined,
-                      transform: selectedColor === color ? "scale(1.15)" : undefined,
-                    }}
-                  />
+                    aria-label={`Select ${label}`}
+                    onClick={() => setSelectedColor(hex)}
+                    className="flex items-center justify-center h-11 w-11 rounded-md shrink-0 transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
+                  >
+                    <span
+                      className="h-5 w-5 rounded-full"
+                      style={{
+                        backgroundColor: hex,
+                        boxShadow: selectedColor === hex
+                          ? `0 0 0 2px #18181b, 0 0 0 4px ${hex}`
+                          : undefined,
+                        transform: selectedColor === hex ? "scale(1.15)" : undefined,
+                        display: "block",
+                        transition: "transform 0.1s",
+                      }}
+                    />
+                  </button>
                 ))}
               </div>
             </div>

@@ -76,32 +76,32 @@ export function AccountsList({ accounts }: AccountsListProps) {
             >
               <div className="min-w-0 flex items-center gap-3">
                 <span
-                  className="h-2.5 w-2.5 rounded-full shrink-0"
+                  className="h-3 w-3 rounded-full shrink-0"
                   style={{ backgroundColor: account.color }}
                 />
                 <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-zinc-100 truncate">
-                    {account.name}
-                  </span>
-                  <Badge
-                    variant={syncBadgeVariant(account.syncStatus)}
-                    className="text-xs capitalize"
-                  >
-                    {account.syncStatus}
-                  </Badge>
-                  {!account.isActive && (
-                    <Badge variant="outline" className="text-xs text-zinc-500">
-                      Disabled
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-zinc-100 truncate">
+                      {account.name}
+                    </span>
+                    <Badge
+                      variant={syncBadgeVariant(account.syncStatus)}
+                      className="text-xs capitalize"
+                    >
+                      {account.syncStatus}
                     </Badge>
+                    {!account.isActive && (
+                      <Badge variant="outline" className="text-xs text-zinc-500">
+                        Disabled
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-zinc-400 truncate">{account.email}</p>
+                  {account.syncError && (
+                    <p className="text-xs text-red-400 truncate mt-0.5">
+                      {account.syncError}
+                    </p>
                   )}
-                </div>
-                <p className="text-xs text-zinc-400 truncate">{account.email}</p>
-                {account.syncError && (
-                  <p className="text-xs text-red-400 truncate mt-0.5">
-                    {account.syncError}
-                  </p>
-                )}
                 </div>
               </div>
 
