@@ -38,7 +38,7 @@ The sidebar and gatekeeper list were built before the OKLCH migration and use ha
 | `bg-zinc-800` | Border / hover fill |
 | `text-zinc-50` / `text-zinc-100` | Primary text |
 | `text-zinc-400` / `text-zinc-500` | Muted text |
-| `text-orange-500` | Active nav item, brand accent |
+| `text-primary` | Active nav item, brand accent |
 | `border-zinc-800` | Dividers |
 
 ### Accent / Brand Color
@@ -156,7 +156,7 @@ flex items-center gap-3
 - **Desktop**: dot | avatar | sender (`w-36 lg:w-40`) | subject+snippet stacked (`flex-1`) | count badge | paperclip | date (`w-16`).
 - **Count badge**: `bg-zinc-800 text-zinc-400 rounded-full tabular-nums` — only shown when `messageCount > 1`.
 - **Hover**: `hover:bg-zinc-800/60`.
-- **Focus**: `focus:ring-2 focus:ring-orange-500/50`.
+- **Focus**: `focus:ring-2 focus:ring-ring/50`.
 
 > Note: New list screens should follow the **Email Card** pattern (semantic tokens, `bg-muted/70`, `border-2`) rather than the Gatekeeper Row pattern.
 
@@ -252,7 +252,7 @@ Structure:
 - Scrollable body: `flex-1 overflow-y-auto px-6 space-y-4 pb-4` — contains the form fields
 - Sticky footer: `px-6 py-4 border-t border-zinc-800 shrink-0` — contains Cancel + Submit buttons
 
-Inputs in dialogs: `bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-orange-500`
+Inputs in dialogs: `bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-ring`
 
 Form field error text: `text-xs text-red-400`
 
@@ -294,7 +294,7 @@ All inputs must be **controlled** (`value` + `onChange` + `useState`) when insid
 ### Nav Item Active State
 
 ```
-bg-zinc-900 text-orange-500          // active
+bg-zinc-900 text-primary             // active
 text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300  // inactive
 ```
 
