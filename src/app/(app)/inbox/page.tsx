@@ -36,7 +36,7 @@ export default async function InboxPage() {
       ),
     );
 
-  const [rows, [{ total }], [{ screenerCount }]] = await Promise.all([
+  const [rows, [{ total }], [{ screenerCount }], allAccounts] = await Promise.all([
     db
       .select({
         id: emails.id,
@@ -71,6 +71,11 @@ export default async function InboxPage() {
       .select({ screenerCount: count() })
       .from(screenerQueue)
       .where(eq(screenerQueue.userId, userId)),
+
+    db
+      .select({ id: mailAccounts.id, name: mailAccounts.name, color: mailAccounts.color })
+      .from(mailAccounts)
+      .where(eq(mailAccounts.userId, userId)),
   ]);
 
   const locale = await getLocale();
@@ -81,18 +86,8 @@ export default async function InboxPage() {
     sentAt: row.sentAt.toISOString(),
   }));
 
-  // Distinct accounts in the inbox result (for the filter UI)
-  const accountMap = new Map<string, { id: string; name: string; color: string }>();
-  for (const row of rows) {
-    if (!accountMap.has(row.mailAccountId)) {
-      accountMap.set(row.mailAccountId, {
-        id: row.mailAccountId,
-        name: row.mailAccountName,
-        color: row.accountColor,
-      });
-    }
-  }
-  const accounts = Array.from(accountMap.values());
+  // All user accounts — used for the mailbox filter (independent of inbox contents)
+  const accounts = allAccounts;
 
   return (
     <InboxView

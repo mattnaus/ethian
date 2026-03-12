@@ -246,7 +246,7 @@ export function InboxView({
 
             {/* Center: Mailbox filter + Search */}
             <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-              {accounts.length > 1 && (
+              {accounts.length > 0 && (
                 <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                   <PopoverTrigger asChild>
                     <button className="flex items-center gap-2 px-3 py-1.5 h-9 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors text-sm">
@@ -304,7 +304,7 @@ export function InboxView({
             </button>
           )}
           <div className="flex items-center justify-center gap-2">
-            {accounts.length > 1 && (
+            {accounts.length > 0 && (
               <Popover open={filterOpen} onOpenChange={setFilterOpen}>
                 <PopoverTrigger asChild>
                   <button className="flex items-center gap-2 px-3 py-2 h-11 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
