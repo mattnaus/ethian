@@ -386,6 +386,11 @@ Every change — no matter how small — is only done when all of the following 
 
 **Skip condition:** Steps 2–4 are skipped **only** when the user's prompt explicitly ends with `- no review`.
 
+### Invoking the reviewer
+When invoking the reviewer sub-agent, always pass:
+1. The **commit hash** and changed files being reviewed.
+2. The **work log entry** for that commit, copied from `.claude/work/YYYYMMDD.md`. This gives the reviewer the original request and functional spec so it can verify the implementation against the stated intent — not just review the code in isolation.
+
 ### Committing & Pushing
 - **Always commit and push after completing a task**, unless the user explicitly says otherwise.
 - Commit messages follow Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`.
