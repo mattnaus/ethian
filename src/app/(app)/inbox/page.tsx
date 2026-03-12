@@ -4,8 +4,13 @@ import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
 import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { emailAttachments, emails, mailAccounts } from "@/db/schema";
-import { EmailList } from "./_components/email-list";
+import {
+  emailAttachments,
+  emails,
+  mailAccounts,
+  screenerQueue,
+} from "@/db/schema";
+import { InboxView } from "./_components/inbox-view";
 
 const INBOX_LIMIT = 100;
 
@@ -20,7 +25,7 @@ export default async function InboxPage() {
 
   const userId = session.user.id;
 
-  // Correlated subquery via Drizzle's query builder — table tracked at compile time
+  // Correlated subquery — checks if the email has non-inline attachments
   const attachmentSubquery = db
     .select({ _: sql`1` })
     .from(emailAttachments)
@@ -31,12 +36,7 @@ export default async function InboxPage() {
       ),
     );
 
-  const baseCondition = and(
-    eq(mailAccounts.userId, userId),
-    eq(emails.category, "inbox"),
-  );
-
-  const [rows, [{ total }]] = await Promise.all([
+  const [rows, [{ total }], [{ screenerCount }]] = await Promise.all([
     db
       .select({
         id: emails.id,
@@ -47,11 +47,15 @@ export default async function InboxPage() {
         sentAt: emails.sentAt,
         isRead: emails.isRead,
         accountColor: mailAccounts.color,
+        mailAccountId: mailAccounts.id,
+        mailAccountName: mailAccounts.name,
         hasAttachments: sql<boolean>`EXISTS (${attachmentSubquery})`,
       })
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
-      .where(baseCondition)
+      .where(
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "inbox")),
+      )
       .orderBy(desc(emails.sentAt))
       .limit(INBOX_LIMIT),
 
@@ -59,34 +63,44 @@ export default async function InboxPage() {
       .select({ total: count() })
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
-      .where(baseCondition),
+      .where(
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "inbox")),
+      ),
+
+    db
+      .select({ screenerCount: count() })
+      .from(screenerQueue)
+      .where(eq(screenerQueue.userId, userId)),
   ]);
 
-  const [t, locale] = await Promise.all([
-    getTranslations("pages.inbox"),
-    getLocale(),
-  ]);
+  const locale = await getLocale();
 
-  // Serialize Date → ISO string for serialization safety
-  const emailRows = rows.map((row) => ({
+  const entries = rows.map((row) => ({
     ...row,
+    snippet: row.snippet ?? "",
     sentAt: row.sentAt.toISOString(),
   }));
 
-  const showingMessage =
-    total > INBOX_LIMIT ? t("showingOf", { shown: INBOX_LIMIT, total }) : null;
+  // Distinct accounts in the inbox result (for the filter UI)
+  const accountMap = new Map<string, { id: string; name: string; color: string }>();
+  for (const row of rows) {
+    if (!accountMap.has(row.mailAccountId)) {
+      accountMap.set(row.mailAccountId, {
+        id: row.mailAccountId,
+        name: row.mailAccountName,
+        color: row.accountColor,
+      });
+    }
+  }
+  const accounts = Array.from(accountMap.values());
 
   return (
-    <div className="flex flex-col h-full">
-      <header className="flex h-12 items-center border-b border-zinc-800 px-6 shrink-0">
-        <h1 className="text-base font-semibold text-zinc-100">{t("title")}</h1>
-      </header>
-      <EmailList
-        emails={emailRows}
-        emptyMessage={t("empty")}
-        showingMessage={showingMessage}
-        locale={locale}
-      />
-    </div>
+    <InboxView
+      emails={entries}
+      accounts={accounts}
+      screenerCount={screenerCount}
+      locale={locale}
+      total={total}
+    />
   );
 }

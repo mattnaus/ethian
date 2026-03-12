@@ -129,7 +129,23 @@
     "inbox": {
       "title": "Inbox",
       "empty": "Your inbox is empty. Add a mail account in Settings to get started.",
-      "showingOf": "Showing {shown} of {total} emails"
+      "showingOf": "Showing {shown} of {total} emails",
+      "messageCount": "{count, plural, one {# message} other {# messages}}",
+      "gatekeeperButton": "{count, plural, one {# new sender} other {# new senders}}",
+      "mailboxFilter": "Mailbox",
+      "newButton": "New",
+      "searchPlaceholder": "Search\u2026",
+      "groupToday": "Today",
+      "groupThisWeek": "This Week",
+      "groupThisMonth": "This Month",
+      "folders": {
+        "inbox": "Inbox",
+        "feed": "Feed",
+        "paperTrail": "Paper Trail",
+        "gatekeeper": "Gatekeeper",
+        "setAside": "Set Aside",
+        "replyLater": "Reply Later"
+      }
     },
     "gatekeeper": {
       "title": "Gatekeeper",

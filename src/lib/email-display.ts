@@ -67,3 +67,17 @@ export function formatDate(isoString: string, locale: string): string {
     year: "2-digit",
   }).format(date);
 }
+
+/** Relative date — "5m ago", "3h ago", "2d ago", then falls back to "Mar 5" style. */
+export function formatRelativeDate(isoString: string, locale: string): string {
+  const date = new Date(isoString);
+  const diff = Date.now() - date.getTime();
+  const minutes = Math.floor(diff / 60_000);
+  const hours = Math.floor(diff / 3_600_000);
+  const days = Math.floor(diff / 86_400_000);
+
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return formatDate(isoString, locale);
+}

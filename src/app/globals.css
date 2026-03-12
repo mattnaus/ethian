@@ -1,63 +1,91 @@
 @import "tailwindcss";
 
 /* =============================================================================
-   Ethian Design System — CSS custom properties for shadcn/ui
-   Dark mode only. Zinc scale + orange-500 accent.
-   Follows shadcn/ui v2 convention: HSL values without the hsl() wrapper.
+   Ethian Design System — OKLCH color tokens
+   Dark mode only.
    ============================================================================= */
 
 @layer base {
   :root {
-    /* Background & foreground — zinc-950 / zinc-50 */
-    --background: 240 6% 4%;       /* zinc-950 #09090b */
-    --foreground: 0 0% 98%;        /* zinc-50  #fafafa */
+    /* Backgrounds */
+    --background: oklch(0.13 0.005 285);   /* deep dark */
+    --foreground: oklch(0.95 0 0);         /* near-white */
 
-    /* Card — zinc-900 */
-    --card: 240 4% 10%;            /* zinc-900 #18181b */
-    --card-foreground: 0 0% 98%;
+    --card: oklch(0.16 0.005 285);
+    --card-foreground: oklch(0.95 0 0);
 
-    /* Popover — zinc-900 */
-    --popover: 240 4% 10%;
-    --popover-foreground: 0 0% 98%;
+    --popover: oklch(0.18 0.005 285);
+    --popover-foreground: oklch(0.95 0 0);
 
-    /* Primary — orange-500 */
-    --primary: 25 95% 53%;         /* orange-500 #f97316 */
-    --primary-foreground: 0 0% 100%;
+    /* Orange accent — primary brand color for buttons, CTAs */
+    --primary: oklch(0.70 0.16 45);
+    --primary-foreground: oklch(0.98 0 0);
 
-    /* Secondary — zinc-800 */
-    --secondary: 240 4% 16%;       /* zinc-800 #27272a */
-    --secondary-foreground: 0 0% 98%;
+    /* Muted surfaces */
+    --secondary: oklch(0.22 0.005 285);
+    --secondary-foreground: oklch(0.85 0 0);
 
-    /* Muted — zinc-800 */
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 65%; /* zinc-400 #a1a1aa */
+    --muted: oklch(0.20 0.005 285);
+    --muted-foreground: oklch(0.55 0 0);
 
-    /* Accent — orange-500/10 for backgrounds */
-    --accent: 240 4% 16%;
-    --accent-foreground: 0 0% 98%;
+    /* Accent — same orange as primary, used for unread indicators */
+    --accent: oklch(0.70 0.16 45);
+    --accent-foreground: oklch(0.98 0 0);
 
-    /* Destructive — red-500 */
-    --destructive: 0 72% 51%;      /* red-500 #ef4444 */
-    --destructive-foreground: 0 0% 98%;
+    --destructive: oklch(0.55 0.22 25);
+    --destructive-foreground: oklch(0.95 0 0);
 
-    /* Border & input — zinc-800 */
-    --border: 240 4% 16%;          /* zinc-800 #27272a */
-    --input: 240 4% 16%;
+    --border: oklch(0.25 0.005 285);
+    --input: oklch(0.20 0.005 285);
+    --ring: oklch(0.70 0.16 45);
 
-    /* Ring — orange-500 */
-    --ring: 25 95% 53%;
-
-    /* Border radius */
     --radius: 0.5rem;
 
     /* Ethian category colors */
-    --color-inbox: 217 91% 60%;       /* blue   — approved / Imbox */
-    --color-feed: 142 72% 45%;        /* green  — newsletters */
-    --color-paper-trail: 38 92% 50%;  /* amber  — receipts */
-    --color-gatekeeper: 262 80% 60%;  /* violet — unknown senders */
-    --color-set-aside: 199 89% 48%;   /* cyan   — parked */
-    --color-reply-later: 0 72% 58%;   /* red    — needs reply */
+    --color-inbox: 217 91% 60%;
+    --color-feed: 142 72% 45%;
+    --color-paper-trail: 38 92% 50%;
+    --color-gatekeeper: 262 80% 60%;
+    --color-set-aside: 199 89% 48%;
+    --color-reply-later: 0 72% 58%;
   }
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @layer base {
@@ -77,45 +105,4 @@
   :focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
-}
-
-/* =============================================================================
-   Tailwind v4 theme extension via @theme
-   ============================================================================= */
-
-@theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
 }
