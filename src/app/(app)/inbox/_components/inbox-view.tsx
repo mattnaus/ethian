@@ -293,7 +293,7 @@ export function InboxView({
                   <PopoverTrigger asChild>
                     <button className="flex items-center gap-2 px-3 py-1.5 h-9 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors text-sm">
                       {!searchExpanded && (
-                        <span className="text-xs">{t("mailboxFilter")}</span>
+                        <span className="text-sm text-foreground/70">{t("mailboxFilter")}</span>
                       )}
                       <div className="flex gap-1">
                         {visibleDots.map((a) => (
@@ -357,7 +357,7 @@ export function InboxView({
                 <PopoverTrigger asChild>
                   <button className="flex items-center gap-2 px-3 py-2 h-11 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
                     {!searchExpanded && (
-                      <span className="text-sm">{t("mailboxFilter")}</span>
+                      <span className="text-sm text-foreground/70">{t("mailboxFilter")}</span>
                     )}
                     <div className="flex gap-1">
                       {visibleDots.map((a) => (
