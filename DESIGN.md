@@ -21,7 +21,7 @@ The app uses OKLCH-based CSS custom properties. Always use the semantic token cl
 | `border-border` | `oklch(0.25 0.005 285)` | All borders and dividers |
 | `text-foreground` | `oklch(0.95 0 0)` | Primary text |
 | `text-muted-foreground` | `oklch(0.55 0 0)` | Secondary / metadata text |
-| `bg-primary` | `oklch(0.70 0.16 45)` | Orange accent — buttons, active states, unread indicators |
+| `bg-primary` | `oklch(0.702 0.195 47.6)` | Orange accent — buttons, active states, unread indicators |
 | `text-primary-foreground` | `oklch(0.98 0 0)` | Text on primary (white) |
 | `bg-accent` | same as primary | Orange — also used for focus rings, unread borders |
 | `bg-popover` | `oklch(0.18 0.005 285)` | Popover / dropdown backgrounds |
@@ -43,7 +43,7 @@ The sidebar and gatekeeper list were built before the OKLCH migration and use ha
 
 ### Accent / Brand Color
 
-`orange-500` / `oklch(0.70 0.16 45)` is the single brand accent. It appears on:
+`orange-500` / `oklch(0.702 0.195 47.6)` is the single brand accent. It appears on:
 - Active sidebar nav items
 - Primary CTA buttons (`bg-primary`)
 - Unread email left-border indicator (`border-l-primary`)
