@@ -46,6 +46,7 @@ export function GatekeeperRow({
       {/* Avatar */}
       <div
         className="h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold text-white select-none"
+        style={{ boxShadow: `0 0 0 2px ${dotColor}` }}
       >
         {initials}
       </div>

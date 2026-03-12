@@ -54,7 +54,7 @@ The sidebar and gatekeeper list were built before the OKLCH migration and use ha
 
 - **Gatekeeper button**: `bg-slate-600 hover:bg-slate-500 text-white` — intentionally distinct from the orange accent. Count badge inside uses `bg-white/20 text-white`.
 - **Error / destructive**: `text-red-400`, `bg-red-500/10 border border-red-500/20` for inline error banners.
-- **Avatar backgrounds**: Hash-derived from sender email address — 8 fixed colors (`#2563eb`, `#7c3aed`, `#059669`, `#d97706`, `#dc2626`, `#0891b2`, `#db2777`, `#65a30d`). See `src/lib/email-display.ts`.
+- **Avatar backgrounds**: Transparent — no background color. The account color ring provides the visual boundary.
 - **Account color ring**: User-defined hex color applied as `box-shadow: 0 0 0 2px {hex}` on the avatar.
 
 ---
@@ -151,7 +151,7 @@ flex items-center gap-3
 ```
 
 - No unread/read distinction — all rows look the same.
-- **Left**: `h-1.5 w-1.5` account color dot → `h-8 w-8` avatar (hash color bg).
+- **Left**: `h-1.5 w-1.5` account color dot → `h-8 w-8` avatar (transparent bg, account color ring).
 - **Mobile**: two-line block (sender + date row; subject + count badge + paperclip row).
 - **Desktop**: dot | avatar | sender (`w-36 lg:w-40`) | subject+snippet stacked (`flex-1`) | count badge | paperclip | date (`w-16`).
 - **Count badge**: `bg-zinc-800 text-zinc-400 rounded-full tabular-nums` — only shown when `messageCount > 1`.
