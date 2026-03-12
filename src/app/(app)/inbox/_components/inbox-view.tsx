@@ -104,6 +104,7 @@ interface MailboxFilterContentProps {
   activeAccounts: Set<string>;
   emailCounts: Map<string, number>;
   onToggle: (id: string) => void;
+  heading: string;
 }
 
 function MailboxFilterContent({
@@ -111,11 +112,12 @@ function MailboxFilterContent({
   activeAccounts,
   emailCounts,
   onToggle,
+  heading,
 }: MailboxFilterContentProps) {
   return (
     <div className="space-y-1 p-3">
       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 py-1.5">
-        Accounts
+        {heading}
       </h3>
       {accounts.map((account) => {
         const active = activeAccounts.has(account.id);
@@ -274,11 +276,11 @@ export function InboxView({
                 className="flex items-center gap-1.5 px-4 py-1.5 h-9 rounded-full bg-slate-600 text-white hover:bg-slate-500 transition-colors text-sm font-medium"
               >
                 <ShieldCheck className="h-3.5 w-3.5" />
-                <span>Gatekeeper:</span>
+                <span>{t("gatekeeperLabel")}</span>
                 <span className="bg-white/20 text-white text-xs font-medium px-1.5 py-0.5 rounded-full">
                   {screenerCount}
                 </span>
-                <span>new senders</span>
+                <span>{t("gatekeeperButton", { count: screenerCount })}</span>
               </button>
             )}
             {screenerCount === 0 && <div />}
@@ -312,6 +314,7 @@ export function InboxView({
                       activeAccounts={activeAccounts}
                       emailCounts={emailCounts}
                       onToggle={toggleAccount}
+                      heading={t("mailboxAccountsHeading")}
                     />
                   </PopoverContent>
                 </Popover>
@@ -340,11 +343,11 @@ export function InboxView({
               className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 h-11 rounded-full bg-slate-600 text-white hover:bg-slate-500 transition-colors text-sm font-medium"
             >
               <ShieldCheck className="h-4 w-4 shrink-0" />
-              <span>Gatekeeper:</span>
+              <span>{t("gatekeeperLabel")}</span>
               <span className="bg-white/20 text-white text-xs font-medium px-1.5 py-0.5 rounded-full">
                 {screenerCount}
               </span>
-              <span>new senders</span>
+              <span>{t("gatekeeperButton", { count: screenerCount })}</span>
             </button>
           )}
           <div className="flex items-center justify-center gap-2">
@@ -375,6 +378,7 @@ export function InboxView({
                     activeAccounts={activeAccounts}
                     emailCounts={emailCounts}
                     onToggle={toggleAccount}
+                    heading={t("mailboxAccountsHeading")}
                   />
                 </PopoverContent>
               </Popover>
