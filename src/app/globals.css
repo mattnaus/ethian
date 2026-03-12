@@ -98,6 +98,30 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  /* Custom scrollbar — thin, dark, rounded */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.35 0.005 285) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: oklch(0.35 0.005 285);
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.45 0.005 285);
+  }
+
   html {
     scroll-behavior: smooth;
   }
