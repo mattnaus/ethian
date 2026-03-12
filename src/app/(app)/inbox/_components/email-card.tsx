@@ -4,7 +4,6 @@ import { Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   safeColor,
-  avatarBgColor,
   getInitials,
   formatRelativeDate,
 } from "@/lib/email-display";
@@ -31,7 +30,6 @@ export function EmailCard({
   locale: string;
 }) {
   const initials = getInitials(email.fromName, email.fromAddress);
-  const bgColor = avatarBgColor(email.fromAddress);
   const ringColor = safeColor(email.accountColor);
   const senderDisplay = email.fromName?.trim() || email.fromAddress;
   const formattedDate = formatRelativeDate(email.sentAt, locale);
@@ -55,7 +53,6 @@ export function EmailCard({
         <div
           className="h-9 w-9 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold text-white select-none"
           style={{
-            backgroundColor: bgColor,
             boxShadow: `0 0 0 2px ${ringColor}`,
           }}
         >
