@@ -234,9 +234,9 @@ Two sizes used:
 
 Both: `rounded-full flex items-center justify-center text-xs font-semibold text-white select-none`
 
-Background: hash of sender email address → one of 8 fixed colors (see `src/lib/email-display.ts → avatarBgColor`).
+Background: transparent (no background color).
 
-Account color ring (inbox cards): `box-shadow: 0 0 0 2px {accountColor}` — uses the mail account's user-defined hex color validated through `safeColor()`.
+Account color ring: `box-shadow: 0 0 0 2px {accountColor}` — uses the mail account's user-defined hex color validated through `safeColor()`.
 
 Initials: first letter of first + last word of sender name, or first letter of email local part, or `?`. See `src/lib/email-display.ts → getInitials`.
 
@@ -355,7 +355,6 @@ All in `src/lib/email-display.ts`:
 | Function | Purpose |
 |---|---|
 | `safeColor(hex, fallback)` | Validates hex against `/^#[0-9a-fA-F]{6}$/` before use in inline styles |
-| `avatarBgColor(email)` | Hash → one of 8 avatar bg colors |
 | `getInitials(name, email)` | `"Sarah Chen"` → `"SC"`, email fallback, `"?"` guard |
 | `formatDate(iso, locale)` | Today → `"14:32"`, this year → `"Mar 5"`, older → `"Mar 5, '23"` |
 | `formatRelativeDate(iso, locale)` | `"5m ago"`, `"3h ago"`, `"2d ago"`, falls back to `formatDate` after 7 days |

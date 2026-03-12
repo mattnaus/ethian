@@ -1,6 +1,6 @@
 import { Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { safeColor, avatarBgColor, getInitials, formatDate } from "@/lib/email-display";
+import { safeColor, getInitials, formatDate } from "@/lib/email-display";
 
 export type GatekeeperEntry = {
   id: string;
@@ -23,7 +23,6 @@ export function GatekeeperRow({
   locale: string;
 }) {
   const initials = getInitials(entry.fromName, entry.fromAddress);
-  const bgColor = avatarBgColor(entry.fromAddress);
   const dotColor = safeColor(entry.accountColor);
   const nameDisplay = entry.fromName?.trim() || entry.fromAddress;
   const formattedDate = formatDate(entry.lastSeenAt, locale);
@@ -47,7 +46,6 @@ export function GatekeeperRow({
       {/* Avatar */}
       <div
         className="h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold text-white select-none"
-        style={{ backgroundColor: bgColor }}
       >
         {initials}
       </div>
