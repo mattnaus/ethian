@@ -50,7 +50,7 @@ function DesktopNavItem({
     "flex items-center rounded-md px-3 py-2 transition-colors w-full",
     expanded ? "gap-3" : "justify-center",
     active
-      ? "bg-zinc-900 text-orange-500"
+      ? "bg-zinc-900 text-primary"
       : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
   );
 
@@ -97,7 +97,7 @@ function TabItem({
       href={href}
       className={cn(
         "flex flex-1 flex-col items-center justify-center gap-1 min-h-11 transition-colors",
-        active ? "text-orange-500" : "text-zinc-500"
+        active ? "text-primary" : "text-zinc-500"
       )}
     >
       <Icon className="h-5 w-5 shrink-0" />
@@ -142,7 +142,7 @@ export function Sidebar() {
     "flex items-center rounded-md px-3 py-2 transition-colors w-full",
     expanded ? "gap-3" : "justify-center",
     settingsActive
-      ? "bg-zinc-900 text-orange-500"
+      ? "bg-zinc-900 text-primary"
       : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
   );
 
@@ -170,7 +170,7 @@ export function Sidebar() {
             expanded ? "px-3 justify-between" : "justify-center"
           )}
         >
-          <span className="text-sm font-bold text-orange-500">
+          <span className="text-sm font-bold text-primary">
             {expanded ? t("brandName") : t("brandName").charAt(0)}
           </span>
           {expanded && (

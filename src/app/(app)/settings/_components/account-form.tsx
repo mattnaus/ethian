@@ -98,7 +98,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
     return state.fieldErrors?.[name]?.[0];
   }
 
-  const inputClass = "bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-orange-500";
+  const inputClass = "bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-ring";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -214,7 +214,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
                   type="checkbox"
                   defaultChecked={account?.imapSecure ?? true}
                   value="true"
-                  className="accent-orange-500"
+                  className="accent-primary"
                 />
                 <Label htmlFor="imapSecure" className="text-zinc-300 font-normal">{t("form.tlsLabel")}</Label>
               </div>
@@ -260,7 +260,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
                   type="checkbox"
                   defaultChecked={account?.smtpSecure ?? true}
                   value="true"
-                  className="accent-orange-500"
+                  className="accent-primary"
                 />
                 <Label htmlFor="smtpSecure" className="text-zinc-300 font-normal">{t("form.tlsLabel")}</Label>
               </div>
@@ -320,7 +320,7 @@ export function AccountForm({ open, onOpenChange, account }: AccountFormProps) {
             <Button
               type="submit"
               disabled={isPending}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {isPending
                 ? isEdit ? t("form.savingButton") : t("form.addingButton")

@@ -23,7 +23,7 @@ The app uses OKLCH-based CSS custom properties. Always use the semantic token cl
 | `text-muted-foreground` | `oklch(0.55 0 0)` | Secondary / metadata text |
 | `bg-primary` | `var(--color-orange-500)` | Orange accent — buttons, active states, unread indicators |
 | `text-primary-foreground` | `oklch(0.98 0 0)` | Text on primary (white) |
-| `bg-accent` | same as primary | Orange — also used for focus rings, unread borders |
+| `bg-accent` | `var(--color-orange-500)` | Orange — also used for focus rings, unread borders |
 | `bg-popover` | `oklch(0.18 0.005 285)` | Popover / dropdown backgrounds |
 | `bg-destructive` | `oklch(0.55 0.22 25)` | Delete, error states |
 

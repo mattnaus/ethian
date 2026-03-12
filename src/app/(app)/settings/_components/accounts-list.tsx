@@ -55,7 +55,7 @@ export function AccountsList({ accounts }: AccountsListProps) {
         </div>
         <Button
           onClick={openAdd}
-          className="bg-orange-500 hover:bg-orange-600 text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
           size="sm"
         >
           <Plus className="h-4 w-4 mr-1.5" />
