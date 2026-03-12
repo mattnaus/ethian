@@ -200,7 +200,8 @@ export function InboxView({
   const [activeAccounts, setActiveAccounts] = useState<Set<string>>(
     new Set(accounts.map((a) => a.id)),
   );
-  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterOpenDesktop, setFilterOpenDesktop] = useState(false);
+  const [filterOpenMobile, setFilterOpenMobile] = useState(false);
   const [folderOpen, setFolderOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchExpanded, setSearchExpanded] = useState(false);
@@ -288,7 +289,7 @@ export function InboxView({
             {/* Center: Mailbox filter + Search */}
             <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
               {accounts.length > 0 && (
-                <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+                <Popover open={filterOpenDesktop} onOpenChange={setFilterOpenDesktop}>
                   <PopoverTrigger asChild>
                     <button className="flex items-center gap-2 px-3 py-1.5 h-9 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors text-sm">
                       {!searchExpanded && (
@@ -352,7 +353,7 @@ export function InboxView({
           )}
           <div className="flex items-center justify-center gap-2">
             {accounts.length > 0 && (
-              <Popover open={filterOpen} onOpenChange={setFilterOpen}>
+              <Popover open={filterOpenMobile} onOpenChange={setFilterOpenMobile}>
                 <PopoverTrigger asChild>
                   <button className="flex items-center gap-2 px-3 py-2 h-11 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
                     {!searchExpanded && (
