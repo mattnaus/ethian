@@ -96,6 +96,92 @@ function GroupDivider({ label }: { label: string }) {
 }
 
 // ---------------------------------------------------------------------------
+// Mailbox filter popover content
+// ---------------------------------------------------------------------------
+
+interface MailboxFilterContentProps {
+  accounts: MailAccountFilter[];
+  activeAccounts: Set<string>;
+  emailCounts: Map<string, number>;
+  onToggle: (id: string) => void;
+}
+
+function MailboxFilterContent({
+  accounts,
+  activeAccounts,
+  emailCounts,
+  onToggle,
+}: MailboxFilterContentProps) {
+  return (
+    <div className="space-y-1 p-3">
+      <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 py-1.5">
+        Accounts
+      </h3>
+      {accounts.map((account) => {
+        const active = activeAccounts.has(account.id);
+        const color = safeColor(account.color);
+        const count = emailCounts.get(account.id) ?? 0;
+        return (
+          <button
+            key={account.id}
+            onClick={() => onToggle(account.id)}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm",
+              active
+                ? "text-foreground"
+                : "hover:bg-secondary/50 text-muted-foreground hover:text-foreground",
+            )}
+            style={active ? { backgroundColor: color + "1a" } : undefined}
+          >
+            <div
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: color }}
+            />
+            <span className="flex-1 text-left font-medium truncate">{account.name}</span>
+            {count > 0 && (
+              <span className="text-xs bg-muted/60 text-muted-foreground px-2 py-0.5 rounded">
+                {count}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Folder switcher content
+// ---------------------------------------------------------------------------
+
+interface FolderSwitcherContentProps {
+  onNavigate: (href: string) => void;
+  getLabel: (id: string) => string;
+}
+
+function FolderSwitcherContent({ onNavigate, getLabel }: FolderSwitcherContentProps) {
+  return (
+    <>
+      {FOLDERS.map(({ id, href, icon: Icon }) => (
+        <button
+          key={id}
+          onClick={() => onNavigate(href)}
+          className={cn(
+            "w-full flex items-center gap-3 px-4 md:px-3 py-3.5 md:py-2.5 rounded-lg transition-colors text-base md:text-sm",
+            id === "inbox"
+              ? "bg-secondary text-foreground font-semibold"
+              : "text-foreground/70 hover:bg-secondary/50 hover:text-foreground",
+          )}
+        >
+          <Icon className="h-5 w-5 md:h-4 md:w-4 shrink-0" />
+          {getLabel(id)}
+        </button>
+      ))}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
@@ -128,6 +214,15 @@ export function InboxView({
 
   const allSelected = activeAccounts.size === accounts.length;
 
+  // Email counts per account (from full emails list, not filtered)
+  const emailCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const email of emails) {
+      map.set(email.mailAccountId, (map.get(email.mailAccountId) ?? 0) + 1);
+    }
+    return map;
+  }, [emails]);
+
   const filtered = useMemo(() => {
     return emails.filter((e) => {
       if (!allSelected && !activeAccounts.has(e.mailAccountId)) return false;
@@ -156,69 +251,13 @@ export function InboxView({
     return key; // month/year string from toLocaleString
   }
 
-  // ---------------------------------------------------------------------------
-  // Mailbox filter popover (shared between mobile + desktop)
-  // ---------------------------------------------------------------------------
-
-  function MailboxFilterContent() {
-    return (
-      <div className="space-y-1 p-3">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2 py-1.5">
-          Accounts
-        </h3>
-        {accounts.map((account) => {
-          const active = activeAccounts.has(account.id);
-          const color = safeColor(account.color);
-          return (
-            <button
-              key={account.id}
-              onClick={() => toggleAccount(account.id)}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm",
-                active
-                  ? "bg-secondary text-foreground"
-                  : "hover:bg-secondary/50 text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <div
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: color }}
-              />
-              <span className="flex-1 text-left font-medium truncate">{account.name}</span>
-            </button>
-          );
-        })}
-      </div>
-    );
+  function handleFolderNavigate(href: string) {
+    setFolderOpen(false);
+    router.push(href);
   }
 
-  // ---------------------------------------------------------------------------
-  // Folder switcher content (shared between mobile + desktop)
-  // ---------------------------------------------------------------------------
-
-  function FolderSwitcherContent() {
-    return (
-      <>
-        {FOLDERS.map(({ id, href, icon: Icon }) => (
-          <button
-            key={id}
-            onClick={() => {
-              setFolderOpen(false);
-              router.push(href);
-            }}
-            className={cn(
-              "w-full flex items-center gap-3 px-4 md:px-3 py-3.5 md:py-2.5 rounded-lg transition-colors text-base md:text-sm",
-              id === "inbox"
-                ? "bg-secondary text-foreground font-semibold"
-                : "text-foreground/70 hover:bg-secondary/50 hover:text-foreground",
-            )}
-          >
-            <Icon className="h-5 w-5 md:h-4 md:w-4 shrink-0" />
-            {t(`folders.${id}`)}
-          </button>
-        ))}
-      </>
-    );
+  function getFolderLabel(id: string) {
+    return t(`folders.${id as "inbox" | "feed" | "paperTrail" | "gatekeeper" | "setAside" | "replyLater"}`);
   }
 
   return (
@@ -268,7 +307,12 @@ export function InboxView({
                     </button>
                   </PopoverTrigger>
                   <PopoverContent className="w-64 p-0">
-                    <MailboxFilterContent />
+                    <MailboxFilterContent
+                      accounts={accounts}
+                      activeAccounts={activeAccounts}
+                      emailCounts={emailCounts}
+                      onToggle={toggleAccount}
+                    />
                   </PopoverContent>
                 </Popover>
               )}
@@ -326,7 +370,12 @@ export function InboxView({
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[calc(100vw-20px)] p-0">
-                  <MailboxFilterContent />
+                  <MailboxFilterContent
+                    accounts={accounts}
+                    activeAccounts={activeAccounts}
+                    emailCounts={emailCounts}
+                    onToggle={toggleAccount}
+                  />
                 </PopoverContent>
               </Popover>
             )}
@@ -362,7 +411,10 @@ export function InboxView({
                 className="w-[calc(100vw-20px)] md:w-52 p-2 md:p-1.5"
                 align="start"
               >
-                <FolderSwitcherContent />
+                <FolderSwitcherContent
+                  onNavigate={handleFolderNavigate}
+                  getLabel={getFolderLabel}
+                />
               </PopoverContent>
             </Popover>
             <span className="text-xs text-muted-foreground">
