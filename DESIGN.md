@@ -2,6 +2,8 @@
 
 Reference for building visually consistent screens. Read this before writing any UI code.
 
+**Design reference repo:** The inbox screen was rebuilt from a v0 prototype at [https://github.com/mattnaus/v0-email-client-design](https://github.com/mattnaus/v0-email-client-design). When building screens with no clear precedent in the existing Ethian code, fetch that repo for visual and structural reference.
+
 ---
 
 ## Color System

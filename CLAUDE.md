@@ -69,6 +69,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 ## UI & Design System
 
 ### Principles
+- **Read DESIGN.md first** — before creating or modifying any UI component, read `DESIGN.md` in full. It documents the color tokens, typography scale, spacing conventions, component patterns, and layout rules. Never guess at values that are defined there.
 - **shadcn/ui only** — use shadcn/ui components by default for all UI elements. Custom components require explicit user confirmation before building.
 - **Dark mode only** — no light mode; all CSS variables and Tailwind classes target dark backgrounds.
 - **Inspiration:** Linear (linear.app) and Superlist — clean, compact, high-contrast dark UI with strong typographic hierarchy.
