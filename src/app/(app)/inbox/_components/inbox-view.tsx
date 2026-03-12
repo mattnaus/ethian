@@ -232,13 +232,14 @@ export function InboxView({
             {screenerCount > 0 && (
               <button
                 onClick={() => router.push("/gatekeeper")}
-                className="flex items-center gap-1.5 px-4 py-1.5 h-9 rounded-full bg-secondary border border-border text-foreground/80 hover:text-foreground hover:border-foreground/30 transition-colors text-sm font-medium"
+                className="flex items-center gap-1.5 px-4 py-1.5 h-9 rounded-full bg-slate-600 text-white hover:bg-slate-500 transition-colors text-sm font-medium"
               >
                 <ShieldCheck className="h-3.5 w-3.5" />
-                <span>Gatekeeper</span>
-                <span className="bg-primary text-primary-foreground text-xs font-semibold px-1.5 py-0.5 rounded-full ml-0.5">
+                <span>Gatekeeper:</span>
+                <span className="bg-white/20 text-white text-xs font-medium px-1.5 py-0.5 rounded-full">
                   {screenerCount}
                 </span>
+                <span>new senders</span>
               </button>
             )}
             {screenerCount === 0 && <div />}
@@ -292,13 +293,14 @@ export function InboxView({
           {screenerCount > 0 && (
             <button
               onClick={() => router.push("/gatekeeper")}
-              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 h-11 rounded-full bg-secondary border border-border text-foreground/80 hover:text-foreground transition-colors text-sm font-medium"
+              className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 h-11 rounded-full bg-slate-600 text-white hover:bg-slate-500 transition-colors text-sm font-medium"
             >
               <ShieldCheck className="h-4 w-4 shrink-0" />
-              <span>Gatekeeper</span>
-              <span className="bg-primary text-primary-foreground text-xs font-semibold px-1.5 py-0.5 rounded-full ml-0.5">
+              <span>Gatekeeper:</span>
+              <span className="bg-white/20 text-white text-xs font-medium px-1.5 py-0.5 rounded-full">
                 {screenerCount}
               </span>
+              <span>new senders</span>
             </button>
           )}
           <div className="flex items-center justify-center gap-2">
