@@ -86,7 +86,7 @@ export function EmailCard({
         <div className="flex items-baseline gap-2 min-w-0">
           <span
             className={cn(
-              "text-sm truncate shrink-0 max-w-[60%] md:max-w-none",
+              "text-sm truncate min-w-0 max-w-[60%] md:max-w-none",
               !email.isRead ? "font-medium text-foreground" : "text-foreground/80",
             )}
           >
