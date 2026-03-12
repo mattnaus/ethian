@@ -18,7 +18,7 @@
     --popover-foreground: oklch(0.95 0 0);
 
     /* Orange accent — primary brand color for buttons, CTAs */
-    --primary: oklch(0.702 0.195 47.6);
+    --primary: var(--color-orange-500);
     --primary-foreground: oklch(0.98 0 0);
 
     /* Muted surfaces */
@@ -29,7 +29,7 @@
     --muted-foreground: oklch(0.55 0 0);
 
     /* Accent — same orange as primary, used for unread indicators */
-    --accent: oklch(0.702 0.195 47.6);
+    --accent: var(--color-orange-500);
     --accent-foreground: oklch(0.98 0 0);
 
     --destructive: oklch(0.55 0.22 25);
@@ -37,7 +37,7 @@
 
     --border: oklch(0.25 0.005 285);
     --input: oklch(0.20 0.005 285);
-    --ring: oklch(0.702 0.195 47.6);
+    --ring: var(--color-orange-500);
 
     --radius: 0.5rem;
 
