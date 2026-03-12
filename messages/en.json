@@ -133,6 +133,7 @@
       "messageCount": "{count, plural, one {# message} other {# messages}}",
       "gatekeeperButton": "{count, plural, one {# new sender} other {# new senders}}",
       "gatekeeperLabel": "Gatekeeper:",
+      "gatekeeperSuffix": "{count, plural, one {new sender} other {new senders}}",
       "mailboxFilter": "Mailbox",
       "mailboxAccountsHeading": "Accounts",
       "newButton": "New",

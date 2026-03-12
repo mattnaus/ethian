@@ -280,7 +280,7 @@ export function InboxView({
                 <span className="bg-white/20 text-white text-xs font-medium px-1.5 py-0.5 rounded-full">
                   {screenerCount}
                 </span>
-                <span>{t("gatekeeperButton", { count: screenerCount })}</span>
+                <span>{t("gatekeeperSuffix", { count: screenerCount })}</span>
               </button>
             )}
             {screenerCount === 0 && <div />}
