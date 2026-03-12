@@ -94,7 +94,7 @@ export function EmailCard({
           </span>
           {email.snippet && (
             <span className="hidden md:inline text-sm text-muted-foreground truncate">
-              — {email.snippet}
+              - {email.snippet}
             </span>
           )}
         </div>
