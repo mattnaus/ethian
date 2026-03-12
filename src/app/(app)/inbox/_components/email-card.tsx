@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -35,7 +36,8 @@ export function EmailCard({
   const formattedDate = formatRelativeDate(email.sentAt, locale);
 
   return (
-    <div
+    <Link
+      href={`/inbox/${email.id}`}
       tabIndex={0}
       className={cn(
         "group relative flex flex-col gap-3 rounded-xl p-4 transition-all cursor-pointer",
@@ -115,6 +117,6 @@ export function EmailCard({
           {formattedDate}
         </span>
       </div>
-    </div>
+    </Link>
   );
 }

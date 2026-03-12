@@ -348,6 +348,49 @@ Key icon choices:
 
 ---
 
+## Email Detail View
+
+Route: `/inbox/[emailId]`. Layout: `flex flex-col h-full` — top bar + scrollable body + reply bar.
+
+### Top bar
+
+Same height as all other top bars: `h-12 flex items-center gap-3 px-4 border-b border-zinc-800 shrink-0`.
+
+Contents (left to right):
+- Back button: `h-8 w-8 rounded-lg hover:bg-zinc-800` icon button with `ArrowLeft` (`h-4 w-4`)
+- Avatar: `h-8 w-8 rounded-full`, transparent bg, account color ring via `boxShadow: 0 0 0 2px {ringColor}` — same pattern as email card and gatekeeper row
+- Sender name (`text-sm font-semibold text-zinc-50 truncate`) + email address (`text-xs text-zinc-500 truncate`) stacked in a `flex-1 min-w-0` block
+- Date: `text-xs text-zinc-500 shrink-0` (uses `formatDate`, not relative)
+
+### Scrollable body
+
+`flex-1 overflow-y-auto`. Inner: `mx-auto w-full max-w-3xl px-4 md:px-8 py-6 space-y-6`.
+
+Contents:
+- Subject: `text-xl font-semibold text-zinc-50 leading-snug`
+- Recipients: `text-xs text-zinc-500` — "To:" label in `text-zinc-400`, addresses comma-joined
+- Horizontal divider: `border-t border-zinc-800`
+- Body text: `<pre>` with `text-sm text-zinc-200 whitespace-pre-wrap font-sans leading-relaxed` — uses `bodyText` when available; falls back to `bodyHtml` with tags stripped (no `dangerouslySetInnerHTML`)
+- Attachments section (when present): `text-xs font-medium text-zinc-400 uppercase tracking-wide` heading + `flex flex-wrap gap-2` chip row
+
+### Attachment chip
+
+`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-sm`
+
+Contents: `Paperclip` icon `h-3.5 w-3.5 text-zinc-400`, filename truncated `max-w-[200px]`, file size in `text-zinc-500`.
+
+### Reply compose bar
+
+`shrink-0 border-t border-zinc-800 px-4 md:px-8 py-4 mx-auto w-full max-w-3xl`.
+
+Inner container: `rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3`.
+
+- `<textarea rows={3}>` with `bg-transparent text-sm text-zinc-200 placeholder-zinc-600 resize-none outline-none leading-relaxed`
+- Footer row: `flex items-center justify-end pt-2 border-t border-zinc-800`
+- Send button: `px-4 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90` — UI-only, SMTP not yet wired
+
+---
+
 ## Utility Helpers
 
 All in `src/lib/email-display.ts`:

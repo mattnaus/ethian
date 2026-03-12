@@ -167,6 +167,13 @@
     },
     "trash": {
       "comingSoon": "Trash \u2014 coming soon"
+    },
+    "emailDetail": {
+      "back": "Back",
+      "to": "To:",
+      "attachments": "{count, plural, one {# attachment} other {# attachments}}",
+      "replyPlaceholder": "Reply\u2026",
+      "sendButton": "Send"
     }
   }
 }
