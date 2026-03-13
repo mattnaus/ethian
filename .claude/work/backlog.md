@@ -4,6 +4,14 @@ Issues not fixed at review time. Each entry links to the review where it was rai
 
 ---
 
+## Features
+
+### "Gatekept" — sender rule management panel
+**Source:** User request (2026-03-13)
+**Detail:** Add a sidebar item "Gatekept" that shows all existing sender rules (approved, blocked, feed, paper trail) so the user can review and manage them. This is distinct from the Gatekeeper (which shows *pending* unknown senders) — Gatekept shows *decided* senders. Likely a new route `/gatekept` with a list of `sender_rules` rows grouped or filterable by decision type, with the ability to edit or delete rules.
+
+---
+
 ## Warnings
 
 ### Null-threadId fallback loses attachments
