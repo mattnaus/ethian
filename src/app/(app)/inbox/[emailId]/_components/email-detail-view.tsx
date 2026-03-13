@@ -86,23 +86,28 @@ function stripHtmlQuotes(html: string): string {
     .trim();
 }
 
+// Patterns hoisted to avoid recompilation on each line.
+// Attribution must contain a 4-digit year to avoid false positives.
+const ATTRIBUTION_RE = /^On\s.+\d{4}.+wrote:$/;
+const ATTRIBUTION_START_RE = /^On\s.+\d{4}/;
+
 // Strip quoted reply text from plain-text bodies.
 // Handles the three most common patterns:
-//   1. Lines starting with ">" (RFC-style quoting)
+//   1. Lines starting with "> " (RFC 3676 quote marker)
 //   2. "On <date> ... wrote:" attribution lines (Gmail/Outlook/Apple Mail)
-//   3. "-- " signature separators
+//   3. "-- " signature separator (RFC 3676)
 function stripPlainTextQuotes(text: string): string {
   const lines = text.split("\n");
   const result: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    // Stop at quoted-line blocks
-    if (line.startsWith(">")) break;
-    // Stop at "On ... wrote:" attribution (single-line or split across two lines)
-    if (/^On .+wrote:$/.test(line)) break;
-    if (i + 1 < lines.length && /^On .+/.test(line) && /wrote:$/.test(lines[i + 1])) break;
-    // Stop at signature separator
-    if (line === "-- " || line === "--") break;
+    // Stop at RFC 3676 quoted blocks ("> " with trailing space, or lone ">")
+    if (line === ">" || line.startsWith("> ")) break;
+    // Stop at "On <date> ... wrote:" attribution (single-line or split across two lines)
+    if (ATTRIBUTION_RE.test(line)) break;
+    if (i + 1 < lines.length && ATTRIBUTION_START_RE.test(line) && /wrote:$/.test(lines[i + 1])) break;
+    // Stop at standard signature separator
+    if (line === "-- ") break;
     result.push(line);
   }
   return result.join("\n").trim();
