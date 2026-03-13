@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
+import { normalizeMessageId } from "@/lib/utils";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { emails, mailAccounts } from "@/db/schema";
@@ -81,12 +82,13 @@ export async function sendReplyAction(payload: unknown): Promise<SendReplyResult
   let sendResult: Awaited<ReturnType<typeof sendEmail>>;
   try {
     // RFC 2822 headers require angle-bracketed message IDs; DB stores bare IDs.
+    // normalizeMessageId guards against legacy rows that still have brackets.
     sendResult = await sendEmail(row.account, {
       to: [{ address: row.fromAddress, name: row.fromName ?? undefined }],
       subject: replySubject,
       bodyText,
-      inReplyTo: `<${row.messageId}>`,
-      references: replyReferences.map((id) => `<${id}>`),
+      inReplyTo: `<${normalizeMessageId(row.messageId) ?? row.messageId}>`,
+      references: replyReferences.map((id) => `<${normalizeMessageId(id) ?? id}>`),
     });
   } catch (err) {
     console.error("[sendReply] SMTP error:", err);
@@ -101,7 +103,7 @@ export async function sendReplyAction(payload: unknown): Promise<SendReplyResult
       .insert(emails)
       .values({
         mailAccountId,
-        messageId: sendResult.messageId,
+        messageId: normalizeMessageId(sendResult.messageId) ?? sendResult.messageId,
         threadId: row.threadId ?? row.messageId,
         inReplyTo: row.messageId,
         references: replyReferences,

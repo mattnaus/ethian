@@ -11,6 +11,7 @@
 import { ImapFlow } from "imapflow";
 import { simpleParser } from "mailparser";
 import { decrypt } from "@/lib/crypto";
+import { normalizeMessageId } from "@/lib/utils";
 import type { MailAccount } from "@/db/schema";
 
 // ---------------------------------------------------------------------------
@@ -65,17 +66,6 @@ export interface SyncResult {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/**
- * Strip angle brackets from a Message-ID, normalising to bare format.
- * imapflow's IMAP ENVELOPE returns "<abc@domain>" but mailparser's
- * parsed.references returns "abc@domain" — stripping here makes all
- * stored message IDs consistent with what mailparser produces for references.
- */
-function normalizeMessageId(id: string | null | undefined): string | undefined {
-  if (!id) return undefined;
-  return id.replace(/^<|>$/g, "").trim() || undefined;
-}
 
 /**
  * Parse an imapflow address object into our EmailAddress shape.
