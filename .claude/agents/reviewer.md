@@ -23,10 +23,11 @@ You are a senior developer reviewing code for Ethian, a self-hosted email client
 1. Read the relevant files in full. Use Glob and Grep to find related files if needed.
 2. Check git log for the commits being reviewed: `git log --oneline -10`
 3. Read the relevant work log entry from `.claude/work/YYYYMMDD.md` (use today's date or the date of the commits). This describes the original request, the plan, and key decisions — use it to understand intent before judging the implementation.
-4. For each issue found, note the exact file path and line number.
-5. Categorise issues as: **Critical** (must fix before shipping), **Warning** (should fix), or **Suggestion** (nice to have / style).
-6. Check if `README.md` needs updating — does the change affect setup, architecture, new env vars, or user-facing behaviour? If yes, note it as a Warning.
-7. Check if any new e2e tests are warranted — any new user-visible flow, form, redirect, or error state that isn't already covered. If yes, record the suggested test(s) in `.claude/e2e_tests_to_make/[feature].md`.
+4. **Run the build**: execute `npm run build 2>&1` from the project root. Any TypeScript errors, missing imports, or Next.js build failures are automatic **Critical** issues. Report the full error output.
+5. For each issue found, note the exact file path and line number.
+6. Categorise issues as: **Critical** (must fix before shipping), **Warning** (should fix), or **Suggestion** (nice to have / style).
+7. Check if `README.md` needs updating — does the change affect setup, architecture, new env vars, or user-facing behaviour? If yes, note it as a Warning.
+8. Check if any new e2e tests are warranted — any new user-visible flow, form, redirect, or error state that isn't already covered. If yes, record the suggested test(s) in `.claude/e2e_tests_to_make/[feature].md`.
 
 ## Output format
 
