@@ -50,6 +50,10 @@ The sidebar and gatekeeper list were built before the OKLCH migration and use ha
 - Focus rings (`ring-ring/50` — neutral, not orange)
 - The "Ethian" wordmark in the sidebar header
 
+### Focus Rings
+
+Focus rings are **suppressed globally** — the `:focus-visible` rule in `globals.css` applies only `outline-none`. The `Input` shadcn component has also had its `focus-visible:ring-*` classes removed. Do not add `ring-*` or `outline-*` focus styles to new components.
+
 ### Special-Purpose Colors
 
 - **Gatekeeper button**: `bg-slate-600 hover:bg-slate-500 text-white` — intentionally distinct from the orange accent. Count badge inside uses `bg-white/20 text-white`.
@@ -464,7 +468,7 @@ When building a new screen or component not yet defined above:
 2. **Every interactive element needs intentional states.** Hover, 
    focus-visible, active, and disabled must all be explicitly styled — 
    never rely on browser defaults. Use the existing patterns (orange 
-   border on hover, `ring-ring/50` on focus) as the baseline.
+   border on hover) as the baseline. Focus rings are suppressed — do not add ring styles.
 
 3. **Motion budget.** Default transition: `duration-150 ease-out` for 
    micro-interactions (hover, focus). `duration-200 ease-in-out` for 
