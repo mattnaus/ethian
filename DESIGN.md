@@ -433,3 +433,41 @@ All in `src/lib/email-display.ts`:
 | `getInitials(name, email)` | `"Sarah Chen"` → `"SC"`, email fallback, `"?"` guard |
 | `formatDate(iso, locale)` | Today → `"14:32"`, this year → `"Mar 5"`, older → `"Mar 5, '23"` |
 | `formatRelativeDate(iso, locale)` | `"5m ago"`, `"3h ago"`, `"2d ago"`, falls back to `formatDate` after 7 days |
+
+---
+
+---
+
+## Implementation Principles
+
+When building a new screen or component not yet defined above:
+
+1. **Reference before inventing.** Find the closest existing screen 
+   in the codebase and use its layout, spacing, and component patterns 
+   as the starting point. Check the v0 reference repo if no precedent 
+   exists in Ethian.
+
+2. **Every interactive element needs intentional states.** Hover, 
+   focus-visible, active, and disabled must all be explicitly styled — 
+   never rely on browser defaults. Use the existing patterns (orange 
+   border on hover, `ring-primary/50` on focus) as the baseline.
+
+3. **Motion budget.** Default transition: `duration-150 ease-out` for 
+   micro-interactions (hover, focus). `duration-200 ease-in-out` for 
+   layout shifts (sidebar, expanding search). `duration-300` with 
+   staggered `animation-delay` for page entrance sequences. Prefer one 
+   well-orchestrated entrance over scattered animations. CSS transitions 
+   first; reach for Framer Motion only when CSS can't express it.
+
+4. **Depth and atmosphere.** Surfaces shouldn't all feel identically 
+   flat. Use the existing layering (background → card → muted → popover) 
+   to create hierarchy. Subtle shadows or border treatments can 
+   distinguish interactive cards from static containers. Don't introduce 
+   gradients or textures that aren't already in the system, but do use 
+   opacity and border variations to create visual interest.
+
+5. **No generic fallbacks.** Don't fall back to browser-default focus 
+   rings, system font stacks, or shadcn defaults that haven't been 
+   themed to match Ethian's tokens. If a component doesn't have an 
+   Ethian-specific style yet, define one consistent with this document 
+   rather than shipping the default.
