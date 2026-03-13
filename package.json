@@ -30,7 +30,6 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.0",
     "drizzle-orm": "^0.38.0",
-    "email-reply-parser": "^2.3.5",
     "imapflow": "^1.0.0",
     "ioredis": "^5.4.0",
     "lucide-react": "^0.469.0",

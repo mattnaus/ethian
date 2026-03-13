@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo } from "react";
-import EmailReplyParser from "email-reply-parser";
 import { sendReplyAction } from "../_actions/reply";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Send, Paperclip, MoreHorizontal } from "lucide-react";
@@ -87,9 +86,31 @@ function stripHtmlQuotes(html: string): string {
     .trim();
 }
 
+// Strip quoted reply text from plain-text bodies.
+// Handles the three most common patterns:
+//   1. Lines starting with ">" (RFC-style quoting)
+//   2. "On <date> ... wrote:" attribution lines (Gmail/Outlook/Apple Mail)
+//   3. "-- " signature separators
+function stripPlainTextQuotes(text: string): string {
+  const lines = text.split("\n");
+  const result: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // Stop at quoted-line blocks
+    if (line.startsWith(">")) break;
+    // Stop at "On ... wrote:" attribution (single-line or split across two lines)
+    if (/^On .+wrote:$/.test(line)) break;
+    if (i + 1 < lines.length && /^On .+/.test(line) && /wrote:$/.test(lines[i + 1])) break;
+    // Stop at signature separator
+    if (line === "-- " || line === "--") break;
+    result.push(line);
+  }
+  return result.join("\n").trim();
+}
+
 function getMessageBody(bodyText: string | null, bodyHtml: string | null): string {
   if (bodyText) {
-    const visible = new EmailReplyParser().parseReply(bodyText).trim();
+    const visible = stripPlainTextQuotes(bodyText);
     return visible || bodyText.trim();
   }
   if (bodyHtml) return stripHtmlQuotes(bodyHtml);
