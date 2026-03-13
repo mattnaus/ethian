@@ -309,7 +309,7 @@ export function EmailDetailView({
               type="button"
               disabled={!reply.trim()}
               aria-label={t("sendButton")}
-              className="h-8 w-8 p-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 shrink-0 mb-0.5 flex items-center justify-center transition-colors"
+              className="flex items-center justify-center min-w-11 min-h-11 -my-1.5 p-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 shrink-0 transition-colors"
             >
               <Send className="h-3.5 w-3.5" />
             </button>
