@@ -4,34 +4,6 @@ Issues not fixed at review time. Each entry links to the review where it was rai
 
 ---
 
-### Hardcoded "New" divider text bypasses i18n
-**Source:** `.claude/reviews/2026-03-13/email-detail-v0-rewrite-3cbe007.md`
-**Location:** `src/app/(app)/inbox/[emailId]/_components/email-detail-view.tsx` line 275
-**Detail:** The "New" string is hardcoded in JSX, bypassing the translation system. Add a `newDivider` key under `pages.emailDetail` in `messages/en.json` and use `t("newDivider")`.
-
----
-
-### "Cmd+Enter to send" hint is Mac-only
-**Source:** `.claude/reviews/2026-03-13/email-detail-v0-rewrite-3cbe007.md`
-**Location:** `src/app/(app)/inbox/[emailId]/_components/email-detail-view.tsx` line 313; `messages/en.json`
-**Detail:** The keyboard handler already handles both Cmd and Ctrl, but the hint displays "Cmd+Enter" which is wrong on Windows/Linux. Use platform detection (`navigator.platform` / `navigator.userAgent`) to show "Ctrl+Enter" on non-Mac, or change the hint to a neutral string like "⌘/Ctrl+Enter to send".
-
----
-
-### "More options" button and paperclip button below 44px touch target
-**Source:** `.claude/reviews/2026-03-13/email-detail-v0-rewrite-3cbe007.md`
-**Location:** `src/app/(app)/inbox/[emailId]/_components/email-detail-view.tsx` lines 247-253
-**Detail:** The MoreHorizontal button is `w-9 h-9` (36px) and the paperclip button has no explicit dimensions — both violate the 44px mobile touch target requirement. Change to `min-h-11 min-w-11` or use `p-3` padding.
-
----
-
-### DESIGN.md Email Detail View section is stale
-**Source:** `.claude/reviews/2026-03-13/email-detail-v0-rewrite-3cbe007.md`
-**Location:** `DESIGN.md` lines 351–423
-**Detail:** Still documents the old MessageBlock layout, h-12 top bar, pl-[2.375rem] indent pattern. Current implementation uses chat bubbles, py-4 header, auto-resize textarea. Update the Email Detail View section to reflect the new design.
-
----
-
 ## Features
 
 ### "Gatekept" — sender rule management panel
