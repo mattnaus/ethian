@@ -20,6 +20,20 @@ Issues not fixed at review time. Each entry links to the review where it was rai
 
 ---
 
+### Composite index on (thread_id, mail_account_id)
+**Source:** `.claude/reviews/2026-03-13/cross-account-thread-fix-e52c1d4.md`
+**Location:** `src/db/schema/emails.ts`
+**Detail:** The thread detail query now filters by both `thread_id` and `mail_account_id`. The existing index covers only `thread_id`. A composite index on `(thread_id, mail_account_id)` would better serve this query pattern.
+
+---
+
+### Duplicated grouping key expression in inbox page
+**Source:** `.claude/reviews/2026-03-13/cross-account-thread-fix-e52c1d4.md`
+**Location:** `src/app/(app)/inbox/page.tsx` — lines 98 and 113
+**Detail:** The expression `` entry.threadId ? `${entry.threadId}:${entry.mailAccountId}` : entry.id `` is duplicated in Pass 2 and Pass 3. Extract to a local helper `function threadKey(entry)` to prevent future drift.
+
+---
+
 ### Thread count badge understated for large inboxes
 **Source:** `.claude/reviews/2026-03-13/thread-grouping-d0386ce.md`
 **Location:** `src/app/(app)/inbox/page.tsx` — Pass 2 grouping, marked with `// TODO`
