@@ -2,23 +2,51 @@
 
 import { revalidatePath } from "next/cache";
 import { and, eq } from "drizzle-orm";
+import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { emails, mailAccounts } from "@/db/schema";
 import { sendEmail } from "@/lib/smtp/client";
 
-type SendReplyResult =
+// ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const PayloadSchema = z.object({
+  mailAccountId: z.string().regex(UUID_RE),
+  emailId: z.string().regex(UUID_RE),
+  bodyText: z.string().min(1).max(100_000),
+});
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type SendReplyError =
+  | "unauthenticated"
+  | "invalid_input"
+  | "not_found"
+  | "smtp_error"
+  | "db_error";
+
+export type SendReplyResult =
   | { success: true; sentEmailId: string; sentAt: string }
-  | { success: false; error: string };
+  | { success: false; error: SendReplyError };
 
-export async function sendReplyAction(payload: {
-  mailAccountId: string;
-  emailId: string;
-  bodyText: string;
-}): Promise<SendReplyResult> {
+// ---------------------------------------------------------------------------
+// Action
+// ---------------------------------------------------------------------------
+
+export async function sendReplyAction(payload: unknown): Promise<SendReplyResult> {
   const session = await auth();
-  if (!session?.user?.id) return { success: false, error: "Not authenticated" };
+  if (!session?.user?.id) return { success: false, error: "unauthenticated" };
 
+  const parsed = PayloadSchema.safeParse(payload);
+  if (!parsed.success) return { success: false, error: "invalid_input" };
+
+  const { mailAccountId, emailId, bodyText } = parsed.data;
   const userId = session.user.id;
 
   // Fetch the email being replied to + full mail account (SMTP credentials)
@@ -36,14 +64,14 @@ export async function sendReplyAction(payload: {
     .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
     .where(
       and(
-        eq(emails.id, payload.emailId),
-        eq(emails.mailAccountId, payload.mailAccountId),
+        eq(emails.id, emailId),
+        eq(emails.mailAccountId, mailAccountId),
         eq(mailAccounts.userId, userId),
       ),
     )
     .limit(1);
 
-  if (!row) return { success: false, error: "Email not found" };
+  if (!row) return { success: false, error: "not_found" };
 
   // RFC 2822 threading headers
   const replySubject = /^re:/i.test(row.subject) ? row.subject : `Re: ${row.subject}`;
@@ -55,44 +83,56 @@ export async function sendReplyAction(payload: {
     sendResult = await sendEmail(row.account, {
       to: [{ address: row.fromAddress, name: row.fromName ?? undefined }],
       subject: replySubject,
-      bodyText: payload.bodyText,
+      bodyText,
       inReplyTo: row.messageId,
       references: replyReferences,
     });
   } catch (err) {
     console.error("[sendReply] SMTP error:", err);
-    return { success: false, error: "Failed to send. Please try again." };
+    return { success: false, error: "smtp_error" };
   }
 
   // Insert sent email into DB immediately
   const now = new Date();
-  const [inserted] = await db
-    .insert(emails)
-    .values({
-      mailAccountId: payload.mailAccountId,
-      messageId: sendResult.messageId,
-      threadId: row.threadId ?? row.messageId,
-      inReplyTo: row.messageId,
-      references: replyReferences,
-      subject: replySubject,
-      fromAddress: row.account.email,
-      fromName: row.account.name,
-      toAddresses: [{ address: row.fromAddress, name: row.fromName ?? undefined }],
-      bodyText: payload.bodyText,
-      bodyHtml: null,
-      snippet: payload.bodyText.slice(0, 200),
-      sentAt: now,
-      receivedAt: now,
-      isRead: true,
-      isSent: true,
-      category: "sent",
-      imapUid: 0,
-      imapFlags: ["\\Seen"],
-      imapMailbox: "Sent",
-    })
-    .returning({ id: emails.id, sentAt: emails.sentAt });
+  let inserted: { id: string; sentAt: Date };
+  try {
+    [inserted] = await db
+      .insert(emails)
+      .values({
+        mailAccountId,
+        messageId: sendResult.messageId,
+        threadId: row.threadId ?? row.messageId,
+        inReplyTo: row.messageId,
+        references: replyReferences,
+        subject: replySubject,
+        fromAddress: row.account.email,
+        fromName: row.account.name,
+        toAddresses: [{ address: row.fromAddress, name: row.fromName ?? undefined }],
+        bodyText,
+        bodyHtml: null,
+        snippet: bodyText.slice(0, 200),
+        sentAt: now,
+        receivedAt: now,
+        isRead: true,
+        isSent: true,
+        category: "sent",
+        imapUid: 0,
+        imapFlags: ["\\Seen"],
+        imapMailbox: "Sent",
+      })
+      .returning({ id: emails.id, sentAt: emails.sentAt });
+  } catch (err) {
+    // Email was sent successfully via SMTP but we failed to record it locally.
+    // Log with enough context to recover manually if needed.
+    console.error(
+      "[sendReply] DB insert failed after successful SMTP send. messageId:",
+      sendResult.messageId,
+      err,
+    );
+    return { success: false, error: "db_error" };
+  }
 
-  revalidatePath(`/inbox/${payload.emailId}`);
+  revalidatePath(`/inbox/${emailId}`);
 
   return {
     success: true,

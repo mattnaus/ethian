@@ -180,6 +180,11 @@ export function EmailDetailView({
     return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
   }, []);
 
+  // Re-sync optimistic state when the server re-renders with fresh data
+  useEffect(() => {
+    setOptimisticMessages(threadMessages);
+  }, [threadMessages]);
+
   // Scroll to bottom on load; smooth-scroll when new messages are appended
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
@@ -238,7 +243,7 @@ export function EmailDetailView({
       // Rollback optimistic message and restore draft
       setOptimisticMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
       setReply(text);
-      setSendError(result.error);
+      setSendError(t("sendFailed"));
     }
   }
 
