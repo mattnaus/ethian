@@ -80,12 +80,13 @@ export async function sendReplyAction(payload: unknown): Promise<SendReplyResult
   // Send via SMTP
   let sendResult: Awaited<ReturnType<typeof sendEmail>>;
   try {
+    // RFC 2822 headers require angle-bracketed message IDs; DB stores bare IDs.
     sendResult = await sendEmail(row.account, {
       to: [{ address: row.fromAddress, name: row.fromName ?? undefined }],
       subject: replySubject,
       bodyText,
-      inReplyTo: row.messageId,
-      references: replyReferences,
+      inReplyTo: `<${row.messageId}>`,
+      references: replyReferences.map((id) => `<${id}>`),
     });
   } catch (err) {
     console.error("[sendReply] SMTP error:", err);

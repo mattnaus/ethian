@@ -67,6 +67,17 @@ export interface SyncResult {
 // ---------------------------------------------------------------------------
 
 /**
+ * Strip angle brackets from a Message-ID, normalising to bare format.
+ * imapflow's IMAP ENVELOPE returns "<abc@domain>" but mailparser's
+ * parsed.references returns "abc@domain" — stripping here makes all
+ * stored message IDs consistent with what mailparser produces for references.
+ */
+function normalizeMessageId(id: string | null | undefined): string | undefined {
+  if (!id) return undefined;
+  return id.replace(/^<|>$/g, "").trim() || undefined;
+}
+
+/**
  * Parse an imapflow address object into our EmailAddress shape.
  */
 function parseAddresses(
@@ -220,7 +231,7 @@ export async function syncMailbox(
             }
           });
 
-          const inReplyTo = parsed.inReplyTo ?? undefined;
+          const inReplyTo = normalizeMessageId(parsed.inReplyTo);
           // Use simpleParser's already-parsed references array directly.
           const references = parsed.references
             ? (Array.isArray(parsed.references) ? parsed.references : [parsed.references])
@@ -230,7 +241,7 @@ export async function syncMailbox(
           const replyToParsed = parseAddresses(envelope.replyTo ?? []);
 
           const email: RawEmailData = {
-            messageId: envelope.messageId ?? `generated-${message.uid}`,
+            messageId: normalizeMessageId(envelope.messageId) ?? `generated-${message.uid}`,
             imapUid: message.uid,
             imapFlags: [...(message.flags ?? [])].map(String),
             imapMailbox: mailboxName,
