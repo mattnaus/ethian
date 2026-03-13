@@ -71,13 +71,17 @@ function formatFullDate(iso: string, locale: string): string {
   }).format(new Date(iso));
 }
 
-const replyParser = new EmailReplyParser();
-
 function stripHtmlQuotes(html: string): string {
-  // Remove <blockquote> elements (covers Gmail, Outlook, Apple Mail quoted content)
-  // and their contents before stripping all remaining tags.
+  // Use DOMParser when available (browser) — correctly handles nested blockquotes
+  // and removes Gmail (.gmail_quote) and Yahoo (.yahoo_quoted) quote wrappers.
+  if (typeof window !== "undefined") {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    doc.querySelectorAll("blockquote, .gmail_quote, .yahoo_quoted").forEach((el) => el.remove());
+    return (doc.body.textContent ?? "").replace(/\s{2,}/g, " ").trim();
+  }
+  // SSR fallback: best-effort regex (no nesting support, but sufficient for server render)
   return html
-    .replace(/<blockquote[\s\S]*?<\/blockquote>/gi, "")
+    .replace(/<blockquote[^>]*>[\s\S]*?<\/blockquote>/gi, "")
     .replace(/<[^>]+>/g, " ")
     .replace(/\s{2,}/g, " ")
     .trim();
@@ -85,8 +89,8 @@ function stripHtmlQuotes(html: string): string {
 
 function getMessageBody(bodyText: string | null, bodyHtml: string | null): string {
   if (bodyText) {
-    const visible = replyParser.parseReply(bodyText).trim();
-    return visible || bodyText.trim(); // fall back to full text if parser returns empty
+    const visible = new EmailReplyParser().parseReply(bodyText).trim();
+    return visible || bodyText.trim();
   }
   if (bodyHtml) return stripHtmlQuotes(bodyHtml);
   return "";
