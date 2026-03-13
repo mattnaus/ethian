@@ -10,7 +10,7 @@
  */
 
 import { Worker, type Job } from "bullmq";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray, asc } from "drizzle-orm";
 import { db } from "@/db";
 import {
   mailAccounts,
@@ -280,12 +280,32 @@ async function handleProcessEmail(
   const isSent = rawEmail.imapMailbox.toLowerCase().includes("sent") ||
     flagsLower.includes("\\answered");
 
-  // Build thread ID from References or In-Reply-To
-  // Simple strategy: use the root message ID as the thread ID
-  const threadId =
-    rawEmail.references.length > 0
-      ? rawEmail.references[0]
-      : rawEmail.inReplyTo ?? rawEmail.messageId;
+  // Resolve threadId by inheriting from a known parent email in our DB.
+  // Checking the DB first handles clients (e.g. Hey) that truncate the
+  // References chain to only the immediate parent rather than the full root.
+  // Fallback: use references[0] → inReplyTo → own messageId.
+  const parentIds = [rawEmail.inReplyTo, ...rawEmail.references].filter(
+    (id): id is string => Boolean(id),
+  );
+
+  let threadId: string;
+  if (parentIds.length > 0) {
+    const [parent] = await db
+      .select({ threadId: emails.threadId })
+      .from(emails)
+      .where(
+        and(
+          eq(emails.mailAccountId, mailAccountId),
+          inArray(emails.messageId, parentIds),
+        ),
+      )
+      .orderBy(asc(emails.sentAt))
+      .limit(1);
+
+    threadId = parent?.threadId ?? rawEmail.references[0] ?? rawEmail.inReplyTo ?? rawEmail.messageId;
+  } else {
+    threadId = rawEmail.messageId;
+  }
 
   const newEmail: NewEmail = {
     mailAccountId,
