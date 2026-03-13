@@ -1,10 +1,11 @@
 "use client";
 
+import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Paperclip } from "lucide-react";
+import { ArrowLeft, Send, Paperclip, MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { safeColor, getInitials, formatDate } from "@/lib/email-display";
+import { safeColor, getInitials } from "@/lib/email-display";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -21,6 +22,7 @@ type EmailDetail = {
   sentAt: string;
   isRead: boolean;
   mailAccountId: string;
+  mailAccountEmail: string;
   accountColor: string;
   accountName: string;
 };
@@ -48,100 +50,103 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / 1_048_576).toFixed(1)} MB`;
 }
 
+function formatTime(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(iso));
+}
+
+function formatFullDate(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(iso));
+}
+
+function getMessageBody(bodyText: string | null, bodyHtml: string | null): string {
+  if (bodyText) return bodyText;
+  if (bodyHtml) return bodyHtml.replace(/<[^>]+>/g, " ").replace(/\s{2,}/g, " ").trim();
+  return "";
+}
+
+// ---------------------------------------------------------------------------
+// AttachmentChip
+// ---------------------------------------------------------------------------
+
 function AttachmentChip({
   attachment,
 }: {
   attachment: { id: string; filename: string; contentType: string; size: number };
 }) {
   return (
-    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border text-sm">
+    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/60 border border-border hover:bg-secondary transition-colors cursor-pointer max-w-[220px]">
       <Paperclip className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-      <span className="text-foreground/80 truncate max-w-[200px]">{attachment.filename}</span>
-      <span className="text-muted-foreground shrink-0">{formatFileSize(attachment.size)}</span>
+      <div className="min-w-0">
+        <p className="text-xs font-medium text-foreground truncate">{attachment.filename}</p>
+        <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
+      </div>
     </div>
   );
 }
 
-function EmailBody({ bodyText, bodyHtml }: { bodyText: string | null; bodyHtml: string | null }) {
-  if (bodyText) {
-    return (
-      <pre className="text-sm text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">
-        {bodyText}
-      </pre>
-    );
-  }
-
-  if (bodyHtml) {
-    // Strip tags for a safe plaintext fallback — no dangerouslySetInnerHTML
-    const stripped = bodyHtml.replace(/<[^>]+>/g, " ").replace(/\s{2,}/g, " ").trim();
-    return (
-      <pre className="text-sm text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">
-        {stripped}
-      </pre>
-    );
-  }
-
-  return <p className="text-sm text-muted-foreground italic">No message body.</p>;
-}
-
 // ---------------------------------------------------------------------------
-// MessageBlock — one message in a thread
+// MessageBubble
 // ---------------------------------------------------------------------------
 
-function MessageBlock({
+function MessageBubble({
   message,
+  isSelf,
   locale,
-  t,
 }: {
   message: ThreadMessage;
+  isSelf: boolean;
   locale: string;
-  t: ReturnType<typeof useTranslations<"pages.emailDetail">>;
 }) {
-  const initials = getInitials(message.fromName, message.fromAddress);
-  const ringColor = safeColor(message.accountColor);
-  const senderDisplay = message.fromName?.trim() || message.fromAddress;
-  const formattedDate = formatDate(message.sentAt, locale);
-  const toAddresses = Array.isArray(message.toAddresses) ? message.toAddresses : [];
-  const toList = toAddresses.map((r) => r.name?.trim() || r.address).join(", ");
+  const body = getMessageBody(message.bodyText, message.bodyHtml);
+  const time = formatTime(message.sentAt, locale);
+  const fullDate = formatFullDate(message.sentAt, locale);
 
   return (
-    <div>
-      {/* Message header */}
-      <div className="flex items-center gap-2.5">
-        <div
-          className="h-7 w-7 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold text-white select-none"
-          style={{ boxShadow: `0 0 0 2px ${ringColor}` }}
-        >
-          {initials}
-        </div>
-        <span className="text-sm font-semibold text-foreground">{senderDisplay}</span>
-        <span className="text-xs text-muted-foreground hidden md:inline">{message.fromAddress}</span>
-        <span className="text-xs text-muted-foreground shrink-0 ml-auto">{formattedDate}</span>
-      </div>
-
-      {/* Body + recipients + attachments — indented to align with avatar right edge */}
-      {/* pl = h-7 (1.75rem) + gap-2.5 (0.625rem) = 2.375rem */}
-      <div className="pl-[2.375rem] mt-3 space-y-4">
-        {toList && (
-          <p className="text-xs text-muted-foreground">
-            <span className="text-muted-foreground/70">{t("to")}</span> {toList}
-          </p>
+    <div className={cn("flex items-end gap-2.5", isSelf ? "flex-row-reverse" : "flex-row")}>
+      <div
+        className={cn(
+          "flex flex-col gap-1 max-w-[90%] md:max-w-[60%]",
+          isSelf ? "items-end" : "items-start",
         )}
+      >
+        {/* Bubble */}
+        <div
+          className={cn(
+            "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
+            isSelf
+              ? "bg-primary text-primary-foreground rounded-br-sm"
+              : "bg-secondary text-foreground rounded-bl-sm",
+          )}
+        >
+          {body || <span className="italic opacity-60">No message body.</span>}
+        </div>
 
-        <EmailBody bodyText={message.bodyText} bodyHtml={message.bodyHtml} />
-
+        {/* Attachments */}
         {message.attachments.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              {t("attachments", { count: message.attachments.length })}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {message.attachments.map((a) => (
-                <AttachmentChip key={a.id} attachment={a} />
+          <div className="w-full overflow-x-auto scrollbar-none">
+            <div className="flex gap-2 pb-1">
+              {message.attachments.map((att) => (
+                <AttachmentChip key={att.id} attachment={att} />
               ))}
             </div>
           </div>
         )}
+
+        {/* Timestamp */}
+        <span className="text-xs text-muted-foreground px-1" title={fullDate}>
+          {time}
+        </span>
       </div>
     </div>
   );
@@ -162,106 +167,154 @@ export function EmailDetailView({
 }) {
   const router = useRouter();
   const t = useTranslations("pages.emailDetail");
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [reply, setReply] = useState("");
 
-  // Top bar uses the original sender (oldest message) for avatar + name
-  const topBarMessage = threadMessages[0] ?? {
-    fromName: email.fromName,
-    fromAddress: email.fromAddress,
-    accountColor: email.accountColor,
-  };
-  const initials = getInitials(topBarMessage.fromName, topBarMessage.fromAddress);
-  const ringColor = safeColor(topBarMessage.accountColor);
-  const senderDisplay = topBarMessage.fromName?.trim() || topBarMessage.fromAddress;
+  // Scroll to bottom on load
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "instant" });
+  }, []);
 
-  // Date shows the most recent message
-  const formattedDate = formatDate(email.sentAt, locale);
+  function handleInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    setReply(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      // TODO: wire to SMTP send
+    }
+  }
+
+  // Original sender (oldest message) for the top bar
+  const topMsg = threadMessages[0];
+  const topInitials = getInitials(
+    topMsg?.fromName ?? email.fromName,
+    topMsg?.fromAddress ?? email.fromAddress,
+  );
+  const topRingColor = safeColor(topMsg?.accountColor ?? email.accountColor);
+  const ringColor = safeColor(email.accountColor);
+
+  // "New" divider before the first unread message (only if it's not the very first)
+  const firstUnreadIndex = threadMessages.findIndex((m) => !m.isRead);
 
   return (
-    // pb-16 md:pb-0 accounts for the fixed mobile bottom tab bar (h-16)
+    // pb-16 md:pb-0 reserves space for the mobile bottom tab bar
     <div className="flex flex-col h-full pb-16 md:pb-0">
-      {/* Top bar */}
-      <div className="flex items-center gap-3 h-12 px-4 border-b border-border shrink-0">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center justify-center min-h-11 min-w-11 p-3 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shrink-0"
-          aria-label={t("back")}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
+      <div className="flex-1 flex flex-col mx-auto w-full max-w-5xl px-[10px] md:px-6 min-h-0">
 
-        {/* Avatar */}
-        <div
-          className="h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold text-white select-none"
-          style={{ boxShadow: `0 0 0 2px ${ringColor}` }}
-        >
-          {initials}
-        </div>
+        {/* Header */}
+        <header className="flex items-center gap-3 py-4 border-b border-border shrink-0">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label={t("back")}
+            className="flex items-center justify-center w-11 h-11 -ml-1 rounded-full hover:bg-secondary active:bg-secondary/80 transition-colors text-muted-foreground hover:text-foreground shrink-0"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
 
-        {/* Sender info */}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-foreground truncate leading-tight">
-            {senderDisplay}
-          </p>
-          <p className="text-xs text-muted-foreground truncate leading-tight">
-            {topBarMessage.fromAddress}
-          </p>
-        </div>
-
-        {/* Date (most recent) */}
-        <span className="text-xs text-muted-foreground shrink-0">{formattedDate}</span>
-      </div>
-
-      {/* Scrollable body */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-3xl px-4 md:px-8 py-6 space-y-6">
-          {/* Subject */}
-          <h1 className="text-xl font-semibold text-foreground leading-snug">{email.subject}</h1>
-
-          {/* Thread message count (only when > 1) */}
-          {threadMessages.length > 1 && (
-            <p className="text-xs text-muted-foreground">
-              {t("threadMessageCount", { count: threadMessages.length })}
-            </p>
-          )}
-
-          {/* Conversation */}
-          <div>
-            {threadMessages.map((msg, i) => (
-              <div key={msg.id}>
-                <MessageBlock message={msg} locale={locale} t={t} />
-                {i < threadMessages.length - 1 && (
-                  <div className={cn("border-t border-border my-5")} />
-                )}
-              </div>
-            ))}
+          <div
+            className="h-9 w-9 rounded-full shrink-0 flex items-center justify-center text-xs font-medium text-white select-none"
+            style={{ boxShadow: `0 0 0 2px ${topRingColor}` }}
+          >
+            {topInitials}
           </div>
-        </div>
-      </div>
 
-      {/* Reply compose bar */}
-      <div className="shrink-0 border-t border-border">
-        <div className="mx-auto w-full max-w-3xl px-4 md:px-8 py-4">
-          <div className="rounded-xl border border-border bg-card px-4 py-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate leading-tight">
+              {topMsg?.fromName?.trim() || topMsg?.fromAddress || email.fromName?.trim() || email.fromAddress}
+            </p>
+            <p className="text-xs text-muted-foreground truncate leading-tight">
+              {topMsg?.fromAddress || email.fromAddress}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <span
+              className="text-xs font-medium px-2.5 py-1 rounded-full border"
+              style={{
+                color: ringColor,
+                borderColor: ringColor + "40",
+                backgroundColor: ringColor + "1a",
+              }}
+            >
+              {email.accountName}
+            </span>
+            <button
+              type="button"
+              aria-label={t("moreOptions")}
+              className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* Subject */}
+        <div className="py-4 border-b border-border shrink-0">
+          <h1 className="text-base font-semibold text-foreground text-balance">{email.subject}</h1>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto py-6 flex flex-col gap-4 min-h-0">
+          {threadMessages.map((message, index) => {
+            const isSelf =
+              message.fromAddress.toLowerCase() === email.mailAccountEmail.toLowerCase();
+            const isFirstUnread = index === firstUnreadIndex && firstUnreadIndex > 0;
+            return (
+              <div key={message.id}>
+                {isFirstUnread && (
+                  <div className="flex items-center gap-3 my-2">
+                    <div className="flex-1 h-px bg-primary/40" />
+                    <span className="text-xs font-medium text-primary shrink-0">New</span>
+                    <div className="flex-1 h-px bg-primary/40" />
+                  </div>
+                )}
+                <MessageBubble message={message} isSelf={isSelf} locale={locale} />
+              </div>
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Compose bar */}
+        <div className="shrink-0 py-4 border-t border-border">
+          <div className="flex items-end gap-2 bg-secondary/40 border border-border rounded-2xl px-4 py-3">
+            <button
+              type="button"
+              aria-label={t("attachFile")}
+              className="text-muted-foreground hover:text-foreground transition-colors mb-1 shrink-0"
+            >
+              <Paperclip className="h-4 w-4" />
+            </button>
             <textarea
-              rows={3}
+              ref={textareaRef}
+              value={reply}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
               placeholder={t("replyPlaceholder")}
               aria-label={t("replyPlaceholder")}
-              className={cn(
-                "w-full bg-transparent text-sm text-foreground/80 placeholder:text-muted-foreground/50",
-                "resize-none outline-none leading-relaxed",
-              )}
+              rows={1}
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none leading-relaxed min-h-[24px]"
             />
-            <div className="flex items-center justify-end pt-2 border-t border-border">
-              <button
-                type="button"
-                disabled
-                className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium opacity-50 cursor-not-allowed"
-              >
-                {t("sendButton")}
-              </button>
-            </div>
+            <button
+              type="button"
+              disabled={!reply.trim()}
+              aria-label={t("sendButton")}
+              className="h-8 w-8 p-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 shrink-0 mb-0.5 flex items-center justify-center transition-colors"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
           </div>
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            {t("cmdEnterToSend")}
+          </p>
         </div>
+
       </div>
     </div>
   );

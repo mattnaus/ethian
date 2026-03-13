@@ -39,6 +39,7 @@ export default async function EmailDetailPage({
       mailAccountId: emails.mailAccountId,
       accountColor: mailAccounts.color,
       accountName: mailAccounts.name,
+      accountEmail: mailAccounts.email,
     })
     .from(emails)
     .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
@@ -133,6 +134,7 @@ export default async function EmailDetailPage({
     ...row,
     sentAt: row.sentAt.toISOString(),
     isRead: row.isRead,
+    mailAccountEmail: row.accountEmail,
   };
 
   // Build threadMessages array

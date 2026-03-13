@@ -175,7 +175,10 @@
       "attachments": "{count, plural, one {# attachment} other {# attachments}}",
       "replyPlaceholder": "Reply\u2026",
       "sendButton": "Send",
-      "threadMessageCount": "{count, plural, one {# message} other {# messages}}"
+      "threadMessageCount": "{count, plural, one {# message} other {# messages}}",
+      "cmdEnterToSend": "Cmd+Enter to send",
+      "attachFile": "Attach file",
+      "moreOptions": "More options"
     }
   }
 }
