@@ -23,7 +23,7 @@ The app uses OKLCH-based CSS custom properties. Always use the semantic token cl
 | `text-muted-foreground` | `oklch(0.55 0 0)` | Secondary / metadata text |
 | `bg-primary` | `var(--color-orange-500)` | Orange accent — buttons, active states, unread indicators |
 | `text-primary-foreground` | `oklch(0.98 0 0)` | Text on primary (white) |
-| `bg-accent` | `var(--color-orange-500)` | Orange — also used for focus rings, unread borders |
+| `bg-accent` | `var(--color-orange-500)` | Orange — unread borders; **not** used for focus rings |
 | `bg-popover` | `oklch(0.18 0.005 285)` | Popover / dropdown backgrounds |
 | `bg-destructive` | `oklch(0.55 0.22 25)` | Delete, error states |
 
@@ -47,7 +47,7 @@ The sidebar and gatekeeper list were built before the OKLCH migration and use ha
 - Active sidebar nav items
 - Primary CTA buttons (`bg-primary`)
 - Unread email left-border indicator (`border-l-primary`)
-- Focus rings (`ring-primary/50`)
+- Focus rings (`ring-ring/50` — neutral, not orange)
 - The "Ethian" wordmark in the sidebar header
 
 ### Special-Purpose Colors
@@ -136,7 +136,7 @@ bg-muted/70  border-2  rounded-xl  p-4
 - **Unread state**: `border-l-primary border-r-transparent border-t-transparent border-b-transparent` — orange left border, other sides transparent.
 - **Read state**: `border-transparent`.
 - **Hover**: `hover:border-primary/50` — faint orange full border.
-- **Focus**: `focus-visible:ring-2 focus-visible:ring-primary/50`.
+- **Focus**: `focus-visible:ring-2 focus-visible:ring-ring/50`.
 - **Layout (mobile `< md`)**: `flex-col gap-3` — avatar+sender in first row, subject+snippet below, attachments+date at the bottom.
 - **Layout (desktop `md+`)**: `flex-row items-center gap-4` — avatar | sender (fixed `w-36 lg:w-40`) | subject+snippet (flex-1) | attachment badge | date (`w-16 text-right`).
 - **Sender inline on mobile**: avatar and sender name side by side in the first row (`flex items-center gap-3`).
@@ -450,7 +450,7 @@ When building a new screen or component not yet defined above:
 2. **Every interactive element needs intentional states.** Hover, 
    focus-visible, active, and disabled must all be explicitly styled — 
    never rely on browser defaults. Use the existing patterns (orange 
-   border on hover, `ring-primary/50` on focus) as the baseline.
+   border on hover, `ring-ring/50` on focus) as the baseline.
 
 3. **Motion budget.** Default transition: `duration-150 ease-out` for 
    micro-interactions (hover, focus). `duration-200 ease-in-out` for 

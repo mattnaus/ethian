@@ -37,7 +37,7 @@
 
     --border: oklch(0.25 0.005 285);
     --input: oklch(0.20 0.005 285);
-    --ring: var(--color-orange-500);
+    --ring: oklch(0.45 0.005 285);
 
     --radius: 0.5rem;
 
