@@ -36,10 +36,10 @@ function formatFileSize(bytes: number): string {
 
 function AttachmentChip({ attachment }: { attachment: Attachment }) {
   return (
-    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-sm">
-      <Paperclip className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
-      <span className="text-zinc-200 truncate max-w-[200px]">{attachment.filename}</span>
-      <span className="text-zinc-500 shrink-0">{formatFileSize(attachment.size)}</span>
+    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border text-sm">
+      <Paperclip className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+      <span className="text-foreground/80 truncate max-w-[200px]">{attachment.filename}</span>
+      <span className="text-muted-foreground shrink-0">{formatFileSize(attachment.size)}</span>
     </div>
   );
 }
@@ -47,7 +47,7 @@ function AttachmentChip({ attachment }: { attachment: Attachment }) {
 function EmailBody({ bodyText, bodyHtml }: { bodyText: string | null; bodyHtml: string | null }) {
   if (bodyText) {
     return (
-      <pre className="text-sm text-zinc-200 whitespace-pre-wrap font-sans leading-relaxed">
+      <pre className="text-sm text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">
         {bodyText}
       </pre>
     );
@@ -57,13 +57,13 @@ function EmailBody({ bodyText, bodyHtml }: { bodyText: string | null; bodyHtml: 
     // Strip tags for a safe plaintext fallback — no dangerouslySetInnerHTML
     const stripped = bodyHtml.replace(/<[^>]+>/g, " ").replace(/\s{2,}/g, " ").trim();
     return (
-      <pre className="text-sm text-zinc-200 whitespace-pre-wrap font-sans leading-relaxed">
+      <pre className="text-sm text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">
         {stripped}
       </pre>
     );
   }
 
-  return <p className="text-sm text-zinc-500 italic">No message body.</p>;
+  return <p className="text-sm text-muted-foreground italic">No message body.</p>;
 }
 
 export function EmailDetailView({
@@ -83,17 +83,17 @@ export function EmailDetailView({
   const senderDisplay = email.fromName?.trim() || email.fromAddress;
   const formattedDate = formatDate(email.sentAt, locale);
 
-  const toList = email.toAddresses
-    .map((r) => r.name?.trim() || r.address)
-    .join(", ");
+  const toAddresses = Array.isArray(email.toAddresses) ? email.toAddresses : [];
+  const toList = toAddresses.map((r) => r.name?.trim() || r.address).join(", ");
 
   return (
-    <div className="flex flex-col h-full">
+    // pb-16 md:pb-0 accounts for the fixed mobile bottom tab bar (h-16)
+    <div className="flex flex-col h-full pb-16 md:pb-0">
       {/* Top bar */}
-      <div className="flex items-center gap-3 h-12 px-4 border-b border-zinc-800 shrink-0">
+      <div className="flex items-center gap-3 h-12 px-4 border-b border-border shrink-0">
         <button
           onClick={() => router.back()}
-          className="flex items-center justify-center h-8 w-8 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-400 hover:text-zinc-50"
+          className="flex items-center justify-center h-11 w-11 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shrink-0"
           aria-label={t("back")}
         >
           <ArrowLeft className="h-4 w-4" />
@@ -109,35 +109,35 @@ export function EmailDetailView({
 
         {/* Sender info */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-zinc-50 truncate leading-tight">
+          <p className="text-sm font-semibold text-foreground truncate leading-tight">
             {senderDisplay}
           </p>
-          <p className="text-xs text-zinc-500 truncate leading-tight">
+          <p className="text-xs text-muted-foreground truncate leading-tight">
             {email.fromAddress}
           </p>
         </div>
 
         {/* Date */}
-        <span className="text-xs text-zinc-500 shrink-0">{formattedDate}</span>
+        <span className="text-xs text-muted-foreground shrink-0">{formattedDate}</span>
       </div>
 
       {/* Scrollable body */}
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-3xl px-4 md:px-8 py-6 space-y-6">
           {/* Subject */}
-          <h1 className="text-xl font-semibold text-zinc-50 leading-snug">
+          <h1 className="text-xl font-semibold text-foreground leading-snug">
             {email.subject}
           </h1>
 
           {/* Recipients */}
           {toList && (
-            <p className="text-xs text-zinc-500">
-              <span className="text-zinc-400">{t("to")}</span> {toList}
+            <p className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground/70">{t("to")}</span> {toList}
             </p>
           )}
 
           {/* Divider */}
-          <div className="border-t border-zinc-800" />
+          <div className="border-t border-border" />
 
           {/* Body */}
           <EmailBody bodyText={email.bodyText} bodyHtml={email.bodyHtml} />
@@ -145,7 +145,7 @@ export function EmailDetailView({
           {/* Attachments */}
           {attachments.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-zinc-400 uppercase tracking-wide">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 {t("attachments", { count: attachments.length })}
               </p>
               <div className="flex flex-wrap gap-2">
@@ -159,26 +159,27 @@ export function EmailDetailView({
       </div>
 
       {/* Reply compose bar */}
-      <div className={cn(
-        "shrink-0 border-t border-zinc-800",
-        "px-4 md:px-8 py-4",
-        "mx-auto w-full max-w-3xl",
-      )}>
-        <div className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-3">
-          <textarea
-            rows={3}
-            placeholder={t("replyPlaceholder")}
-            className={cn(
-              "w-full bg-transparent text-sm text-zinc-200 placeholder-zinc-600",
-              "resize-none outline-none leading-relaxed",
-            )}
-          />
-          <div className="flex items-center justify-end pt-2 border-t border-zinc-800">
-            <button
-              className="px-4 py-1.5 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              {t("sendButton")}
-            </button>
+      <div className="shrink-0 border-t border-border">
+        <div className="mx-auto w-full max-w-3xl px-4 md:px-8 py-4">
+          <div className="rounded-xl border border-border bg-card px-4 py-3">
+            <textarea
+              rows={3}
+              placeholder={t("replyPlaceholder")}
+              aria-label={t("replyPlaceholder")}
+              className={cn(
+                "w-full bg-transparent text-sm text-foreground/80 placeholder:text-muted-foreground/50",
+                "resize-none outline-none leading-relaxed",
+              )}
+            />
+            <div className="flex items-center justify-end pt-2 border-t border-border">
+              <button
+                type="button"
+                disabled
+                className="px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium opacity-50 cursor-not-allowed"
+              >
+                {t("sendButton")}
+              </button>
+            </div>
           </div>
         </div>
       </div>

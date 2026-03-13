@@ -6,12 +6,17 @@ import { db } from "@/db";
 import { emailAttachments, emails, mailAccounts } from "@/db/schema";
 import { EmailDetailView } from "./_components/email-detail-view";
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default async function EmailDetailPage({
   params,
 }: {
   params: Promise<{ emailId: string }>;
 }) {
   const { emailId } = await params;
+
+  if (!UUID_RE.test(emailId)) notFound();
 
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
@@ -68,8 +73,8 @@ export default async function EmailDetailPage({
       .set({ isRead: true })
       .where(eq(emails.id, emailId))
       .execute()
-      .catch(() => {
-        // Non-critical; ignore
+      .catch((err: unknown) => {
+        console.error("[EmailDetail] Failed to mark email as read:", err);
       });
   }
 
