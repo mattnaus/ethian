@@ -172,7 +172,7 @@ export function EmailDetailView({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [reply, setReply] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [sendError, setSendError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ text: string; isError: boolean } | null>(null);
   const [optimisticMessages, setOptimisticMessages] = useState<ThreadMessage[]>(threadMessages);
   const isFirstRender = useRef(true);
   const isMac = useMemo(() => {
@@ -229,7 +229,7 @@ export function EmailDetailView({
       textareaRef.current.style.height = "auto";
     }
     setIsSending(true);
-    setSendError(null);
+    setFeedback(null);
 
     const result = await sendReplyAction({
       mailAccountId: email.mailAccountId,
@@ -243,9 +243,11 @@ export function EmailDetailView({
       // SMTP failed — rollback optimistic message and restore draft
       setOptimisticMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
       setReply(text);
-      setSendError(t("sendFailed"));
+      setFeedback({ text: t("sendFailed"), isError: true });
+    } else if (result.success === "partial") {
+      // SMTP sent but DB insert failed — keep optimistic message, warn user
+      setFeedback({ text: t("sendPartialWarning"), isError: false });
     }
-    // success === "partial": SMTP sent but DB insert failed — keep optimistic message
   }
 
   // Original sender (oldest message) for the top bar
@@ -373,8 +375,10 @@ export function EmailDetailView({
           <p className="text-xs text-muted-foreground text-center mt-2">
             {isMac ? t("cmdEnterToSend") : t("ctrlEnterToSend")}
           </p>
-          {sendError && (
-            <p className="text-xs text-destructive text-center mt-1">{sendError}</p>
+          {feedback && (
+            <p className={cn("text-xs text-center mt-1", feedback.isError ? "text-destructive" : "text-muted-foreground")}>
+              {feedback.text}
+            </p>
           )}
         </div>
 

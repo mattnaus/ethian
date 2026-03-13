@@ -182,7 +182,8 @@
       "attachFile": "Attach file",
       "moreOptions": "More options",
       "sending": "Sending\u2026",
-      "sendFailed": "Failed to send. Please try again."
+      "sendFailed": "Failed to send. Please try again.",
+      "sendPartialWarning": "Sent, but couldn\u2019t be saved locally. It may not appear after reload."
     }
   }
 }

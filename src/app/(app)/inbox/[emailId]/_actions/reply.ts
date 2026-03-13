@@ -28,8 +28,7 @@ export type SendReplyError =
   | "unauthenticated"
   | "invalid_input"
   | "not_found"
-  | "smtp_error"
-  | "db_error";
+  | "smtp_error";
 
 export type SendReplyResult =
   | { success: true; sentEmailId: string; sentAt: string }
