@@ -19,6 +19,13 @@ Issues not fixed at review time. Each entry links to the review where it was rai
 
 ---
 
+### Race condition in thread grouping under parallel workers
+**Source:** `.claude/reviews/2026-03-13/threadid-db-parent-6786b45.md`
+**Location:** `src/lib/queue/workers/sync.worker.ts` — process-email worker
+**Detail:** The process worker runs at `concurrency * 2`. If two emails from the same thread are processed simultaneously, the second may not find the first in the DB yet and fall back to `references[0]`, producing a wrong `threadId`. Mitigations: a post-insert reconciliation pass that re-resolves `threadId` for newly inserted emails whose parent lands after them, or serialising processing per `mailAccountId`.
+
+---
+
 ## Warnings
 
 ### Null-threadId fallback loses attachments
