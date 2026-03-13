@@ -180,7 +180,9 @@
       "ctrlEnterToSend": "Ctrl+Enter to send",
       "newDivider": "New",
       "attachFile": "Attach file",
-      "moreOptions": "More options"
+      "moreOptions": "More options",
+      "sending": "Sending\u2026",
+      "sendFailed": "Failed to send. Please try again."
     }
   }
 }

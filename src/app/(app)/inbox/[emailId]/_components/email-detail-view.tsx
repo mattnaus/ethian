@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo } from "react";
+import { sendReplyAction } from "../_actions/reply";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Send, Paperclip, MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -170,15 +171,22 @@ export function EmailDetailView({
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [reply, setReply] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [optimisticMessages, setOptimisticMessages] = useState<ThreadMessage[]>(threadMessages);
+  const isFirstRender = useRef(true);
   const isMac = useMemo(() => {
     if (typeof navigator === "undefined") return false;
     return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
   }, []);
 
-  // Scroll to bottom on load
+  // Scroll to bottom on load; smooth-scroll when new messages are appended
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "instant" });
-  }, []);
+    bottomRef.current?.scrollIntoView({
+      behavior: isFirstRender.current ? "instant" : "smooth",
+    });
+    isFirstRender.current = false;
+  }, [optimisticMessages.length]);
 
   function handleInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
     setReply(e.target.value);
@@ -189,7 +197,48 @@ export function EmailDetailView({
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
-      // TODO: wire to SMTP send
+      void handleSend();
+    }
+  }
+
+  async function handleSend() {
+    const text = reply.trim();
+    if (!text || isSending) return;
+
+    // Optimistic update — append a synthetic sent message immediately
+    const optimistic: ThreadMessage = {
+      id: crypto.randomUUID(),
+      fromName: email.accountName,
+      fromAddress: email.mailAccountEmail,
+      toAddresses: [{ address: email.fromAddress, name: email.fromName ?? undefined }],
+      bodyHtml: null,
+      bodyText: text,
+      sentAt: new Date().toISOString(),
+      isRead: true,
+      accountColor: email.accountColor,
+      attachments: [],
+    };
+    setOptimisticMessages((prev) => [...prev, optimistic]);
+    setReply("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+    setIsSending(true);
+    setSendError(null);
+
+    const result = await sendReplyAction({
+      mailAccountId: email.mailAccountId,
+      emailId: email.id,
+      bodyText: text,
+    });
+
+    setIsSending(false);
+
+    if (!result.success) {
+      // Rollback optimistic message and restore draft
+      setOptimisticMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+      setReply(text);
+      setSendError(result.error);
     }
   }
 
@@ -203,7 +252,7 @@ export function EmailDetailView({
   const ringColor = safeColor(email.accountColor);
 
   // "New" divider before the first unread message (only if it's not the very first)
-  const firstUnreadIndex = threadMessages.findIndex((m) => !m.isRead);
+  const firstUnreadIndex = optimisticMessages.findIndex((m) => !m.isRead);
 
   return (
     // pb-16 md:pb-0 reserves space for the mobile bottom tab bar
@@ -265,7 +314,7 @@ export function EmailDetailView({
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto py-6 flex flex-col gap-4 min-h-0">
-          {threadMessages.map((message, index) => {
+          {optimisticMessages.map((message, index) => {
             const isSelf =
               message.fromAddress.toLowerCase() === email.mailAccountEmail.toLowerCase();
             const isFirstUnread = index === firstUnreadIndex && firstUnreadIndex > 0;
@@ -307,8 +356,9 @@ export function EmailDetailView({
             />
             <button
               type="button"
-              disabled={!reply.trim()}
-              aria-label={t("sendButton")}
+              onClick={() => void handleSend()}
+              disabled={!reply.trim() || isSending}
+              aria-label={isSending ? t("sending") : t("sendButton")}
               className="flex items-center justify-center min-w-11 min-h-11 -my-1.5 p-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 shrink-0 transition-colors"
             >
               <Send className="h-3.5 w-3.5" />
@@ -317,6 +367,9 @@ export function EmailDetailView({
           <p className="text-xs text-muted-foreground text-center mt-2">
             {isMac ? t("cmdEnterToSend") : t("ctrlEnterToSend")}
           </p>
+          {sendError && (
+            <p className="text-xs text-destructive text-center mt-1">{sendError}</p>
+          )}
         </div>
 
       </div>
