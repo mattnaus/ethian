@@ -95,7 +95,7 @@ export default async function InboxPage() {
   const threadCounts = new Map<string, number>();
 
   for (const entry of allEntries) {
-    const key = entry.threadId ?? entry.id;
+    const key = entry.threadId ? `${entry.threadId}:${entry.mailAccountId}` : entry.id;
     threadCounts.set(key, (threadCounts.get(key) ?? 0) + 1);
     if (!threadMap.has(key)) {
       threadMap.set(key, entry);
@@ -110,7 +110,7 @@ export default async function InboxPage() {
   const seen = new Set<string>();
   const entries: typeof allEntries = [];
   for (const entry of allEntries) {
-    const key = entry.threadId ?? entry.id;
+    const key = entry.threadId ? `${entry.threadId}:${entry.mailAccountId}` : entry.id;
     if (seen.has(key)) continue;
     seen.add(key);
     entries.push({ ...threadMap.get(key)!, threadCount: threadCounts.get(key) ?? 1 });

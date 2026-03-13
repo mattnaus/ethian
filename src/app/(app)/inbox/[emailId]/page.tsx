@@ -69,7 +69,11 @@ export default async function EmailDetailPage({
         })
         .from(emails)
         .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
-        .where(and(eq(emails.threadId, row.threadId), eq(mailAccounts.userId, userId)))
+        .where(and(
+          eq(emails.threadId, row.threadId),
+          eq(emails.mailAccountId, row.mailAccountId),
+          eq(mailAccounts.userId, userId),
+        ))
         .orderBy(asc(emails.sentAt))
     : [];
 
