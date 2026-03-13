@@ -398,7 +398,7 @@ flex items-center gap-3 my-2
 
 `flex items-end gap-2.5` — `flex-row-reverse` for self, `flex-row` for others.
 
-Inner column: `flex flex-col gap-1 max-w-[90%] md:max-w-[60%]`, aligned end (self) or start (others).
+Inner column: `flex flex-col gap-1 max-w-[90%] md:max-w-[72%]`, aligned end (self) or start (others).
 
 **Self bubble** (fromAddress === mailAccountEmail):
 ```
@@ -435,7 +435,7 @@ Compose box: `flex items-end gap-2 bg-secondary/40 border border-border rounded-
 
 - Paperclip button: `min-w-11 min-h-11 flex items-center justify-center` — 44px touch target
 - Textarea: `flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none leading-relaxed min-h-[24px]` — auto-resizes up to 160px
-- Send button: `h-8 w-8 p-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30` with `Send h-3.5 w-3.5` icon
+- Send button: `min-w-11 min-h-11 -my-1.5 p-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30` with `Send h-3.5 w-3.5` icon — 44px touch target, negative margin keeps compose bar height compact
 
 Keyboard hint below box: `text-xs text-muted-foreground text-center mt-2` — "Cmd+Enter to send" on macOS, "Ctrl+Enter to send" on Windows/Linux (platform-detected at runtime via `navigator.platform`).
 
