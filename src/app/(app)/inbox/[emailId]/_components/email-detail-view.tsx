@@ -93,7 +93,7 @@ export function EmailDetailView({
       <div className="flex items-center gap-3 h-12 px-4 border-b border-border shrink-0">
         <button
           onClick={() => router.back()}
-          className="flex items-center justify-center h-11 w-11 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shrink-0"
+          className="flex items-center justify-center min-h-11 min-w-11 p-3 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shrink-0"
           aria-label={t("back")}
         >
           <ArrowLeft className="h-4 w-4" />
