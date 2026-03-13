@@ -11,13 +11,6 @@ Issues not fixed at review time. Each entry links to the review where it was rai
 
 ---
 
-### Send button below 44px touch target
-**Source:** `.claude/reviews/2026-03-13/email-detail-warnings-5e30006.md`
-**Location:** `src/app/(app)/inbox/[emailId]/_components/email-detail-view.tsx` — send button
-**Detail:** The circular send button is `h-8 w-8` (32px), below the 44px mobile minimum. Needs a larger invisible tap area — use a wrapper with `min-w-11 min-h-11 flex items-center justify-center` or add padding.
-
----
-
 ## Features
 
 ### "Gatekept" — sender rule management panel
