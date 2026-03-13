@@ -21,6 +21,8 @@ export type InboxEmail = {
   mailAccountId: string;
   mailAccountName: string;
   hasAttachments: boolean;
+  threadId: string | null;
+  threadCount: number; // 1 = single message; ≥2 = multi-message thread
 };
 
 export function EmailCard({
@@ -92,6 +94,11 @@ export function EmailCard({
           )}>
             {email.subject}
           </span>
+          {email.threadCount > 1 && (
+            <span className="shrink-0 text-xs font-medium text-muted-foreground tabular-nums bg-secondary px-1.5 py-0.5 rounded-full">
+              {email.threadCount}
+            </span>
+          )}
           {email.snippet && (
             <span className="hidden md:inline flex-1 min-w-0 truncate text-muted-foreground">
               - {email.snippet}

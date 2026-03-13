@@ -6,12 +6,9 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { safeColor, getInitials, formatDate } from "@/lib/email-display";
 
-type Attachment = {
-  id: string;
-  filename: string;
-  contentType: string;
-  size: number;
-};
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 type EmailDetail = {
   id: string;
@@ -28,13 +25,34 @@ type EmailDetail = {
   accountName: string;
 };
 
+export type ThreadMessage = {
+  id: string;
+  fromName: string | null;
+  fromAddress: string;
+  toAddresses: Array<{ address: string; name?: string }>;
+  bodyHtml: string | null;
+  bodyText: string | null;
+  sentAt: string;
+  isRead: boolean;
+  accountColor: string;
+  attachments: Array<{ id: string; filename: string; contentType: string; size: number }>;
+};
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1_048_576) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / 1_048_576).toFixed(1)} MB`;
 }
 
-function AttachmentChip({ attachment }: { attachment: Attachment }) {
+function AttachmentChip({
+  attachment,
+}: {
+  attachment: { id: string; filename: string; contentType: string; size: number };
+}) {
   return (
     <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border text-sm">
       <Paperclip className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
@@ -66,25 +84,97 @@ function EmailBody({ bodyText, bodyHtml }: { bodyText: string | null; bodyHtml: 
   return <p className="text-sm text-muted-foreground italic">No message body.</p>;
 }
 
+// ---------------------------------------------------------------------------
+// MessageBlock — one message in a thread
+// ---------------------------------------------------------------------------
+
+function MessageBlock({
+  message,
+  locale,
+  t,
+}: {
+  message: ThreadMessage;
+  locale: string;
+  t: ReturnType<typeof useTranslations<"pages.emailDetail">>;
+}) {
+  const initials = getInitials(message.fromName, message.fromAddress);
+  const ringColor = safeColor(message.accountColor);
+  const senderDisplay = message.fromName?.trim() || message.fromAddress;
+  const formattedDate = formatDate(message.sentAt, locale);
+  const toAddresses = Array.isArray(message.toAddresses) ? message.toAddresses : [];
+  const toList = toAddresses.map((r) => r.name?.trim() || r.address).join(", ");
+
+  return (
+    <div>
+      {/* Message header */}
+      <div className="flex items-center gap-2.5">
+        <div
+          className="h-7 w-7 rounded-full shrink-0 flex items-center justify-center text-xs font-semibold text-white select-none"
+          style={{ boxShadow: `0 0 0 2px ${ringColor}` }}
+        >
+          {initials}
+        </div>
+        <span className="text-sm font-semibold text-foreground">{senderDisplay}</span>
+        <span className="text-xs text-muted-foreground hidden md:inline">{message.fromAddress}</span>
+        <span className="text-xs text-muted-foreground shrink-0 ml-auto">{formattedDate}</span>
+      </div>
+
+      {/* Body + recipients + attachments — indented to align with avatar right edge */}
+      {/* pl = h-7 (1.75rem) + gap-2.5 (0.625rem) = 2.375rem */}
+      <div className="pl-[2.375rem] mt-3 space-y-4">
+        {toList && (
+          <p className="text-xs text-muted-foreground">
+            <span className="text-muted-foreground/70">{t("to")}</span> {toList}
+          </p>
+        )}
+
+        <EmailBody bodyText={message.bodyText} bodyHtml={message.bodyHtml} />
+
+        {message.attachments.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              {t("attachments", { count: message.attachments.length })}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {message.attachments.map((a) => (
+                <AttachmentChip key={a.id} attachment={a} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// EmailDetailView
+// ---------------------------------------------------------------------------
+
 export function EmailDetailView({
   email,
-  attachments,
+  threadMessages,
   locale,
 }: {
   email: EmailDetail;
-  attachments: Attachment[];
+  threadMessages: ThreadMessage[];
   locale: string;
 }) {
   const router = useRouter();
   const t = useTranslations("pages.emailDetail");
 
-  const initials = getInitials(email.fromName, email.fromAddress);
-  const ringColor = safeColor(email.accountColor);
-  const senderDisplay = email.fromName?.trim() || email.fromAddress;
-  const formattedDate = formatDate(email.sentAt, locale);
+  // Top bar uses the original sender (oldest message) for avatar + name
+  const topBarMessage = threadMessages[0] ?? {
+    fromName: email.fromName,
+    fromAddress: email.fromAddress,
+    accountColor: email.accountColor,
+  };
+  const initials = getInitials(topBarMessage.fromName, topBarMessage.fromAddress);
+  const ringColor = safeColor(topBarMessage.accountColor);
+  const senderDisplay = topBarMessage.fromName?.trim() || topBarMessage.fromAddress;
 
-  const toAddresses = Array.isArray(email.toAddresses) ? email.toAddresses : [];
-  const toList = toAddresses.map((r) => r.name?.trim() || r.address).join(", ");
+  // Date shows the most recent message
+  const formattedDate = formatDate(email.sentAt, locale);
 
   return (
     // pb-16 md:pb-0 accounts for the fixed mobile bottom tab bar (h-16)
@@ -113,11 +203,11 @@ export function EmailDetailView({
             {senderDisplay}
           </p>
           <p className="text-xs text-muted-foreground truncate leading-tight">
-            {email.fromAddress}
+            {topBarMessage.fromAddress}
           </p>
         </div>
 
-        {/* Date */}
+        {/* Date (most recent) */}
         <span className="text-xs text-muted-foreground shrink-0">{formattedDate}</span>
       </div>
 
@@ -125,36 +215,26 @@ export function EmailDetailView({
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-3xl px-4 md:px-8 py-6 space-y-6">
           {/* Subject */}
-          <h1 className="text-xl font-semibold text-foreground leading-snug">
-            {email.subject}
-          </h1>
+          <h1 className="text-xl font-semibold text-foreground leading-snug">{email.subject}</h1>
 
-          {/* Recipients */}
-          {toList && (
+          {/* Thread message count (only when > 1) */}
+          {threadMessages.length > 1 && (
             <p className="text-xs text-muted-foreground">
-              <span className="text-muted-foreground/70">{t("to")}</span> {toList}
+              {t("threadMessageCount", { count: threadMessages.length })}
             </p>
           )}
 
-          {/* Divider */}
-          <div className="border-t border-border" />
-
-          {/* Body */}
-          <EmailBody bodyText={email.bodyText} bodyHtml={email.bodyHtml} />
-
-          {/* Attachments */}
-          {attachments.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {t("attachments", { count: attachments.length })}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {attachments.map((a) => (
-                  <AttachmentChip key={a.id} attachment={a} />
-                ))}
+          {/* Conversation */}
+          <div>
+            {threadMessages.map((msg, i) => (
+              <div key={msg.id}>
+                <MessageBlock message={msg} locale={locale} t={t} />
+                {i < threadMessages.length - 1 && (
+                  <div className={cn("border-t border-border my-5")} />
+                )}
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       </div>
 

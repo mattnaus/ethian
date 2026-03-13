@@ -379,6 +379,38 @@ Contents:
 
 Contents: `Paperclip` icon `h-3.5 w-3.5 text-muted-foreground`, filename `text-foreground/80` truncated `max-w-[200px]`, file size in `text-muted-foreground`.
 
+### Thread / Conversation View
+
+When an email has multiple messages sharing the same `threadId`, the detail view renders them as a stacked conversation (oldest → newest).
+
+**Thread count label** (shown only when `threadMessages.length > 1`):
+```
+text-xs text-muted-foreground
+```
+
+**Message separator** between consecutive messages:
+```
+border-t border-border my-5
+```
+
+**`MessageBlock` component** — one message in the conversation:
+
+Header row (`flex items-center gap-2.5`):
+- Avatar: `h-7 w-7 rounded-full`, transparent bg, account color ring (`boxShadow: 0 0 0 2px {ringColor}`)
+- Sender name: `text-sm font-semibold text-foreground`
+- Email address: `text-xs text-muted-foreground hidden md:inline`
+- Date: `text-xs text-muted-foreground shrink-0 ml-auto` (uses `formatDate`, not relative)
+
+Body indent: `pl-[2.375rem]` — aligns content with the avatar's right edge (`h-7` = 1.75rem + `gap-2.5` = 0.625rem = 2.375rem).
+
+**Inbox thread count badge** (shown on email cards when `threadCount > 1`):
+```
+shrink-0 text-xs font-medium text-muted-foreground tabular-nums bg-secondary px-1.5 py-0.5 rounded-full
+```
+Placed after the subject `<span>` in the `flex items-baseline` row.
+
+**Top bar for thread**: uses `threadMessages[0]` (oldest/original sender) for avatar + name. Date shows the most recent message (`email.sentAt`).
+
 ### Reply compose bar
 
 Full-width `shrink-0 border-t border-border`. Inner: `mx-auto w-full max-w-3xl px-4 md:px-8 py-4`.

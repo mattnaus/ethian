@@ -131,6 +131,7 @@
       "empty": "Your inbox is empty. Add a mail account in Settings to get started.",
       "showingOf": "Showing {shown} of {total} emails",
       "messageCount": "{count, plural, one {# message} other {# messages}}",
+      "threadCount": "{count, plural, one {# thread} other {# threads}}",
       "gatekeeperButton": "{count, plural, one {# new sender} other {# new senders}}",
       "gatekeeperLabel": "Gatekeeper:",
       "gatekeeperSuffix": "{count, plural, one {new sender} other {new senders}}",
@@ -173,7 +174,8 @@
       "to": "To:",
       "attachments": "{count, plural, one {# attachment} other {# attachments}}",
       "replyPlaceholder": "Reply\u2026",
-      "sendButton": "Send"
+      "sendButton": "Send",
+      "threadMessageCount": "{count, plural, one {# message} other {# messages}}"
     }
   }
 }

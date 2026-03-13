@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -100,7 +101,9 @@ export const emails = pgTable("emails", {
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
-});
+}, (t) => [
+  index("idx_emails_thread_id").on(t.threadId),
+]);
 
 export type Email = typeof emails.$inferSelect;
 export type NewEmail = typeof emails.$inferInsert;

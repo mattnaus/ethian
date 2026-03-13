@@ -423,7 +423,7 @@ export function InboxView({
               </PopoverContent>
             </Popover>
             <span className="text-xs text-muted-foreground">
-              {t("messageCount", { count: filtered.length })}
+              {t("threadCount", { count: filtered.length })}
             </span>
           </div>
 

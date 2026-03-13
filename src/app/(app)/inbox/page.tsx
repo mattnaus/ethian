@@ -50,6 +50,7 @@ export default async function InboxPage() {
         mailAccountId: mailAccounts.id,
         mailAccountName: mailAccounts.name,
         hasAttachments: sql<boolean>`EXISTS (${attachmentSubquery})`,
+        threadId: emails.threadId,
       })
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
@@ -80,11 +81,40 @@ export default async function InboxPage() {
 
   const locale = await getLocale();
 
-  const entries = rows.map((row) => ({
+  // Pass 1: raw rows → flat entries
+  const allEntries = rows.map((row) => ({
     ...row,
     snippet: row.snippet ?? "",
     sentAt: row.sentAt.toISOString(),
+    threadCount: 1,
   }));
+
+  // Pass 2: group by threadId, pick the latest (rows are DESC by sentAt)
+  // TODO: threadCount may be understated if thread spans >100 rows
+  const threadMap = new Map<string, typeof allEntries[number]>();
+  const threadCounts = new Map<string, number>();
+
+  for (const entry of allEntries) {
+    const key = entry.threadId ?? entry.id;
+    threadCounts.set(key, (threadCounts.get(key) ?? 0) + 1);
+    if (!threadMap.has(key)) {
+      threadMap.set(key, entry);
+    } else {
+      const existing = threadMap.get(key)!;
+      if (!entry.isRead) existing.isRead = false;
+      if (entry.hasAttachments) existing.hasAttachments = true;
+    }
+  }
+
+  // Pass 3: output in original order, deduplicated
+  const seen = new Set<string>();
+  const entries: typeof allEntries = [];
+  for (const entry of allEntries) {
+    const key = entry.threadId ?? entry.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    entries.push({ ...threadMap.get(key)!, threadCount: threadCounts.get(key) ?? 1 });
+  }
 
   // All user accounts — used for the mailbox filter (independent of inbox contents)
   const accounts = allAccounts;
