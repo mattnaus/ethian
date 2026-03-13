@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Send, Paperclip, MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -170,6 +170,10 @@ export function EmailDetailView({
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [reply, setReply] = useState("");
+  const isMac = useMemo(() => {
+    if (typeof navigator === "undefined") return false;
+    return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+  }, []);
 
   // Scroll to bottom on load
   useEffect(() => {
@@ -247,7 +251,7 @@ export function EmailDetailView({
             <button
               type="button"
               aria-label={t("moreOptions")}
-              className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+              className="flex items-center justify-center min-w-11 min-h-11 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
             >
               <MoreHorizontal className="h-4 w-4" />
             </button>
@@ -270,7 +274,7 @@ export function EmailDetailView({
                 {isFirstUnread && (
                   <div className="flex items-center gap-3 my-2">
                     <div className="flex-1 h-px bg-primary/40" />
-                    <span className="text-xs font-medium text-primary shrink-0">New</span>
+                    <span className="text-xs font-medium text-primary shrink-0">{t("newDivider")}</span>
                     <div className="flex-1 h-px bg-primary/40" />
                   </div>
                 )}
@@ -287,7 +291,7 @@ export function EmailDetailView({
             <button
               type="button"
               aria-label={t("attachFile")}
-              className="text-muted-foreground hover:text-foreground transition-colors mb-1 shrink-0"
+              className="flex items-center justify-center min-w-11 min-h-11 text-muted-foreground hover:text-foreground transition-colors shrink-0"
             >
               <Paperclip className="h-4 w-4" />
             </button>
@@ -311,7 +315,7 @@ export function EmailDetailView({
             </button>
           </div>
           <p className="text-xs text-muted-foreground text-center mt-2">
-            {t("cmdEnterToSend")}
+            {isMac ? t("cmdEnterToSend") : t("ctrlEnterToSend")}
           </p>
         </div>
 

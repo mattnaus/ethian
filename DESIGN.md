@@ -350,76 +350,90 @@ Key icon choices:
 
 ## Email Detail View
 
-Route: `/inbox/[emailId]`. Layout: `flex flex-col h-full pb-16 md:pb-0` — top bar + scrollable body + reply bar. The `pb-16 md:pb-0` reserves space for the mobile bottom tab bar so the reply compose bar isn't covered.
+Route: `/inbox/[emailId]`. Chat-style conversation view matching the v0 reference design.
 
-### Top bar
+Outer layout: `flex flex-col h-full pb-16 md:pb-0`. Inner content is constrained to `max-w-5xl` via `flex-1 flex flex-col mx-auto w-full max-w-5xl px-[10px] md:px-6 min-h-0`.
 
-Same height as all other top bars: `h-12 flex items-center gap-3 px-4 border-b border-border shrink-0`.
+### Header
+
+`flex items-center gap-3 py-4 border-b border-border shrink-0`
 
 Contents (left to right):
-- Back button: `h-11 w-11 rounded-lg hover:bg-muted` icon button with `ArrowLeft` (`h-4 w-4`) — 44px touch target
-- Avatar: `h-8 w-8 rounded-full`, transparent bg, account color ring via `boxShadow: 0 0 0 2px {ringColor}` — same pattern as email card and gatekeeper row
-- Sender name (`text-sm font-semibold text-foreground truncate`) + email address (`text-xs text-muted-foreground truncate`) stacked in a `flex-1 min-w-0` block
-- Date: `text-xs text-muted-foreground shrink-0` (uses `formatDate`, not relative)
+- Back button: `w-11 h-11 -ml-1 rounded-full hover:bg-secondary active:bg-secondary/80` with `ArrowLeft h-5 w-5` — 44px touch target
+- Avatar: `h-9 w-9 rounded-full`, transparent bg, account color ring (`boxShadow: 0 0 0 2px {ringColor}`) — uses `threadMessages[0]` (original sender)
+- Sender name (`text-sm font-semibold text-foreground truncate`) + email address (`text-xs text-muted-foreground truncate`) stacked in `flex-1 min-w-0`
+- Right slot: account name pill + `MoreHorizontal` button (`min-w-11 min-h-11 rounded-full hover:bg-secondary`)
 
-### Scrollable body
-
-`flex-1 overflow-y-auto`. Inner: `mx-auto w-full max-w-3xl px-4 md:px-8 py-6 space-y-6`.
-
-Contents:
-- Subject: `text-xl font-semibold text-foreground leading-snug`
-- Recipients: `text-xs text-muted-foreground` — "To:" label in `text-muted-foreground/70`, addresses comma-joined; `Array.isArray` guard on the JSONB field
-- Horizontal divider: `border-t border-border`
-- Body text: `<pre>` with `text-sm text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed` — uses `bodyText` when available; falls back to `bodyHtml` with tags stripped (no `dangerouslySetInnerHTML`)
-- Attachments section (when present): `text-xs font-medium text-muted-foreground uppercase tracking-wide` heading + `flex flex-wrap gap-2` chip row
-
-### Attachment chip
-
-`inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-muted border border-border text-sm`
-
-Contents: `Paperclip` icon `h-3.5 w-3.5 text-muted-foreground`, filename `text-foreground/80` truncated `max-w-[200px]`, file size in `text-muted-foreground`.
-
-### Thread / Conversation View
-
-When an email has multiple messages sharing the same `threadId`, the detail view renders them as a stacked conversation (oldest → newest).
-
-**Thread count label** (shown only when `threadMessages.length > 1`):
+**Account name pill:**
 ```
-text-xs text-muted-foreground
+text-xs font-medium px-2.5 py-1 rounded-full border
+color/borderColor/backgroundColor derived from account color hex + opacity suffixes ("40", "1a")
 ```
 
-**Message separator** between consecutive messages:
+### Subject section
+
+`py-4 border-b border-border shrink-0`
+
+Subject text: `text-base font-semibold text-foreground text-balance`
+
+### Message area
+
+`flex-1 overflow-y-auto py-6 flex flex-col gap-4 min-h-0`
+
+Auto-scrolls to bottom on load (`scrollIntoView({ behavior: "instant" })`).
+
+**"New" divider** — shown before the first unread message when it is not the first message in the thread:
 ```
-border-t border-border my-5
+flex items-center gap-3 my-2
+  flex-1 h-px bg-primary/40   (line)
+  text-xs font-medium text-primary shrink-0   (label, i18n key: newDivider)
+  flex-1 h-px bg-primary/40   (line)
 ```
 
-**`MessageBlock` component** — one message in the conversation:
+### MessageBubble
 
-Header row (`flex items-center gap-2.5`):
-- Avatar: `h-7 w-7 rounded-full`, transparent bg, account color ring (`boxShadow: 0 0 0 2px {ringColor}`)
-- Sender name: `text-sm font-semibold text-foreground`
-- Email address: `text-xs text-muted-foreground hidden md:inline`
-- Date: `text-xs text-muted-foreground shrink-0 ml-auto` (uses `formatDate`, not relative)
+`flex items-end gap-2.5` — `flex-row-reverse` for self, `flex-row` for others.
 
-Body indent: `pl-[2.375rem]` — aligns content with the avatar's right edge (`h-7` = 1.75rem + `gap-2.5` = 0.625rem = 2.375rem).
+Inner column: `flex flex-col gap-1 max-w-[90%] md:max-w-[60%]`, aligned end (self) or start (others).
 
-**Inbox thread count badge** (shown on email cards when `threadCount > 1`):
+**Self bubble** (fromAddress === mailAccountEmail):
+```
+px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap
+bg-primary text-primary-foreground rounded-br-sm
+```
+
+**Other bubble:**
+```
+px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap
+bg-secondary text-foreground rounded-bl-sm
+```
+
+**Timestamp:** `text-xs text-muted-foreground px-1`, `title` attribute holds full date string.
+
+**Attachment chips** (below bubble, horizontally scrollable):
+```
+flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/60 border border-border
+hover:bg-secondary transition-colors cursor-pointer max-w-[220px]
+```
+
+### Inbox thread count badge
+
+Shown on email cards when `threadCount > 1`, placed after the subject `<span>`:
 ```
 shrink-0 text-xs font-medium text-muted-foreground tabular-nums bg-secondary px-1.5 py-0.5 rounded-full
 ```
-Placed after the subject `<span>` in the `flex items-baseline` row.
 
-**Top bar for thread**: uses `threadMessages[0]` (oldest/original sender) for avatar + name. Date shows the most recent message (`email.sentAt`).
+### Compose bar
 
-### Reply compose bar
+`shrink-0 py-4 border-t border-border`
 
-Full-width `shrink-0 border-t border-border`. Inner: `mx-auto w-full max-w-3xl px-4 md:px-8 py-4`.
+Compose box: `flex items-end gap-2 bg-secondary/40 border border-border rounded-2xl px-4 py-3`
 
-Compose box: `rounded-xl border border-border bg-card px-4 py-3`.
+- Paperclip button: `min-w-11 min-h-11 flex items-center justify-center` — 44px touch target
+- Textarea: `flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none leading-relaxed min-h-[24px]` — auto-resizes up to 160px
+- Send button: `h-8 w-8 p-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30` with `Send h-3.5 w-3.5` icon
 
-- `<textarea rows={3} aria-label="…">` with `bg-transparent text-sm text-foreground/80 placeholder:text-muted-foreground/50 resize-none outline-none leading-relaxed`
-- Footer row: `flex items-center justify-end pt-2 border-t border-border`
-- Send button: `type="button" disabled` with `bg-primary text-primary-foreground opacity-50 cursor-not-allowed` — UI-only, SMTP not yet wired
+Keyboard hint below box: `text-xs text-muted-foreground text-center mt-2` — "Cmd+Enter to send" on macOS, "Ctrl+Enter to send" on Windows/Linux (platform-detected at runtime via `navigator.platform`).
 
 ---
 

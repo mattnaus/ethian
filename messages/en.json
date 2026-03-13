@@ -177,6 +177,8 @@
       "sendButton": "Send",
       "threadMessageCount": "{count, plural, one {# message} other {# messages}}",
       "cmdEnterToSend": "Cmd+Enter to send",
+      "ctrlEnterToSend": "Ctrl+Enter to send",
+      "newDivider": "New",
       "attachFile": "Attach file",
       "moreOptions": "More options"
     }
