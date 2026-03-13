@@ -116,7 +116,7 @@ function MessageBubble({
     <div className={cn("flex items-end gap-2.5", isSelf ? "flex-row-reverse" : "flex-row")}>
       <div
         className={cn(
-          "flex flex-col gap-1 max-w-[90%] md:max-w-[60%]",
+          "flex flex-col gap-1 max-w-[90%] md:max-w-[72%]",
           isSelf ? "items-end" : "items-start",
         )}
       >
@@ -291,7 +291,7 @@ export function EmailDetailView({
             <button
               type="button"
               aria-label={t("attachFile")}
-              className="flex items-center justify-center min-w-11 min-h-11 text-muted-foreground hover:text-foreground transition-colors shrink-0"
+              className="text-muted-foreground hover:text-foreground transition-colors mb-1 shrink-0"
             >
               <Paperclip className="h-4 w-4" />
             </button>
