@@ -291,7 +291,7 @@ export function EmailDetailView({
             <button
               type="button"
               aria-label={t("attachFile")}
-              className="text-muted-foreground hover:text-foreground transition-colors mb-1 shrink-0"
+              className="flex items-center justify-center min-w-11 min-h-11 -my-1.5 text-muted-foreground hover:text-foreground transition-colors shrink-0"
             >
               <Paperclip className="h-4 w-4" />
             </button>
