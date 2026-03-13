@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useMemo } from "react";
+import EmailReplyParser from "email-reply-parser";
 import { sendReplyAction } from "../_actions/reply";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Send, Paperclip, MoreHorizontal } from "lucide-react";
@@ -70,9 +71,24 @@ function formatFullDate(iso: string, locale: string): string {
   }).format(new Date(iso));
 }
 
+const replyParser = new EmailReplyParser();
+
+function stripHtmlQuotes(html: string): string {
+  // Remove <blockquote> elements (covers Gmail, Outlook, Apple Mail quoted content)
+  // and their contents before stripping all remaining tags.
+  return html
+    .replace(/<blockquote[\s\S]*?<\/blockquote>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 function getMessageBody(bodyText: string | null, bodyHtml: string | null): string {
-  if (bodyText) return bodyText;
-  if (bodyHtml) return bodyHtml.replace(/<[^>]+>/g, " ").replace(/\s{2,}/g, " ").trim();
+  if (bodyText) {
+    const visible = replyParser.parseReply(bodyText).trim();
+    return visible || bodyText.trim(); // fall back to full text if parser returns empty
+  }
+  if (bodyHtml) return stripHtmlQuotes(bodyHtml);
   return "";
 }
 
