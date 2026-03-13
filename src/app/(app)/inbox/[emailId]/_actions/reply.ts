@@ -17,7 +17,7 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const PayloadSchema = z.object({
   mailAccountId: z.string().regex(UUID_RE),
   emailId: z.string().regex(UUID_RE),
-  bodyText: z.string().min(1).max(100_000),
+  bodyText: z.string().trim().min(1).max(100_000),
 });
 
 // ---------------------------------------------------------------------------
@@ -33,6 +33,7 @@ export type SendReplyError =
 
 export type SendReplyResult =
   | { success: true; sentEmailId: string; sentAt: string }
+  | { success: "partial" } // SMTP sent but DB insert failed — email was delivered
   | { success: false; error: SendReplyError };
 
 // ---------------------------------------------------------------------------
@@ -94,7 +95,7 @@ export async function sendReplyAction(payload: unknown): Promise<SendReplyResult
 
   // Insert sent email into DB immediately
   const now = new Date();
-  let inserted: { id: string; sentAt: Date };
+  let inserted: { id: string; sentAt: Date } | undefined;
   try {
     [inserted] = await db
       .insert(emails)
@@ -129,7 +130,15 @@ export async function sendReplyAction(payload: unknown): Promise<SendReplyResult
       sendResult.messageId,
       err,
     );
-    return { success: false, error: "db_error" };
+    return { success: "partial" };
+  }
+
+  if (!inserted) {
+    console.error(
+      "[sendReply] DB insert returned no row. messageId:",
+      sendResult.messageId,
+    );
+    return { success: "partial" };
   }
 
   revalidatePath(`/inbox/${emailId}`);

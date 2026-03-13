@@ -239,12 +239,13 @@ export function EmailDetailView({
 
     setIsSending(false);
 
-    if (!result.success) {
-      // Rollback optimistic message and restore draft
+    if (result.success === false) {
+      // SMTP failed — rollback optimistic message and restore draft
       setOptimisticMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
       setReply(text);
       setSendError(t("sendFailed"));
     }
+    // success === "partial": SMTP sent but DB insert failed — keep optimistic message
   }
 
   // Original sender (oldest message) for the top bar
