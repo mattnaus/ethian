@@ -31,13 +31,14 @@ export default async function GatekeeperPage() {
       ),
     );
 
-  const [rows, [{ total }]] = await Promise.all([
+  const [rows, [{ total }], allAccounts] = await Promise.all([
     db
       .select({
         id: screenerQueue.id,
         fromAddress: screenerQueue.fromAddress,
         fromName: screenerQueue.fromName,
         fromDomain: screenerQueue.fromDomain,
+        mailAccountId: screenerQueue.mailAccountId,
         // Use the most recent email's subject and snippet (emailId → emails join)
         subject: emails.subject,
         snippet: emails.snippet,
@@ -57,6 +58,11 @@ export default async function GatekeeperPage() {
       .select({ total: count() })
       .from(screenerQueue)
       .where(eq(screenerQueue.userId, userId)),
+
+    db
+      .select({ id: mailAccounts.id, name: mailAccounts.name, color: mailAccounts.color })
+      .from(mailAccounts)
+      .where(eq(mailAccounts.userId, userId)),
   ]);
 
   const [t, locale] = await Promise.all([
@@ -77,7 +83,7 @@ export default async function GatekeeperPage() {
   return (
     <GatekeeperList
       entries={entries}
-      emptyMessage={t("empty")}
+      accounts={allAccounts}
       showingMessage={showingMessage}
       locale={locale}
     />
