@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useTransition, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useState, useMemo, useTransition } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { GatekeeperCard, type GatekeeperEmail } from "./gatekeeper-card";
+import { useTranslations } from "next-intl";
 import { safeColor } from "@/lib/email-display";
-import { GatekeeperRow, type GatekeeperEntry } from "./gatekeeper-row";
-import { makeGatekeeperDecision } from "../_actions/decisions";
 import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
+import { makeGatekeeperDecision } from "../_actions/decisions";
 
 interface MailAccountFilter {
   id: string;
@@ -16,14 +16,14 @@ interface MailAccountFilter {
 }
 
 interface GatekeeperListProps {
-  entries: GatekeeperEntry[];
+  emails: GatekeeperEmail[];
   accounts: MailAccountFilter[];
-  showingMessage: string | null;
   locale: string;
+  total: number;
 }
 
 // ---------------------------------------------------------------------------
-// Date grouping (same logic as inbox)
+// Date grouping
 // ---------------------------------------------------------------------------
 
 function getGroupLabel(date: Date): string {
@@ -39,24 +39,22 @@ function getGroupLabel(date: Date): string {
   return date.toLocaleString("default", { month: "long", year: "numeric" });
 }
 
-function groupEntries(
-  entries: GatekeeperEntry[],
-): { key: string; entries: GatekeeperEntry[] }[] {
-  const groups = new Map<string, GatekeeperEntry[]>();
+function groupEmails(emails: GatekeeperEmail[]): { key: string; emails: GatekeeperEmail[] }[] {
+  const groups = new Map<string, GatekeeperEmail[]>();
   const order: string[] = [];
-  for (const entry of entries) {
-    const key = getGroupLabel(new Date(entry.lastSeenAt));
+  for (const email of emails) {
+    const key = getGroupLabel(new Date(email.sentAt));
     if (!groups.has(key)) {
       groups.set(key, []);
       order.push(key);
     }
-    groups.get(key)!.push(entry);
+    groups.get(key)!.push(email);
   }
-  return order.map((key) => ({ key, entries: groups.get(key)! }));
+  return order.map((key) => ({ key, emails: groups.get(key)! }));
 }
 
 // ---------------------------------------------------------------------------
-// GroupDivider (same as inbox)
+// GroupDivider
 // ---------------------------------------------------------------------------
 
 function GroupDivider({ label }: { label: string }) {
@@ -72,13 +70,13 @@ function GroupDivider({ label }: { label: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Mailbox filter (same pattern as inbox)
+// Mailbox filter popover content
 // ---------------------------------------------------------------------------
 
 interface MailboxFilterContentProps {
   accounts: MailAccountFilter[];
   activeAccounts: Set<string>;
-  entryCounts: Map<string, number>;
+  emailCounts: Map<string, number>;
   onToggle: (id: string) => void;
   heading: string;
 }
@@ -86,7 +84,7 @@ interface MailboxFilterContentProps {
 function MailboxFilterContent({
   accounts,
   activeAccounts,
-  entryCounts,
+  emailCounts,
   onToggle,
   heading,
 }: MailboxFilterContentProps) {
@@ -98,7 +96,7 @@ function MailboxFilterContent({
       {accounts.map((account) => {
         const active = activeAccounts.has(account.id);
         const color = safeColor(account.color);
-        const count = entryCounts.get(account.id) ?? 0;
+        const count = emailCounts.get(account.id) ?? 0;
         return (
           <button
             key={account.id}
@@ -111,7 +109,10 @@ function MailboxFilterContent({
             )}
             style={active ? { backgroundColor: color + "1a" } : undefined}
           >
-            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+            <div
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: color }}
+            />
             <span className="flex-1 text-left font-medium truncate">{account.name}</span>
             {count > 0 && (
               <span className="text-xs bg-muted/60 text-muted-foreground px-2 py-0.5 rounded">
@@ -130,17 +131,18 @@ function MailboxFilterContent({
 // ---------------------------------------------------------------------------
 
 export function GatekeeperList({
-  entries: initialEntries,
+  emails,
   accounts,
-  showingMessage,
   locale,
+  total,
 }: GatekeeperListProps) {
   const t = useTranslations("pages.gatekeeper");
   const tInbox = useTranslations("pages.inbox");
 
-  const [entries, setEntries] = useState(initialEntries);
+  const [entries, setEntries] = useState(emails);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
+
   const [activeAccounts, setActiveAccounts] = useState<Set<string>>(
     new Set(accounts.map((a) => a.id)),
   );
@@ -158,24 +160,22 @@ export function GatekeeperList({
 
   const allSelected = activeAccounts.size === accounts.length;
 
-  const entryCounts = useMemo(() => {
+  // Entry counts per account (from full entries list, not filtered)
+  const emailCounts = useMemo(() => {
     const map = new Map<string, number>();
-    for (const entry of entries) {
-      map.set(entry.mailAccountId, (map.get(entry.mailAccountId) ?? 0) + 1);
+    for (const email of entries) {
+      map.set(email.mailAccountId, (map.get(email.mailAccountId) ?? 0) + 1);
     }
     return map;
   }, [entries]);
 
-  const filtered = useMemo(
-    () =>
-      entries.filter(
-        (e) => allSelected || activeAccounts.has(e.mailAccountId),
-      ),
-    [entries, activeAccounts, allSelected],
-  );
+  const filtered = useMemo(() => {
+    return entries.filter((e) => allSelected || activeAccounts.has(e.mailAccountId));
+  }, [entries, activeAccounts, allSelected]);
 
-  const grouped = useMemo(() => groupEntries(filtered), [filtered]);
+  const grouped = useMemo(() => groupEmails(filtered), [filtered]);
 
+  // Dots shown in the filter button (up to 3)
   const visibleDots = accounts
     .filter((a) => activeAccounts.has(a.id))
     .slice(0, 3);
@@ -184,7 +184,7 @@ export function GatekeeperList({
     if (key === "today") return tInbox("groupToday");
     if (key === "thisWeek") return tInbox("groupThisWeek");
     if (key === "thisMonth") return tInbox("groupThisMonth");
-    return key;
+    return key; // month/year string from toLocaleString
   }
 
   function handleDecision(id: string, decision: "approved" | "blocked") {
@@ -202,71 +202,98 @@ export function GatekeeperList({
     });
   }
 
-  const mailboxFilter = (
-    isMobile: boolean,
-    open: boolean,
-    setOpen: (v: boolean) => void,
-  ) =>
-    accounts.length > 0 ? (
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <button
-            className={cn(
-              "flex items-center gap-2 px-3 h-9 rounded-full border border-border",
-              "text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors text-sm",
-              isMobile && "h-11",
-            )}
-          >
-            <span className="text-foreground/70">{tInbox("mailboxFilter")}</span>
-            <div className="flex gap-1">
-              {visibleDots.map((a) => (
-                <div
-                  key={a.id}
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: safeColor(a.color) }}
-                />
-              ))}
-              {activeAccounts.size > 3 && (
-                <div className="w-2 h-2 rounded-full bg-muted-foreground/50" />
-              )}
-            </div>
-          </button>
-        </PopoverTrigger>
-        <PopoverContent
-          className={cn("p-0", isMobile ? "w-[calc(100vw-20px)]" : "w-64")}
-        >
-          <MailboxFilterContent
-            accounts={accounts}
-            activeAccounts={activeAccounts}
-            entryCounts={entryCounts}
-            onToggle={toggleAccount}
-            heading={tInbox("mailboxAccountsHeading")}
-          />
-        </PopoverContent>
-      </Popover>
-    ) : null;
-
   return (
     <div className="px-[10px] py-5 md:px-6 md:py-8">
       <div className="mx-auto max-w-5xl">
 
         {/* ── Desktop top bar ── */}
-        <div className="hidden md:flex mb-4 items-center justify-center">
-          {mailboxFilter(false, filterOpenDesktop, setFilterOpenDesktop)}
+        <div className="hidden md:block mb-4">
+          <div className="relative flex items-center justify-between">
+            <div />
+
+            {/* Center: Mailbox filter */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+              {accounts.length > 0 && (
+                <Popover open={filterOpenDesktop} onOpenChange={setFilterOpenDesktop}>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-2 px-3 py-1.5 h-9 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors text-sm">
+                      <span className="text-foreground/70">{tInbox("mailboxFilter")}</span>
+                      <div className="flex gap-1">
+                        {visibleDots.map((a) => (
+                          <div
+                            key={a.id}
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: safeColor(a.color) }}
+                          />
+                        ))}
+                        {activeAccounts.size > 3 && (
+                          <div className="w-2 h-2 rounded-full bg-muted-foreground/50" />
+                        )}
+                      </div>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-0">
+                    <MailboxFilterContent
+                      accounts={accounts}
+                      activeAccounts={activeAccounts}
+                      emailCounts={emailCounts}
+                      onToggle={toggleAccount}
+                      heading={tInbox("mailboxAccountsHeading")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
+
+            <div />
+          </div>
         </div>
 
         {/* ── Mobile top bar ── */}
-        <div className="md:hidden mb-4 flex items-center gap-2">
-          <MobileMenuButton className="-ml-1 mr-auto" />
-          {mailboxFilter(true, filterOpenMobile, setFilterOpenMobile)}
+        <div className="md:hidden mb-4 flex flex-col gap-2">
+          <div className="flex items-center justify-center gap-2">
+            <MobileMenuButton className="-ml-1 mr-auto" />
+            {accounts.length > 0 && (
+              <Popover open={filterOpenMobile} onOpenChange={setFilterOpenMobile}>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-2 px-3 py-2 h-11 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors">
+                    <span className="text-sm text-foreground/70">{tInbox("mailboxFilter")}</span>
+                    <div className="flex gap-1">
+                      {visibleDots.map((a) => (
+                        <div
+                          key={a.id}
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: safeColor(a.color) }}
+                        />
+                      ))}
+                      {activeAccounts.size > 3 && (
+                        <div className="w-2 h-2 rounded-full bg-muted-foreground/50" />
+                      )}
+                    </div>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[calc(100vw-20px)] p-0">
+                  <MailboxFilterContent
+                    accounts={accounts}
+                    activeAccounts={activeAccounts}
+                    emailCounts={emailCounts}
+                    onToggle={toggleAccount}
+                    heading={tInbox("mailboxAccountsHeading")}
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+          </div>
         </div>
 
-        {/* ── Container ── */}
+        {/* ── Email list container ── */}
         <div className="bg-background md:border md:border-border md:rounded-2xl py-2">
 
-          {/* Header */}
+          {/* Container header */}
           <div className="flex items-center justify-between px-[10px] md:px-4 py-3 mb-1">
-            <h2 className="text-2xl font-semibold text-foreground">{t("title")}</h2>
+            <h2 className="text-2xl font-semibold text-foreground">
+              {t("title")}
+            </h2>
             <span className="text-xs text-muted-foreground">
               {t("senderCount", { count: filtered.length })}
             </span>
@@ -279,20 +306,34 @@ export function GatekeeperList({
             </div>
           )}
 
-          {/* Date-grouped entry list */}
+          {/* Date-grouped email list */}
           <div className="flex flex-col px-[10px] md:px-4">
-            {grouped.map(({ key, entries: groupEntries }) => (
+            {grouped.map(({ key, emails: groupEmails }) => (
               <div key={key}>
                 <GroupDivider label={getGroupDisplayLabel(key)} />
                 <div className="flex flex-col gap-[4px] mb-2">
-                  {groupEntries.map((entry) => (
-                    <GatekeeperRow
-                      key={entry.id}
-                      entry={entry}
-                      locale={locale}
-                      onDecision={handleDecision}
-                      isPending={pendingIds.has(entry.id)}
-                    />
+                  {groupEmails.map((email) => (
+                    <div
+                      key={email.id}
+                      className={cn(
+                        "flex items-stretch gap-2",
+                        pendingIds.has(email.id) && "opacity-40 pointer-events-none",
+                      )}
+                    >
+                      <GatekeeperCard email={email} locale={locale} />
+                      <button
+                        onClick={() => handleDecision(email.id, "approved")}
+                        className="rounded-xl px-5 flex items-center justify-center bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/35 transition-colors text-sm font-medium"
+                      >
+                        {t("approve")}
+                      </button>
+                      <button
+                        onClick={() => handleDecision(email.id, "blocked")}
+                        className="rounded-xl px-5 flex items-center justify-center bg-red-600/20 text-red-400 hover:bg-red-600/35 transition-colors text-sm font-medium"
+                      >
+                        {t("block")}
+                      </button>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -300,12 +341,13 @@ export function GatekeeperList({
           </div>
 
           {/* Showing X of Y footer */}
-          {showingMessage && (
+          {total > emails.length && (
             <p className="text-xs text-muted-foreground text-center py-3 mt-1">
-              {showingMessage}
+              {t("showingOf", { shown: emails.length, total })}
             </p>
           )}
         </div>
+
       </div>
     </div>
   );

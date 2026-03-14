@@ -37,9 +37,8 @@ export default async function GatekeeperPage() {
         id: screenerQueue.id,
         fromAddress: screenerQueue.fromAddress,
         fromName: screenerQueue.fromName,
-        fromDomain: screenerQueue.fromDomain,
         mailAccountId: screenerQueue.mailAccountId,
-        // Use the most recent email's subject and snippet (emailId → emails join)
+        mailAccountName: mailAccounts.name,
         subject: emails.subject,
         snippet: emails.snippet,
         lastSeenAt: screenerQueue.lastSeenAt,
@@ -65,27 +64,31 @@ export default async function GatekeeperPage() {
       .where(eq(mailAccounts.userId, userId)),
   ]);
 
-  const [t, locale] = await Promise.all([
-    getTranslations("pages.gatekeeper"),
-    getLocale(),
-  ]);
+  const [locale] = await Promise.all([getLocale()]);
 
-  const entries = rows.map((row) => ({
-    ...row,
-    lastSeenAt: row.lastSeenAt.toISOString(),
+  // Map screener queue rows to the GatekeeperEmail shape (mirrors InboxEmail)
+  const mappedEmails = rows.map((row) => ({
+    id: row.id,
+    subject: row.subject,
+    fromName: row.fromName,
+    fromAddress: row.fromAddress,
+    snippet: row.snippet ?? "",
+    sentAt: row.lastSeenAt.toISOString(),
+    isRead: false,
+    accountColor: row.accountColor,
+    mailAccountId: row.mailAccountId,
+    mailAccountName: row.mailAccountName,
+    hasAttachments: row.hasAttachments,
+    threadId: null,
+    threadCount: row.messageCount,
   }));
-
-  const showingMessage =
-    total > GATEKEEPER_LIMIT
-      ? t("showingOf", { shown: GATEKEEPER_LIMIT, total })
-      : null;
 
   return (
     <GatekeeperList
-      entries={entries}
+      emails={mappedEmails}
       accounts={allAccounts}
-      showingMessage={showingMessage}
       locale={locale}
+      total={total}
     />
   );
 }
