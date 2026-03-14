@@ -163,7 +163,7 @@ function MessageBubble({
     <div className={cn("flex items-end gap-2.5", isSelf ? "flex-row-reverse" : "flex-row")}>
       <div
         className={cn(
-          "flex flex-col gap-1 max-w-[90%] md:max-w-[72%] md:min-w-96",
+          "flex flex-col gap-1 w-[90%] md:w-[65%] md:max-w-3xl",
           isSelf ? "items-end" : "items-start",
         )}
       >
@@ -221,8 +221,8 @@ function DraftBubble({
 
   return (
     <div className="flex flex-row-reverse items-end gap-2.5">
-      <div className="flex flex-col gap-1 max-w-[90%] md:max-w-[72%] items-end">
-        <div className="border-2 border-dashed border-zinc-600 rounded-2xl px-4 py-3 bg-zinc-900/50">
+      <div className="flex flex-col gap-1 w-[90%] md:w-[65%] md:max-w-3xl items-end">
+        <div className="w-full border-2 border-dashed border-zinc-600 rounded-2xl px-4 py-3 bg-zinc-900/50">
           <span className="text-xs border border-zinc-700 text-zinc-500 rounded-full px-2 py-0.5 inline-block mb-2">
             {t("draftLabel")}
           </span>
