@@ -207,8 +207,9 @@ export function ComposeView({
 
   return (
     <div className="flex flex-col h-full bg-background">
+      <div className="flex flex-col flex-1 min-h-0 mx-auto w-full max-w-5xl px-[10px] md:px-6">
       {/* ── Header ── */}
-      <div className="flex h-12 shrink-0 items-center justify-between px-4 border-b border-border">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border">
         <h1 className="text-sm font-semibold text-foreground">{t("title")}</h1>
         <div className="flex items-center gap-2">
           {/* From account selector */}
@@ -462,6 +463,7 @@ export function ComposeView({
         >
           <Send className="h-3.5 w-3.5" />
         </button>
+      </div>
       </div>
     </div>
   );

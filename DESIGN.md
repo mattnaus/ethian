@@ -124,7 +124,32 @@ Font: **Inter** (loaded via `next/font/google`, applied via `--font-sans`).
 
 ### Max Width
 
-The inbox content area is constrained to `max-w-5xl mx-auto` inside the main panel. This prevents excessively wide line lengths on large screens.
+**Every page in the app** constrains its content to `max-w-5xl mx-auto` with `px-[10px] md:px-6` horizontal padding. This is a global rule — no exceptions. The outer shell (`flex flex-col h-full`) stays full-width; the inner content wrapper gets the constraint.
+
+Standard pattern:
+```tsx
+<div className="flex flex-col h-full">
+  <div className="flex flex-col flex-1 min-h-0 mx-auto w-full max-w-5xl px-[10px] md:px-6">
+    {/* page content */}
+  </div>
+</div>
+```
+
+For pages with a sticky/fixed header row that needs a bottom border spanning full width, wrap just the header separately:
+```tsx
+<div className="flex flex-col h-full">
+  <div className="border-b border-border">
+    <div className="mx-auto w-full max-w-5xl px-[10px] md:px-6">
+      <div className="flex h-12 items-center …">…</div>
+    </div>
+  </div>
+  <div className="flex-1 min-h-0 mx-auto w-full max-w-5xl px-[10px] md:px-6">
+    {/* scrollable content */}
+  </div>
+</div>
+```
+
+**Compose button placement:** The "New Message" action lives in the page header of the relevant view (e.g. the inbox "New" button), not as a standalone sidebar item. The sidebar is navigation-only.
 
 ---
 

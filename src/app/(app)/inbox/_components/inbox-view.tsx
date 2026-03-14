@@ -330,7 +330,10 @@ export function InboxView({
             </div>
 
             {/* Right: New */}
-            <Button className="gap-2 rounded-full px-4 h-9 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button
+              onClick={() => router.push("/compose")}
+              className="gap-2 rounded-full px-4 h-9 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
               <PenLine className="h-4 w-4" />
               {t("newButton")}
             </Button>

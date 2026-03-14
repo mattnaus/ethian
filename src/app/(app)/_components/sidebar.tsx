@@ -14,7 +14,6 @@ import {
   Settings,
   PanelLeftOpen,
   PanelLeftClose,
-  SquarePen,
   FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -154,31 +153,6 @@ export function Sidebar() {
 
         {/* Main nav */}
         <nav className="flex flex-1 flex-col gap-0.5 p-2 pt-3 overflow-hidden">
-          {/* Compose button */}
-          {expanded ? (
-            <Link
-              href="/compose"
-              className="flex items-center gap-3 rounded-md px-3 py-2 mb-1 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 transition-colors w-full"
-            >
-              <SquarePen className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t("compose")}</span>
-            </Link>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="/compose"
-                  className="flex items-center justify-center rounded-md px-3 py-2 mb-1 text-primary hover:bg-zinc-800/60 transition-colors w-full"
-                >
-                  <SquarePen className="h-5 w-5 shrink-0" />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={8}>
-                {t("compose")}
-              </TooltipContent>
-            </Tooltip>
-          )}
-
           {navItems.map(({ href, label, icon, dividerBefore }) => (
             <div key={href}>
               {dividerBefore && <Separator className="my-2 bg-zinc-800" />}
