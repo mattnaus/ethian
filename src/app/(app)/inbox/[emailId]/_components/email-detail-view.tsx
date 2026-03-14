@@ -288,6 +288,7 @@ export function EmailDetailView({
   const router = useRouter();
   const t = useTranslations("pages.emailDetail");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [feedback, setFeedback] = useState<{ text: string; isError: boolean } | null>(null);
   const [optimisticMessages, setOptimisticMessages] = useState<ThreadMessage[]>(threadMessages);
   const [editingDraft, setEditingDraft] = useState<{ id: string; bodyText: string } | null>(null);
@@ -300,10 +301,14 @@ export function EmailDetailView({
 
   // Scroll to bottom on load; smooth-scroll when new messages are appended
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: isFirstRender.current ? "instant" : "smooth",
-    });
-    isFirstRender.current = false;
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    if (isFirstRender.current) {
+      el.scrollTop = el.scrollHeight;
+      isFirstRender.current = false;
+    } else {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
   }, [optimisticMessages.length]);
 
   async function handleSend(text: string) {
@@ -466,7 +471,7 @@ export function EmailDetailView({
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto scrollbar-none py-6 flex flex-col gap-4 min-h-0">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-none py-6 flex flex-col gap-4 min-h-0">
           {optimisticMessages.map((message, index) => {
             const isSelf =
               message.fromAddress.toLowerCase() === email.mailAccountEmail.toLowerCase();
