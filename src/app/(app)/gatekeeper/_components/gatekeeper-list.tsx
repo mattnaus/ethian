@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
+import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -332,14 +333,16 @@ export function GatekeeperList({
                       <div className="flex gap-2 md:contents">
                         <button
                           onClick={() => handleDecision(email.id, "approved")}
-                          className="flex-1 md:flex-none rounded-xl px-5 min-h-[44px] md:min-h-0 flex items-center justify-center bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/35 transition-colors text-sm font-medium"
+                          className="flex-1 md:flex-none rounded-xl px-5 min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/35 transition-colors text-sm font-medium"
                         >
+                          <Check className="h-4 w-4 shrink-0" />
                           {t("approve")}
                         </button>
                         <button
                           onClick={() => handleDecision(email.id, "blocked")}
-                          className="flex-1 md:flex-none rounded-xl px-5 min-h-[44px] md:min-h-0 flex items-center justify-center bg-red-600/20 text-red-400 hover:bg-red-600/35 transition-colors text-sm font-medium"
+                          className="flex-1 md:flex-none rounded-xl px-5 min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 bg-red-600/20 text-red-400 hover:bg-red-600/35 transition-colors text-sm font-medium"
                         >
+                          <X className="h-4 w-4 shrink-0" />
                           {t("block")}
                         </button>
                       </div>
