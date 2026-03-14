@@ -103,7 +103,9 @@ export type ProcessEmailJobResult = {
 // Queue instances
 // ---------------------------------------------------------------------------
 
-const queueConnection = { connection: redis };
+// BullMQ bundles its own ioredis version; the cast is safe since they are API-compatible.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const queueConnection = { connection: redis as any };
 
 /**
  * Queue for triggering IMAP account syncs.
@@ -111,7 +113,8 @@ const queueConnection = { connection: redis };
  */
 export const emailSyncQueue = new Queue<
   SyncAccountJobData,
-  SyncAccountJobResult
+  SyncAccountJobResult,
+  "sync-account"
 >("email-sync", {
   ...queueConnection,
   defaultJobOptions: {
@@ -136,7 +139,8 @@ export const emailSyncQueue = new Queue<
  */
 export const emailProcessQueue = new Queue<
   ProcessEmailJobData,
-  ProcessEmailJobResult
+  ProcessEmailJobResult,
+  "process-email"
 >("email-process", {
   ...queueConnection,
   defaultJobOptions: {

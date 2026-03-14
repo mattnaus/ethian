@@ -180,7 +180,7 @@ async function handleSyncAccount(
 
     // Fan out one process-email job per fetched message
     const processJobs = result.fetched.map((rawEmail) => ({
-      name: "process-email",
+      name: "process-email" as const,
       data: {
         mailAccountId,
         userId: account.userId,
@@ -436,7 +436,9 @@ async function upsertScreenerEntry(params: {
 // Register workers
 // ---------------------------------------------------------------------------
 
-const workerConnection = { connection: redis };
+// BullMQ bundles its own ioredis version; the cast is safe since they are API-compatible.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const workerConnection = { connection: redis as any };
 const concurrency = parseInt(process.env.WORKER_CONCURRENCY ?? "5", 10);
 
 const syncWorker = new Worker<SyncAccountJobData, SyncAccountJobResult>(
