@@ -155,16 +155,17 @@ export function ReplyBox({
 
   return (
     <div className="border-t border-border shrink-0">
-      {/* Drag handle */}
-      <div
-        onPointerDown={handleDragStart}
-        className="h-5 flex items-center justify-center cursor-ns-resize select-none touch-none"
-        aria-hidden
-      >
-        <span className="w-8 h-1 rounded-full bg-zinc-700" />
-      </div>
+      <div className="mx-auto w-full max-w-5xl px-[10px] md:px-6">
+        {/* Drag handle */}
+        <div
+          onPointerDown={handleDragStart}
+          className="h-5 flex items-center justify-center cursor-ns-resize select-none touch-none"
+          aria-hidden
+        >
+          <span className="w-8 h-1 rounded-full bg-zinc-700" />
+        </div>
 
-      <div className="border border-border rounded-2xl mx-4 mb-4 bg-zinc-900/40 overflow-hidden">
+      <div className="border border-border rounded-2xl mb-4 bg-zinc-900/40 overflow-hidden">
         {/* Textarea */}
         <textarea
           ref={textareaRef}
@@ -280,6 +281,7 @@ export function ReplyBox({
             <Send className="h-3.5 w-3.5" />
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
