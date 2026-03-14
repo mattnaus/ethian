@@ -74,3 +74,15 @@ Issues not fixed at review time. Each entry links to the review where it was rai
 **Source:** `.claude/reviews/2026-03-14/gatekeeper-rebuild-c5923fd.md`
 **Location:** `src/app/(app)/gatekeeper/_components/gatekeeper-card.tsx`
 **Detail:** `GatekeeperEmail` is structurally identical to `InboxEmail` and `GatekeeperCard` is a near-copy of `EmailCard` (only difference: `<div>` instead of `<Link>` + `flex-1 min-w-0`). Future changes to one will silently diverge from the other. Fix: extract a shared `EmailCardBase` component and a single `EmailShape` type to a shared location, then compose `EmailCard` and `GatekeeperCard` from it.
+
+---
+
+### Audit error handling across all client components and Server Actions
+**Source:** User request (2026-03-14)
+**Detail:** Review all existing client components that call Server Actions and all Server Actions themselves to ensure they follow the established error handling pattern:
+- Server Actions return `{ success: boolean; error?: string }` — never throw to the client.
+- Client callers wrap the call in `try/catch/finally`: `toast.error(t("..."))` on both `{ success: false }` and caught exceptions; `finally` always clears pending state.
+
+**Reference implementation:** `src/app/(app)/gatekeeper/_components/gatekeeper-list.tsx` — `handleDecision()`.
+
+Known areas to audit: settings `_actions/accounts.ts` and its client components (`AccountForm`, `AccountsList`), any other form submission or mutation handlers added in the future.

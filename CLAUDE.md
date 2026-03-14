@@ -365,6 +365,41 @@ This means:
 - Long-running operations (IMAP sync, email processing) always go through BullMQ.
 - Never run IMAP operations in a Next.js Server Action directly — add a job.
 
+### Error handling
+
+**Server Actions** must never throw to the client. Always return a typed result object:
+```ts
+return { success: true };
+return { success: false, error: "Descriptive message" };
+```
+
+**Client components** calling a Server Action must:
+1. Wrap the call in `try/catch/finally`.
+2. On `{ success: false }` **or** a caught exception → call `toast.error(t("..."))` (sonner, already wired into the root layout).
+3. Use `finally` to always clear any loading/pending state — so the UI never gets stuck if the action throws unexpectedly.
+
+```ts
+function handleAction() {
+  setPending(true);
+  startTransition(async () => {
+    try {
+      const result = await someServerAction();
+      if (result.success) {
+        // happy path
+      } else {
+        toast.error(t("actionFailed"));
+      }
+    } catch {
+      toast.error(t("actionFailed"));
+    } finally {
+      setPending(false);
+    }
+  });
+}
+```
+
+**Reference implementation:** `src/app/(app)/gatekeeper/_components/gatekeeper-list.tsx` — `handleDecision()`.
+
 ### Debugging Workflow
 
 When the user reports a bug or problem:
