@@ -409,11 +409,10 @@ export function EmailDetailView({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header + subject — pinned, never scroll */}
-      <div className="mx-auto w-full max-w-5xl px-[10px] md:px-6 shrink-0">
+      <div className="flex-1 flex flex-col mx-auto w-full max-w-5xl px-[10px] md:px-6 min-h-0">
 
         {/* Header */}
-        <header className="flex items-center gap-3 py-4 border-b border-border">
+        <header className="flex items-center gap-3 py-4 border-b border-border shrink-0">
           <button
             type="button"
             onClick={() => router.back()}
@@ -462,16 +461,12 @@ export function EmailDetailView({
         </header>
 
         {/* Subject */}
-        <div className="py-4 border-b border-border">
+        <div className="py-4 border-b border-border shrink-0">
           <h1 className="text-base font-semibold text-foreground text-balance">{email.subject}</h1>
         </div>
 
-      </div>
-
-      {/* Messages — full-width scroll so the scrollbar sits at the viewport edge */}
-      <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="mx-auto w-full max-w-5xl px-[10px] md:px-6">
-          <div className="py-6 flex flex-col gap-4">
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto scrollbar-none py-6 flex flex-col gap-4 min-h-0">
           {optimisticMessages.map((message, index) => {
             const isSelf =
               message.fromAddress.toLowerCase() === email.mailAccountEmail.toLowerCase();
@@ -501,14 +496,13 @@ export function EmailDetailView({
             );
           })}
           <div ref={bottomRef} />
-          </div>
-
-          {feedback && (
-            <p className={cn("text-xs text-center pb-2", feedback.isError ? "text-destructive" : "text-muted-foreground")}>
-              {feedback.text}
-            </p>
-          )}
         </div>
+
+        {feedback && (
+          <p className={cn("text-xs text-center pb-2 shrink-0", feedback.isError ? "text-destructive" : "text-muted-foreground")}>
+            {feedback.text}
+          </p>
+        )}
       </div>
 
       {/* Reply box — outside the max-w container so it spans full width */}
