@@ -14,6 +14,7 @@ import {
   Trash2,
   ShieldQuestion,
   Settings,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
@@ -87,6 +88,7 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: "/inbox", label: t("inbox"), icon: Inbox },
+    { href: "/drafts", label: t("drafts"), icon: FileText },
     { href: "/saved", label: t("saved"), icon: Bookmark },
     { href: "/snoozed", label: t("snoozed"), icon: Clock },
     { href: "/sent", label: t("sent"), icon: Send },
@@ -107,7 +109,9 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
     pathname === "/inbox" ||
     pathname.startsWith("/inbox/") ||
     pathname === "/gatekeeper" ||
-    pathname.startsWith("/gatekeeper/");
+    pathname.startsWith("/gatekeeper/") ||
+    pathname === "/compose" ||
+    pathname.startsWith("/compose/");
 
   return (
     <MobileNavContext.Provider value={{ open, close }}>

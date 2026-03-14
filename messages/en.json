@@ -43,6 +43,7 @@
   },
   "nav": {
     "inbox": "Inbox",
+    "drafts": "Drafts",
     "saved": "Saved",
     "snoozed": "Snoozed",
     "sent": "Sent",
@@ -54,7 +55,8 @@
     "expandSidebar": "Expand sidebar",
     "expand": "Expand",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "compose": "New Message"
   },
   "settings": {
     "heading": "Settings",
@@ -204,6 +206,32 @@
     },
     "trash": {
       "comingSoon": "Trash \u2014 coming soon"
+    },
+    "drafts": {
+      "title": "Drafts",
+      "empty": "No drafts yet.",
+      "noSubject": "(no subject)",
+      "to": "To:"
+    },
+    "compose": {
+      "title": "New Message",
+      "toLabel": "To:",
+      "toPlaceholder": "Add recipient\u2026",
+      "subjectLabel": "Subject:",
+      "subjectPlaceholder": "Enter subject\u2026",
+      "bodyPlaceholder": "Write your message\u2026 (\u2318\u23ce to send)",
+      "sendButton": "Send",
+      "sending": "Sending\u2026",
+      "saveDraft": "Save draft",
+      "saving": "Saving\u2026",
+      "draftSaved": "Draft saved",
+      "draftSaveFailed": "Failed to save draft. Please try again.",
+      "sendFailed": "Failed to send. Please try again.",
+      "sendPartialWarning": "Sent, but couldn\u2019t be saved locally. It may not appear after reload.",
+      "close": "Close",
+      "attachFile": "Attach file",
+      "changeSignature": "Change signature",
+      "removeSignature": "Remove signature"
     },
     "emailDetail": {
       "back": "Back",
