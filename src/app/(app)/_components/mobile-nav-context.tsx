@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -78,6 +78,12 @@ function DrawerNavItem({
 export function MobileNavProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const t = useTranslations("nav");
+  const pathname = usePathname();
+
+  // Close drawer on any route change (e.g. browser back/forward)
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   const navItems = [
     { href: "/inbox", label: t("inbox"), icon: Inbox },
@@ -95,9 +101,25 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
     setIsOpen(false);
   }
 
+  // Pages that render their own MobileMenuButton inside the page header.
+  // All other pages get the universal fixed button below.
+  const hasOwnButton = pathname === "/inbox" || pathname.startsWith("/inbox/");
+
   return (
     <MobileNavContext.Provider value={{ open, close }}>
       {children}
+
+      {/* Universal fixed hamburger — shown on pages without a built-in button */}
+      {!hasOwnButton && (
+        <button
+          type="button"
+          onClick={open}
+          aria-label={t("openMenu")}
+          className="fixed top-1.5 right-1.5 z-30 flex items-center justify-center min-w-11 min-h-11 rounded-full text-muted-foreground hover:bg-secondary transition-colors md:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      )}
 
       {/* Backdrop */}
       <div

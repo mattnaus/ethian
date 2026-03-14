@@ -79,7 +79,6 @@ Font: **Inter** (loaded via `next/font/google`, applied via `--font-sans`).
 | Metadata / dates / counts | `text-xs text-muted-foreground` |
 | Section label (uppercase) | `text-xs font-medium uppercase tracking-wider text-muted-foreground` |
 | Nav labels | `text-sm` |
-| Mobile bottom tab labels | `text-[10px] leading-none` |
 | Badge / pill text | `text-xs font-medium` |
 
 ---
@@ -274,15 +273,17 @@ All inputs must be **controlled** (`value` + `onChange` + `useState`) when insid
 ### App Shell
 
 ```
-<div className="flex h-screen overflow-hidden bg-zinc-950">
-  <Sidebar />                            // hidden on mobile
-  <main className="flex flex-1 flex-col overflow-y-auto pb-16 md:pb-0">
-    {children}
-  </main>
-</div>
+<MobileNavProvider>
+  <div className="flex h-screen overflow-hidden bg-zinc-950">
+    <Sidebar />                            // hidden on mobile
+    <main className="flex flex-1 flex-col overflow-y-auto">
+      {children}
+    </main>
+  </div>
+</MobileNavProvider>
 ```
 
-- `pb-16` on main reserves space for the mobile fixed bottom tab bar.
+- `MobileNavProvider` renders the mobile drawer overlay and universal hamburger button above all content.
 - Main content scrolls via `overflow-y-auto` on the `<main>` element — pages do not need their own scroll wrapper.
 
 ### Sidebar
@@ -293,7 +294,7 @@ All inputs must be **controlled** (`value` + `onChange` + `useState`) when insid
   - Collapse toggle: `PanelLeftClose` (wide) / `PanelLeftOpen` (thin), below a separator.
   - State persisted to `localStorage("sidebar-expanded")`.
   - Transition: `transition-[width] duration-200 ease-in-out`.
-- **Mobile** (`< md`): replaced by a fixed bottom tab bar (`inset-x-0 bottom-0 z-50 flex border-t border-zinc-800 bg-zinc-950`), 4 items. Uses `env(safe-area-inset-bottom)` for iOS safe area.
+- **Mobile** (`< md`): sidebar is hidden. Navigation is provided by `MobileNavProvider` — a slide-in drawer (`w-72`, `translate-x` transition, `z-50`) opened by a `Menu` icon hamburger button. The drawer shows the full nav (same items as desktop wide mode) plus a settings footer. Pages that have their own header (inbox list, conversation view) embed `MobileMenuButton` directly in their header. All other pages get a universal `fixed top-1.5 right-1.5 z-30` hamburger from the provider. Drawer closes on backdrop tap, link click, or route change.
 
 ### Nav Item Active State
 
@@ -328,12 +329,12 @@ Globally styled (outside any `@layer`):
 ## Mobile Conventions
 
 - Breakpoint for desktop layout: `md` (768px).
-- All interactive elements: minimum 44×44px touch target (`h-11 min-w-11`).
-- Bottom tab bar height: `h-16` (implied by `pb-16` on main). Reserve space with `pb-16 md:pb-0`.
-- Mobile FAB position: `fixed bottom-20 right-4 z-50` — above the tab bar.
+- All interactive elements: minimum 44×44px touch target (`min-h-11 min-w-11`).
+- No bottom tab bar — navigation is via the hamburger drawer (see Sidebar section).
+- Mobile FAB position: `fixed bottom-6 right-4 z-50`.
 - Popover widths on mobile: `w-[calc(100vw-20px)]` to fill the screen minus 10px each side.
 - No hover-only interactions — every affordance must work on tap.
-- Safe area: apply `env(safe-area-inset-bottom)` on the bottom tab bar.
+- Safe area: apply `env(safe-area-inset-bottom)` where relevant (drawer footer, modals).
 
 ---
 

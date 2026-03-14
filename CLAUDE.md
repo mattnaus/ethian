@@ -41,7 +41,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 |------|--------|-------|
 | Auth | ✅ Done | NextAuth.js v5 credentials; `/login`, `/register`, middleware, session, `trustHost` |
 | Mail account management | ✅ Done | Settings page: add/edit/delete accounts, IMAP verification, color picker |
-| App shell & sidebar | ✅ Done | Collapsible sidebar (thin/wide), mobile bottom tab bar, localStorage persistence |
+| App shell & sidebar | ✅ Done | Collapsible sidebar (thin/wide), mobile hamburger drawer (`MobileNavProvider`), localStorage persistence |
 | Email sync wiring | ✅ Done | Adding an account schedules repeatable BullMQ sync + immediate first sync |
 | E2E tests | ✅ Done | Playwright: auth flows, settings/account CRUD |
 | i18n / translations | ✅ Done | next-intl v4, `localePrefix: 'never'`, all UI strings in `messages/en.json` |
@@ -95,7 +95,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 - **Active state:** `orange-500` icon + `zinc-900` background pill (`bg-zinc-900`). Inactive hover: `bg-zinc-800/60`.
 - **Main content:** Fills remaining width (`flex-1`), `zinc-950` background.
 - **Header height:** Both the sidebar logo bar and every main-panel top bar use `h-12` (48px) with `flex items-center`. This keeps the horizontal border line continuous across the full width of the app.
-- **Mobile layout:** On small screens (< `md`, i.e. < 768px), the sidebar is replaced by a fixed bottom tab bar (4 items: Inbox, Screener, Sent, Settings). Main content fills the full screen width.
+- **Mobile layout:** On small screens (< `md`, i.e. < 768px), the sidebar is hidden. Navigation is provided by `MobileNavProvider` — a slide-in drawer opened via a `Menu` hamburger icon. Pages with custom headers (inbox, conversation) embed `MobileMenuButton` directly. All other pages get a universal fixed hamburger from the provider. Main content fills the full screen width.
 
 ### Typography
 - **Font:** Inter (already configured)
