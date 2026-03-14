@@ -77,6 +77,27 @@ Issues not fixed at review time. Each entry links to the review where it was rai
 
 ---
 
+### Compose: no mobile navigation (hamburger) on /compose
+**Source:** `.claude/reviews/2026-03-14/compose-drafts-a8e7dc6.md`
+**Location:** `src/app/(app)/compose/_components/compose-view.tsx` + `mobile-nav-context.tsx`
+**Detail:** `/compose` is added to `hasOwnButton` (suppresses the universal fixed hamburger) but no `MobileMenuButton` is embedded in the compose header. In PWA standalone mode on mobile, users have no way to navigate away except the X (close) button. Either embed a `MobileMenuButton` in the compose header, or remove `/compose` from `hasOwnButton` and let the universal button show.
+
+---
+
+### Compose: no client-side email validation on recipient chips
+**Source:** `.claude/reviews/2026-03-14/compose-drafts-a8e7dc6.md`
+**Location:** `src/app/(app)/compose/_components/compose-view.tsx` — `addRecipient()`
+**Detail:** Any string is accepted as a recipient chip. The server rejects invalid emails via Zod but returns a generic error with no indication of which address is invalid. Add a basic email format check before calling `addRecipient` and show an inline validation hint.
+
+---
+
+### Compose: recipient chip remove button below minimum touch target
+**Source:** `.claude/reviews/2026-03-14/compose-drafts-a8e7dc6.md`
+**Location:** `src/app/(app)/compose/_components/compose-view.tsx` — chip X button
+**Detail:** The remove button on each recipient chip uses a 12×12px icon with no padding, far below the 44×44px mobile touch target minimum. Wrap in a `min-w-9 min-h-9` container or increase padding to `p-1.5`.
+
+---
+
 ### Audit error handling across all client components and Server Actions
 **Source:** User request (2026-03-14)
 **Detail:** Review all existing client components that call Server Actions and all Server Actions themselves to ensure they follow the established error handling pattern:

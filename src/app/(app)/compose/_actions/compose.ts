@@ -61,9 +61,9 @@ export async function saveComposeDraftAction(
   const { mailAccountId, toAddresses, subject, bodyText, draftId } = parsed.data;
   const userId = session.user.id;
 
-  // Verify account ownership
+  // Verify account ownership and fetch display fields for draft storage
   const [account] = await db
-    .select({ id: mailAccounts.id })
+    .select({ id: mailAccounts.id, email: mailAccounts.email, name: mailAccounts.name })
     .from(mailAccounts)
     .where(and(eq(mailAccounts.id, mailAccountId), eq(mailAccounts.userId, userId)))
     .limit(1);
@@ -76,16 +76,37 @@ export async function saveComposeDraftAction(
 
   try {
     if (draftId) {
-      await db
-        .update(emails)
-        .set({ toAddresses: toJson, subject, bodyText, snippet, updatedAt: now })
+      // Verify the draft belongs to this user (via its current mailAccount, not the new one)
+      const [existingDraft] = await db
+        .select({ id: emails.id })
+        .from(emails)
+        .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
         .where(
           and(
             eq(emails.id, draftId),
             eq(emails.isDraft, true),
-            eq(emails.mailAccountId, mailAccountId),
+            eq(mailAccounts.userId, userId),
           ),
-        );
+        )
+        .limit(1);
+
+      if (!existingDraft) return { success: false, error: "not_found" };
+
+      // Update including mailAccountId so a From-account change is persisted
+      await db
+        .update(emails)
+        .set({
+          mailAccountId,
+          fromAddress: account.email,
+          fromName: account.name ?? null,
+          toAddresses: toJson,
+          subject,
+          bodyText,
+          snippet,
+          updatedAt: now,
+        })
+        .where(eq(emails.id, draftId));
+
       revalidatePath("/drafts");
       return { success: true, draftId };
     }
@@ -100,8 +121,8 @@ export async function saveComposeDraftAction(
         inReplyTo: null,
         references: [],
         subject,
-        fromAddress: "",
-        fromName: null,
+        fromAddress: account.email,
+        fromName: account.name ?? null,
         toAddresses: toJson,
         bodyText,
         bodyHtml: null,
