@@ -103,7 +103,10 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
 
   // Pages that render their own MobileMenuButton inside the page header.
   // All other pages get the universal fixed button below.
-  const hasOwnButton = pathname === "/inbox" || pathname.startsWith("/inbox/");
+  const hasOwnButton =
+    pathname === "/inbox" ||
+    pathname.startsWith("/inbox/") ||
+    pathname === "/gatekeeper";
 
   return (
     <MobileNavContext.Provider value={{ open, close }}>
@@ -115,9 +118,9 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
           type="button"
           onClick={open}
           aria-label={t("openMenu")}
-          className="fixed top-1.5 right-1.5 z-30 flex items-center justify-center min-w-11 min-h-11 rounded-full text-muted-foreground hover:bg-secondary transition-colors md:hidden"
+          className="fixed top-1.5 right-1.5 z-30 flex items-center justify-center min-w-11 min-h-11 rounded-full text-foreground hover:bg-secondary transition-colors md:hidden"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-6 w-6" />
         </button>
       )}
 
@@ -187,11 +190,11 @@ export function MobileMenuButton({ className }: { className?: string }) {
       onClick={open}
       aria-label={t("openMenu")}
       className={cn(
-        "flex items-center justify-center min-w-11 min-h-11 rounded-full text-muted-foreground hover:bg-secondary transition-colors md:hidden shrink-0",
+        "flex items-center justify-center min-w-11 min-h-11 rounded-full text-foreground hover:bg-secondary transition-colors md:hidden shrink-0",
         className,
       )}
     >
-      <Menu className="h-5 w-5" />
+      <Menu className="h-6 w-6" />
     </button>
   );
 }
