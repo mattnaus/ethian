@@ -86,8 +86,8 @@ export function ReplyBox({
   }
 
   async function handleSend() {
-    const text = buildBodyWithSignature(reply.trim());
     if (!reply.trim() || isSending) return;
+    const text = buildBodyWithSignature(reply.trim());
     setIsSending(true);
     try {
       await onSend(text);
