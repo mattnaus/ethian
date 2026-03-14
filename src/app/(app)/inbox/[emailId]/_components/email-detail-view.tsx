@@ -172,7 +172,7 @@ function MessageBubble({
           className={cn(
             "w-full px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
             isSelf
-              ? "bg-primary text-primary-foreground rounded-br-sm"
+              ? "border border-primary/60 text-foreground rounded-br-sm"
               : "bg-secondary text-foreground rounded-bl-sm",
           )}
         >
