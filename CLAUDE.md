@@ -96,6 +96,7 @@ Ethian is a multi-account email client inspired by Hey.com's opinionated approac
 - **Main content:** Fills remaining width (`flex-1`), `zinc-950` background.
 - **Header height:** Both the sidebar logo bar and every main-panel top bar use `h-12` (48px) with `flex items-center`. This keeps the horizontal border line continuous across the full width of the app.
 - **Mobile layout:** On small screens (< `md`, i.e. < 768px), the sidebar is hidden. Navigation is provided by `MobileNavProvider` — a slide-in drawer opened via a `Menu` hamburger icon. Pages with custom headers (inbox, conversation) embed `MobileMenuButton` directly. All other pages get a universal fixed hamburger from the provider. Main content fills the full screen width.
+- **`hasOwnButton` registration:** When a page embeds `MobileMenuButton` in its own header, its pathname **must** be added to the `hasOwnButton` check in `src/app/(app)/_components/mobile-nav-context.tsx`. Failing to do so causes a duplicate hamburger to appear (the embedded one + the universal fixed one). Use both an exact match and a `startsWith` check to cover sub-routes: `pathname === "/my-page" || pathname.startsWith("/my-page/")`.
 
 ### Typography
 - **Font:** Inter (already configured)
