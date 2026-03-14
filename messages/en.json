@@ -163,7 +163,8 @@
       "block": "Block",
       "feed": "Feed",
       "paperTrail": "Paper Trail",
-      "more": "More"
+      "more": "More",
+      "decisionFailed": "Something went wrong. Please try again."
     },
     "saved": {
       "comingSoon": "Saved \u2014 coming soon"

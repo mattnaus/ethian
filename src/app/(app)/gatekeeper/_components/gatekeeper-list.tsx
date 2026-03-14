@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
+import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { GatekeeperCard, type GatekeeperEmail } from "./gatekeeper-card";
@@ -190,15 +191,22 @@ export function GatekeeperList({
   function handleDecision(id: string, decision: "approved" | "blocked") {
     setPendingIds((prev) => new Set([...prev, id]));
     startTransition(async () => {
-      const result = await makeGatekeeperDecision(id, decision);
-      if (result.success) {
-        setEntries((prev) => prev.filter((e) => e.id !== id));
+      try {
+        const result = await makeGatekeeperDecision(id, decision);
+        if (result.success) {
+          setEntries((prev) => prev.filter((e) => e.id !== id));
+        } else {
+          toast.error(t("decisionFailed"));
+        }
+      } catch {
+        toast.error(t("decisionFailed"));
+      } finally {
+        setPendingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
       }
-      setPendingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
     });
   }
 

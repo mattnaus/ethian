@@ -60,3 +60,17 @@ Issues not fixed at review time. Each entry links to the review where it was rai
 **Source:** `.claude/reviews/2026-03-13/thread-grouping-d0386ce.md`
 **Location:** `src/app/(app)/inbox/page.tsx` — Pass 2 grouping, marked with `// TODO`
 **Detail:** JS grouping runs on the top-100 fetched rows. If a thread has messages beyond position 100, `threadCount` will be understated. Fix: replace JS grouping with a SQL `GROUP BY thread_id, mail_account_id` query that counts all messages per thread accurately.
+
+---
+
+### Gatekeeper approve/block buttons lack minimum touch targets on mobile
+**Source:** `.claude/reviews/2026-03-14/gatekeeper-rebuild-c5923fd.md`
+**Location:** `src/app/(app)/gatekeeper/_components/gatekeeper-list.tsx` — Approve and Block buttons
+**Detail:** The buttons have `px-5` but no `min-h-11 min-w-11`. On mobile, when card content is short, buttons could fall below the 44×44px minimum touch target required by the design system. Add `min-h-11` (and `min-w-11` if needed) to guarantee a valid touch target.
+
+---
+
+### GatekeeperEmail / GatekeeperCard duplicates InboxEmail / EmailCard
+**Source:** `.claude/reviews/2026-03-14/gatekeeper-rebuild-c5923fd.md`
+**Location:** `src/app/(app)/gatekeeper/_components/gatekeeper-card.tsx`
+**Detail:** `GatekeeperEmail` is structurally identical to `InboxEmail` and `GatekeeperCard` is a near-copy of `EmailCard` (only difference: `<div>` instead of `<Link>` + `flex-1 min-w-0`). Future changes to one will silently diverge from the other. Fix: extract a shared `EmailCardBase` component and a single `EmailShape` type to a shared location, then compose `EmailCard` and `GatekeeperCard` from it.
