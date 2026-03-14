@@ -124,7 +124,11 @@
       "defaultBadge": "Default",
       "editAriaLabel": "Edit {name}",
       "deleteAriaLabel": "Delete {name}",
-      "deleteConfirm": "Delete signature \"{name}\"?"
+      "deleteConfirmTitle": "Delete signature?",
+      "deleteConfirmDescription": "This will permanently delete \"{name}\". This cannot be undone.",
+      "deleteConfirmButton": "Delete",
+      "deleteCancelButton": "Cancel",
+      "deleteFailed": "Failed to delete signature. Please try again."
     },
     "signatureForm": {
       "addTitle": "Add signature",
@@ -136,7 +140,8 @@
       "isDefaultLabel": "Set as default",
       "cancelButton": "Cancel",
       "saveButton": "Save",
-      "addButton": "Add signature"
+      "addButton": "Add signature",
+      "actionFailed": "Something went wrong. Please try again."
     }
   },
   "colors": {
@@ -222,6 +227,8 @@
       "editDraft": "Edit",
       "sendDraft": "Send",
       "draftSaved": "Draft saved",
+      "draftSaveFailed": "Failed to save draft. Please try again.",
+      "draftDiscardFailed": "Failed to discard draft. Please try again.",
       "changeSignature": "Change signature",
       "removeSignature": "Remove signature"
     }

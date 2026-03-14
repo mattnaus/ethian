@@ -95,6 +95,8 @@ export function ReplyBox({
       setReply("");
       setCurrentDraftId(null);
       if (textareaRef.current) textareaRef.current.style.height = "auto";
+    } catch {
+      toast.error(t("sendFailed"));
     } finally {
       setIsSending(false);
     }
@@ -115,10 +117,10 @@ export function ReplyBox({
         onDraftSaved(result.draftId);
         toast.success(t("draftSaved"));
       } else {
-        toast.error("Failed to save draft.");
+        toast.error(t("draftSaveFailed"));
       }
     } catch {
-      toast.error("Failed to save draft.");
+      toast.error(t("draftSaveFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -188,7 +190,7 @@ export function ReplyBox({
                     <button
                       type="button"
                       aria-label={t("changeSignature")}
-                      className="flex items-center justify-center h-6 w-6 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+                      className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
                     >
                       <ChevronDown className="h-3.5 w-3.5" />
                     </button>
@@ -241,7 +243,7 @@ export function ReplyBox({
                 type="button"
                 aria-label={t("removeSignature")}
                 onClick={() => setSignatureDismissed(true)}
-                className="flex items-center justify-center h-6 w-6 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+                className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
               >
                 <X className="h-3.5 w-3.5" />
               </button>

@@ -103,13 +103,20 @@ export async function updateSignatureAction(
 // Delete
 // ---------------------------------------------------------------------------
 
-export async function deleteSignatureAction(signatureId: string): Promise<void> {
-  const userId = await requireSession();
-  await verifyOwnership(signatureId, userId);
+export async function deleteSignatureAction(
+  signatureId: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    const userId = await requireSession();
+    await verifyOwnership(signatureId, userId);
 
-  await db
-    .delete(signatures)
-    .where(and(eq(signatures.id, signatureId), eq(signatures.userId, userId)));
+    await db
+      .delete(signatures)
+      .where(and(eq(signatures.id, signatureId), eq(signatures.userId, userId)));
 
-  revalidatePath("/settings");
+    revalidatePath("/settings");
+    return { success: true };
+  } catch {
+    return { success: false, error: "delete_failed" };
+  }
 }

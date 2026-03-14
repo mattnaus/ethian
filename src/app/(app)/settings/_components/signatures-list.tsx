@@ -4,7 +4,18 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { deleteSignatureAction } from "../_actions/signatures";
 import { SignatureForm } from "./signature-form";
 import type { Signature } from "@/db/schema";
@@ -17,6 +28,7 @@ export function SignaturesList({ signatures }: SignaturesListProps) {
   const t = useTranslations("settings.signatures");
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Signature | undefined>();
+  const [deleteTarget, setDeleteTarget] = useState<Signature | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
@@ -30,12 +42,26 @@ export function SignaturesList({ signatures }: SignaturesListProps) {
     setFormOpen(true);
   }
 
-  function handleDelete(sig: Signature) {
-    if (!confirm(t("deleteConfirm", { name: sig.name }))) return;
+  function confirmDelete(sig: Signature) {
+    setDeleteTarget(sig);
+  }
+
+  function handleDeleteConfirmed() {
+    if (!deleteTarget) return;
+    const sig = deleteTarget;
+    setDeleteTarget(null);
     setDeletingId(sig.id);
     startTransition(async () => {
-      await deleteSignatureAction(sig.id);
-      setDeletingId(null);
+      try {
+        const result = await deleteSignatureAction(sig.id);
+        if (!result.success) {
+          toast.error(t("deleteFailed"));
+        }
+      } catch {
+        toast.error(t("deleteFailed"));
+      } finally {
+        setDeletingId(null);
+      }
     });
   }
 
@@ -93,7 +119,7 @@ export function SignaturesList({ signatures }: SignaturesListProps) {
                   variant="ghost"
                   size="icon"
                   aria-label={t("deleteAriaLabel", { name: sig.name })}
-                  onClick={() => handleDelete(sig)}
+                  onClick={() => confirmDelete(sig)}
                   disabled={deletingId === sig.id}
                   className="h-8 w-8 text-zinc-400 hover:text-red-400 hover:bg-zinc-800"
                 >
@@ -111,6 +137,28 @@ export function SignaturesList({ signatures }: SignaturesListProps) {
         onOpenChange={setFormOpen}
         signature={editTarget}
       />
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-zinc-100">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-zinc-100">{t("deleteConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              {deleteTarget ? t("deleteConfirmDescription", { name: deleteTarget.name }) : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-transparent border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100">
+              {t("deleteCancelButton")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirmed}
+              className="bg-red-600 hover:bg-red-500 text-white border-0"
+            >
+              {t("deleteConfirmButton")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

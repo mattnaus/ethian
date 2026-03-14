@@ -179,6 +179,7 @@ export default async function EmailDetailPage({
             bodyText: row.bodyText,
             sentAt: row.sentAt.toISOString(),
             isRead: row.isRead,
+            isDraft: false,
             accountColor: row.accountColor,
             attachments: [],
           },

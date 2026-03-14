@@ -52,10 +52,10 @@ export function SignatureForm({ open, onOpenChange, signature }: SignatureFormPr
       if (result.success) {
         onOpenChange(false);
       } else {
-        toast.error(result.error ?? "Something went wrong.");
+        toast.error(t("actionFailed"));
       }
     } catch {
-      toast.error("Something went wrong.");
+      toast.error(t("actionFailed"));
     } finally {
       setIsPending(false);
     }

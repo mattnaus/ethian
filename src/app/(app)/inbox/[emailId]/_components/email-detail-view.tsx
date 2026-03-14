@@ -331,7 +331,6 @@ export function EmailDetailView({
     if (result.success === false) {
       setOptimisticMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
       setFeedback({ text: t("sendFailed"), isError: true });
-      throw new Error("smtp_error");
     } else if (result.success === "partial") {
       setFeedback({ text: t("sendPartialWarning"), isError: false });
     }
@@ -347,43 +346,51 @@ export function EmailDetailView({
   }, []);
 
   async function handleDiscardDraft(message: ThreadMessage) {
-    const result = await deleteDraftAction({ draftId: message.id, emailId: email.id });
-    if (result.success) {
-      setOptimisticMessages((prev) => prev.filter((m) => m.id !== message.id));
-    } else {
-      toast.error("Failed to discard draft.");
+    try {
+      const result = await deleteDraftAction({ draftId: message.id, emailId: email.id });
+      if (result.success) {
+        setOptimisticMessages((prev) => prev.filter((m) => m.id !== message.id));
+      } else {
+        toast.error(t("draftDiscardFailed"));
+      }
+    } catch {
+      toast.error(t("draftDiscardFailed"));
     }
   }
 
   async function handleSendDraft(message: ThreadMessage) {
-    const result = await sendDraftAction({
-      draftId: message.id,
-      mailAccountId: email.mailAccountId,
-      emailId: email.id,
-    });
-
-    if (result.success === true) {
-      // Remove draft + append sent message optimistically
-      setOptimisticMessages((prev) => {
-        const withoutDraft = prev.filter((m) => m.id !== message.id);
-        const sent: ThreadMessage = {
-          id: result.sentEmailId,
-          fromName: email.accountName,
-          fromAddress: email.mailAccountEmail,
-          toAddresses: [{ address: email.fromAddress, name: email.fromName ?? undefined }],
-          bodyHtml: null,
-          bodyText: message.bodyText,
-          sentAt: result.sentAt,
-          isRead: true,
-          accountColor: email.accountColor,
-          attachments: [],
-        };
-        return [...withoutDraft, sent];
+    try {
+      const result = await sendDraftAction({
+        draftId: message.id,
+        mailAccountId: email.mailAccountId,
+        emailId: email.id,
       });
-    } else if (result.success === "partial") {
-      setOptimisticMessages((prev) => prev.filter((m) => m.id !== message.id));
-      setFeedback({ text: t("sendPartialWarning"), isError: false });
-    } else {
+
+      if (result.success === true) {
+        // Remove draft + append sent message optimistically
+        setOptimisticMessages((prev) => {
+          const withoutDraft = prev.filter((m) => m.id !== message.id);
+          const sent: ThreadMessage = {
+            id: result.sentEmailId,
+            fromName: email.accountName,
+            fromAddress: email.mailAccountEmail,
+            toAddresses: [{ address: email.fromAddress, name: email.fromName ?? undefined }],
+            bodyHtml: null,
+            bodyText: message.bodyText,
+            sentAt: result.sentAt,
+            isRead: true,
+            accountColor: email.accountColor,
+            attachments: [],
+          };
+          return [...withoutDraft, sent];
+        });
+      } else if (result.success === "partial") {
+        setOptimisticMessages((prev) => prev.filter((m) => m.id !== message.id));
+        setFeedback({ text: t("sendPartialWarning"), isError: false });
+      } else {
+        toast.error(t("sendFailed"));
+      }
+    } catch {
       toast.error(t("sendFailed"));
     }
   }
