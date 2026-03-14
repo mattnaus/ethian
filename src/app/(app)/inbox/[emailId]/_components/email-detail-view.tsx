@@ -315,7 +315,7 @@ export function EmailDetailView({
       });
     } else {
       requestAnimationFrame(() => {
-        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+        scrollContainerRef.current?.scrollTo({ top: scrollContainerRef.current.scrollHeight, behavior: "smooth" });
       });
     }
   }, [optimisticMessages.length]);
@@ -336,17 +336,22 @@ export function EmailDetailView({
     setOptimisticMessages((prev) => [...prev, optimistic]);
     setFeedback(null);
 
-    const result = await sendReplyAction({
-      mailAccountId: email.mailAccountId,
-      emailId: email.id,
-      bodyText: text,
-    });
+    try {
+      const result = await sendReplyAction({
+        mailAccountId: email.mailAccountId,
+        emailId: email.id,
+        bodyText: text,
+      });
 
-    if (result.success === false) {
+      if (result.success === false) {
+        setOptimisticMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+        setFeedback({ text: t("sendFailed"), isError: true });
+      } else if (result.success === "partial") {
+        setFeedback({ text: t("sendPartialWarning"), isError: false });
+      }
+    } catch {
       setOptimisticMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
       setFeedback({ text: t("sendFailed"), isError: true });
-    } else if (result.success === "partial") {
-      setFeedback({ text: t("sendPartialWarning"), isError: false });
     }
   }
 
