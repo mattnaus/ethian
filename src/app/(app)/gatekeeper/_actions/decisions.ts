@@ -41,44 +41,46 @@ export async function makeGatekeeperDecision(
 
   const category = decisionToCategory[decision];
 
-  // Upsert a sender rule for this address
-  await db
-    .insert(senderRules)
-    .values({
-      userId,
-      fromAddress: entry.fromAddress.toLowerCase(),
-      displayName: entry.fromName ?? null,
-      decision,
-      appliesTo: "address",
-    })
-    .onConflictDoUpdate({
-      target: [senderRules.userId, senderRules.fromAddress],
-      set: { decision },
-    });
+  await db.transaction(async (tx) => {
+    // Upsert a sender rule for this address
+    await tx
+      .insert(senderRules)
+      .values({
+        userId,
+        fromAddress: entry.fromAddress.toLowerCase(),
+        displayName: entry.fromName ?? null,
+        decision,
+        appliesTo: "address",
+      })
+      .onConflictDoUpdate({
+        target: [senderRules.userId, senderRules.fromAddress],
+        set: { decision },
+      });
 
-  // Re-categorize all screener emails from this sender across user's accounts
-  const userAccounts = await db
-    .select({ id: mailAccounts.id })
-    .from(mailAccounts)
-    .where(eq(mailAccounts.userId, userId));
+    // Re-categorize all screener emails from this sender across user's accounts
+    const userAccounts = await tx
+      .select({ id: mailAccounts.id })
+      .from(mailAccounts)
+      .where(eq(mailAccounts.userId, userId));
 
-  const accountIds = userAccounts.map((a) => a.id);
+    const accountIds = userAccounts.map((a) => a.id);
 
-  if (accountIds.length > 0) {
-    await db
-      .update(emails)
-      .set({ category })
-      .where(
-        and(
-          eq(emails.fromAddress, entry.fromAddress),
-          eq(emails.category, "screener"),
-          inArray(emails.mailAccountId, accountIds),
-        ),
-      );
-  }
+    if (accountIds.length > 0) {
+      await tx
+        .update(emails)
+        .set({ category })
+        .where(
+          and(
+            eq(emails.fromAddress, entry.fromAddress),
+            eq(emails.category, "screener"),
+            inArray(emails.mailAccountId, accountIds),
+          ),
+        );
+    }
 
-  // Remove from screener queue
-  await db.delete(screenerQueue).where(eq(screenerQueue.id, screenerQueueId));
+    // Remove from screener queue
+    await tx.delete(screenerQueue).where(eq(screenerQueue.id, screenerQueueId));
+  });
 
   revalidatePath("/gatekeeper");
   revalidatePath("/inbox");
