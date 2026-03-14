@@ -170,7 +170,7 @@ function MessageBubble({
         {/* Bubble */}
         <div
           className={cn(
-            "px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
+            "w-full px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
             isSelf
               ? "bg-primary text-primary-foreground rounded-br-sm"
               : "bg-secondary text-foreground rounded-bl-sm",
