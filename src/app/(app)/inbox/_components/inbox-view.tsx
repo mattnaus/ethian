@@ -468,6 +468,16 @@ export function InboxView({
           )}
         </div>
 
+        {/* Mobile FAB — Compose */}
+        <div className="md:hidden fixed bottom-6 right-4 z-50">
+          <Button
+            onClick={() => router.push("/compose")}
+            className="h-14 w-14 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg flex items-center justify-center p-0"
+          >
+            <PenLine className="h-5 w-5" />
+          </Button>
+        </div>
+
       </div>
     </div>
   );
