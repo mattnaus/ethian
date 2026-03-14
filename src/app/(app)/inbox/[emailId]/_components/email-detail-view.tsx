@@ -163,7 +163,7 @@ function MessageBubble({
     <div className={cn("flex items-end gap-2.5", isSelf ? "flex-row-reverse" : "flex-row")}>
       <div
         className={cn(
-          "flex flex-col gap-1 max-w-[90%] md:max-w-[72%] md:min-w-64",
+          "flex flex-col gap-1 max-w-[90%] md:max-w-[72%] md:min-w-96",
           isSelf ? "items-end" : "items-start",
         )}
       >
@@ -243,9 +243,9 @@ function DraftBubble({
             <Button
               type="button"
               size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={onEdit}
-              className="h-7 px-2.5 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+              className="h-7 px-2.5 text-xs border-zinc-600 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 bg-transparent"
             >
               <Pencil className="h-3.5 w-3.5 mr-1" />
               {t("editDraft")}
