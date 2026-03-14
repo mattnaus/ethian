@@ -192,7 +192,7 @@ function MessageBubble({
         )}
 
         {/* Timestamp */}
-        <span className="text-xs text-muted-foreground px-1" title={fullDate}>
+        <span className="text-xs text-muted-foreground px-1" title={fullDate} suppressHydrationWarning>
           {time}
         </span>
       </div>
