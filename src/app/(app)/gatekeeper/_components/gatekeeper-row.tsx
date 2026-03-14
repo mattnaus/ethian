@@ -1,6 +1,7 @@
 "use client";
 
 import { Paperclip } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { safeColor, getInitials, formatDate } from "@/lib/email-display";
 
@@ -26,6 +27,7 @@ interface GatekeeperRowProps {
 }
 
 export function GatekeeperRow({ entry, locale, onDecision, isPending }: GatekeeperRowProps) {
+  const t = useTranslations("pages.gatekeeper");
   const ringColor = safeColor(entry.accountColor);
   const initials = getInitials(entry.fromName, entry.fromAddress);
   const nameDisplay = entry.fromName?.trim() || entry.fromAddress;
@@ -118,7 +120,7 @@ export function GatekeeperRow({ entry, locale, onDecision, isPending }: Gatekeep
             "text-sm font-medium min-h-[44px] md:min-h-0",
           )}
         >
-          <span>Approve</span>
+          <span>{t("approve")}</span>
         </button>
         <button
           onClick={() => onDecision(entry.id, "blocked")}
@@ -129,7 +131,7 @@ export function GatekeeperRow({ entry, locale, onDecision, isPending }: Gatekeep
             "text-sm font-medium min-h-[44px] md:min-h-0",
           )}
         >
-          <span>Block</span>
+          <span>{t("block")}</span>
         </button>
       </div>
     </div>

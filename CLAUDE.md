@@ -410,7 +410,7 @@ When invoking the reviewer sub-agent, always pass:
 - **Client Components:** use `useTranslations("namespace")` hook.
 - **Server Components & Server Actions:** use `await getTranslations("namespace")`.
 - **Middleware:** locale is detected and forwarded via the `X-NEXT-INTL-LOCALE` request header. `createIntlMiddleware` is intentionally **not** used — it rewrites URLs to `/en/[path]` internally, which 404s because the app has no `[locale]` route segments.
-- **Adding a new string:** add the key to `messages/en.json` under the appropriate namespace, then reference it via `t("key")`. Never hardcode UI strings in components.
+- **Never hardcode UI strings** — every user-visible string (labels, button text, placeholders, error messages, empty states) must live in `messages/en.json` and be referenced via `t("key")`. This is a hard rule with no exceptions. Before writing any string literal that will be rendered, add it to the messages file first.
 - **Adding a new locale:** add to `routing.locales` in `src/i18n/routing.ts` and create `messages/<locale>.json`.
 
 ### Password Storage
