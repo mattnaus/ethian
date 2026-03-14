@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Send, Paperclip, MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { safeColor, getInitials } from "@/lib/email-display";
+import { safeColor, getInitials, formatTime, formatFullDate } from "@/lib/email-display";
 import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
 
 // ---------------------------------------------------------------------------
@@ -52,24 +52,6 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / 1_048_576).toFixed(1)} MB`;
 }
 
-function formatTime(iso: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale, {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).format(new Date(iso));
-}
-
-function formatFullDate(iso: string, locale: string): string {
-  return new Intl.DateTimeFormat(locale, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).format(new Date(iso));
-}
 
 function stripHtmlQuotes(html: string): string {
   // Use DOMParser when available (browser) — correctly handles nested blockquotes
@@ -157,8 +139,13 @@ function MessageBubble({
   locale: string;
 }) {
   const body = getMessageBody(message.bodyText, message.bodyHtml);
-  const time = formatTime(message.sentAt, locale);
-  const fullDate = formatFullDate(message.sentAt, locale);
+  // Deferred to client-only to avoid Intl.DateTimeFormat SSR/browser ICU mismatch
+  const [time, setTime] = useState("");
+  const [fullDate, setFullDate] = useState("");
+  useEffect(() => {
+    setTime(formatTime(message.sentAt, locale));
+    setFullDate(formatFullDate(message.sentAt, locale));
+  }, [message.sentAt, locale]);
 
   return (
     <div className={cn("flex items-end gap-2.5", isSelf ? "flex-row-reverse" : "flex-row")}>
@@ -192,7 +179,7 @@ function MessageBubble({
         )}
 
         {/* Timestamp */}
-        <span className="text-xs text-muted-foreground px-1" title={fullDate} suppressHydrationWarning>
+        <span className="text-xs text-muted-foreground px-1" title={fullDate}>
           {time}
         </span>
       </div>

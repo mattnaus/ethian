@@ -30,6 +30,27 @@ export function getInitials(name: string | null, email: string): string {
 // Date
 // ---------------------------------------------------------------------------
 
+/** "8:03 PM" — time only, for message bubble timestamps. */
+export function formatTime(isoString: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(isoString));
+}
+
+/** "Fri, Mar 13 at 8:03 PM" — full date+time for tooltip title attributes. */
+export function formatFullDate(isoString: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(new Date(isoString));
+}
+
 export function formatDate(isoString: string, locale: string): string {
   const date = new Date(isoString);
   const now = new Date();

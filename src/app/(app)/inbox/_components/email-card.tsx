@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -35,7 +36,11 @@ export function EmailCard({
   const initials = getInitials(email.fromName, email.fromAddress);
   const ringColor = safeColor(email.accountColor);
   const senderDisplay = email.fromName?.trim() || email.fromAddress;
-  const formattedDate = formatRelativeDate(email.sentAt, locale);
+  // Deferred to client-only to avoid Intl.DateTimeFormat SSR/browser ICU mismatch
+  const [formattedDate, setFormattedDate] = useState("");
+  useEffect(() => {
+    setFormattedDate(formatRelativeDate(email.sentAt, locale));
+  }, [email.sentAt, locale]);
 
   return (
     <Link
