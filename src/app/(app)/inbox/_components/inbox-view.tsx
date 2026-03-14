@@ -395,6 +395,13 @@ export function InboxView({
               onExpandChange={setSearchExpanded}
               placeholder={t("searchPlaceholder")}
             />
+            <Button
+              onClick={() => router.push("/compose")}
+              className="shrink-0 gap-1.5 rounded-full px-3 h-9 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <PenLine className="h-4 w-4" />
+              <span className="sr-only">{t("newButton")}</span>
+            </Button>
           </div>
         </div>
 

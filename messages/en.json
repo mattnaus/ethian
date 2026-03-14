@@ -230,6 +230,7 @@
       "sendPartialWarning": "Sent, but couldn\u2019t be saved locally. It may not appear after reload.",
       "close": "Close",
       "attachFile": "Attach file",
+      "mailboxLabel": "Mailbox",
       "changeSignature": "Change signature",
       "removeSignature": "Remove signature"
     },

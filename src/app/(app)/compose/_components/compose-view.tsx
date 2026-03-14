@@ -208,31 +208,47 @@ export function ComposeView({
   return (
     <div className="flex flex-col h-full bg-background">
       <div className="flex flex-col flex-1 min-h-0 mx-auto w-full max-w-5xl px-[10px] md:px-6">
-      {/* ── Header ── */}
-      <div className="flex h-12 shrink-0 items-center justify-between border-b border-border">
-        <h1 className="text-sm font-semibold text-foreground">{t("title")}</h1>
-        <div className="flex items-center gap-2">
-          {/* From account selector */}
+
+        {/* ── Page header: title + close ── */}
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-border">
+          <h1 className="text-sm font-semibold text-foreground">{t("title")}</h1>
+          <button
+            type="button"
+            aria-label={t("close")}
+            onClick={() => router.back()}
+            className="flex items-center justify-center min-w-9 min-h-9 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* ── Mailbox selector (above card) ── */}
+        <div className="flex items-center gap-3 pt-4 pb-3 shrink-0">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            {t("mailboxLabel")}
+          </span>
           <Popover open={fromPickerOpen} onOpenChange={setFromPickerOpen}>
             <PopoverTrigger asChild>
               <button
                 type="button"
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-zinc-700 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-zinc-700 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors"
               >
                 <span
                   className="w-2 h-2 rounded-full shrink-0"
                   style={{ backgroundColor: fromAccount?.color ?? "#888" }}
                 />
-                <span className="max-w-[140px] truncate text-xs">
-                  {fromAccount?.name ?? fromAccount?.email}
+                <span className="max-w-[200px] truncate text-xs">
+                  {fromAccount?.name
+                    ? `${fromAccount.name} — ${fromAccount.email}`
+                    : (fromAccount?.email ?? "")}
                 </span>
                 <ChevronDown className="h-3 w-3 text-zinc-500" />
               </button>
             </PopoverTrigger>
             <PopoverContent
               side="bottom"
-              align="end"
-              className="w-60 p-1 bg-zinc-900 border-zinc-800"
+              align="start"
+              className="w-64 p-1 bg-zinc-900 border-zinc-800"
             >
               {mailAccounts.map((account) => (
                 <button
@@ -263,207 +279,201 @@ export function ComposeView({
               ))}
             </PopoverContent>
           </Popover>
-
-          {/* Close */}
-          <button
-            type="button"
-            aria-label={t("close")}
-            onClick={() => router.back()}
-            className="flex items-center justify-center min-w-9 min-h-9 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
-      </div>
 
-      {/* ── To: field ── */}
-      <div className="relative flex items-start gap-3 px-4 py-3 border-b border-border min-h-[48px]">
-        <span className="text-sm font-medium text-muted-foreground shrink-0 pt-0.5">
-          {t("toLabel")}
-        </span>
-        <div className="flex-1 flex flex-wrap gap-1.5 items-center min-w-0">
-          {toRecipients.map((r) => (
-            <span
-              key={r}
-              className="flex items-center gap-1 bg-zinc-800 text-zinc-200 text-xs px-2 py-0.5 rounded-full"
-            >
-              {r}
-              <button
-                type="button"
-                onClick={() => removeRecipient(r)}
-                className="text-zinc-500 hover:text-zinc-300 transition-colors"
-              >
-                <X className="h-3 w-3" />
-              </button>
+        {/* ── Card container ── */}
+        <div className="flex flex-col flex-1 min-h-0 mb-4 border border-border rounded-2xl bg-zinc-900/40 overflow-hidden">
+
+          {/* To: field */}
+          <div className="relative flex items-start gap-3 px-4 py-3 border-b border-zinc-800 min-h-[48px] shrink-0">
+            <span className="text-sm font-medium text-muted-foreground shrink-0 pt-0.5">
+              {t("toLabel")}
             </span>
-          ))}
-          <input
-            ref={toInputRef}
-            type="text"
-            value={toInput}
-            onChange={(e) => setToInput(e.target.value)}
-            onKeyDown={handleToKeyDown}
-            placeholder={toRecipients.length === 0 ? t("toPlaceholder") : ""}
-            className="flex-1 min-w-32 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
-          />
-        </div>
-
-        {/* Autocomplete dropdown */}
-        {suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 z-20 mt-0 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-hidden">
-            {suggestions.map((s) => (
-              <button
-                key={s.address}
-                type="button"
-                onMouseDown={(e) => {
-                  e.preventDefault(); // prevent input blur
-                  addRecipient(s.address);
-                }}
-                className="flex items-center gap-3 w-full px-4 py-2.5 text-left hover:bg-zinc-800 transition-colors"
-              >
-                <div className="flex flex-col min-w-0">
-                  {s.name && (
-                    <span className="text-sm text-foreground truncate">{s.name}</span>
-                  )}
-                  <span className="text-xs text-muted-foreground truncate">{s.address}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── Subject ── */}
-      <div className="flex items-center gap-3 px-4 border-b border-border">
-        <span className="text-sm font-medium text-muted-foreground shrink-0">
-          {t("subjectLabel")}
-        </span>
-        <input
-          type="text"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          placeholder={t("subjectPlaceholder")}
-          className="flex-1 py-3 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
-        />
-      </div>
-
-      {/* ── Body ── */}
-      <textarea
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        onKeyDown={handleBodyKeyDown}
-        placeholder={t("bodyPlaceholder")}
-        className="flex-1 min-h-0 w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 resize-none outline-none px-4 py-4 leading-relaxed"
-      />
-
-      {/* ── Signature strip ── */}
-      {signatures.length > 0 && (
-        <div className="border-t border-zinc-800 px-4 py-2.5 flex items-start gap-2 shrink-0">
-          <p className="flex-1 text-xs text-zinc-500 whitespace-pre-wrap line-clamp-3">
-            {activeSignature?.content ?? ""}
-          </p>
-          <div className="flex items-center gap-1 shrink-0">
-            <Popover open={sigPickerOpen} onOpenChange={setSigPickerOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  aria-label={t("changeSignature")}
-                  className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+            <div className="flex-1 flex flex-wrap gap-1.5 items-center min-w-0">
+              {toRecipients.map((r) => (
+                <span
+                  key={r}
+                  className="flex items-center gap-1 bg-zinc-800 text-zinc-200 text-xs px-2 py-0.5 rounded-full"
                 >
-                  <ChevronDown className="h-3.5 w-3.5" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent
-                side="top"
-                align="end"
-                className="w-48 p-1 bg-zinc-900 border-zinc-800"
-              >
-                <div className="flex flex-col">
-                  {signatures.map((sig) => (
-                    <button
-                      key={sig.id}
-                      type="button"
-                      onClick={() => {
-                        setActiveSignatureId(sig.id);
-                        setSigPickerOpen(false);
-                      }}
-                      className="flex items-center gap-2 px-3 py-1.5 text-sm text-left rounded hover:bg-zinc-800 transition-colors"
-                    >
-                      <span
-                        className={
-                          sig.id === activeSignatureId
-                            ? "text-zinc-100 font-medium"
-                            : "text-zinc-400"
-                        }
-                      >
-                        {sig.name}
-                      </span>
-                    </button>
-                  ))}
-                  {activeSignatureId && (
-                    <>
-                      <div className="h-px bg-zinc-800 my-1" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveSignatureId(null);
-                          setSigPickerOpen(false);
-                        }}
-                        className="px-3 py-1.5 text-sm text-left text-zinc-500 hover:text-zinc-300 rounded hover:bg-zinc-800 transition-colors"
-                      >
-                        {t("removeSignature")}
-                      </button>
-                    </>
-                  )}
-                </div>
-              </PopoverContent>
-            </Popover>
-            {activeSignatureId && (
-              <button
-                type="button"
-                aria-label={t("removeSignature")}
-                onClick={() => setActiveSignatureId(null)}
-                className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+                  {r}
+                  <button
+                    type="button"
+                    onClick={() => removeRecipient(r)}
+                    className="text-zinc-500 hover:text-zinc-300 transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+              <input
+                ref={toInputRef}
+                type="text"
+                value={toInput}
+                onChange={(e) => setToInput(e.target.value)}
+                onKeyDown={handleToKeyDown}
+                placeholder={toRecipients.length === 0 ? t("toPlaceholder") : ""}
+                className="flex-1 min-w-32 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
+              />
+            </div>
+
+            {/* Autocomplete dropdown */}
+            {suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-20 mt-0 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-hidden">
+                {suggestions.map((s) => (
+                  <button
+                    key={s.address}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault(); // prevent input blur
+                      addRecipient(s.address);
+                    }}
+                    className="flex items-center gap-3 w-full px-4 py-2.5 text-left hover:bg-zinc-800 transition-colors"
+                  >
+                    <div className="flex flex-col min-w-0">
+                      {s.name && (
+                        <span className="text-sm text-foreground truncate">{s.name}</span>
+                      )}
+                      <span className="text-xs text-muted-foreground truncate">{s.address}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
-        </div>
-      )}
 
-      {/* ── Toolbar ── */}
-      <div
-        className="border-t border-border px-3 py-2 flex items-center justify-between shrink-0"
-        style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
-      >
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            aria-label={t("attachFile")}
-            className="flex items-center justify-center min-w-9 min-h-9 rounded text-muted-foreground hover:text-foreground hover:bg-zinc-800 transition-colors"
+          {/* Subject */}
+          <div className="flex items-center gap-3 px-4 border-b border-zinc-800 shrink-0">
+            <span className="text-sm font-medium text-muted-foreground shrink-0">
+              {t("subjectLabel")}
+            </span>
+            <input
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder={t("subjectPlaceholder")}
+              className="flex-1 py-3 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none"
+            />
+          </div>
+
+          {/* Body */}
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            onKeyDown={handleBodyKeyDown}
+            placeholder={t("bodyPlaceholder")}
+            className="flex-1 min-h-0 w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 resize-none outline-none px-4 py-4 leading-relaxed"
+          />
+
+          {/* Signature strip */}
+          {signatures.length > 0 && (
+            <div className="border-t border-zinc-800 px-4 py-2.5 flex items-start gap-2 shrink-0">
+              <p className="flex-1 text-xs text-zinc-500 whitespace-pre-wrap line-clamp-3">
+                {activeSignature?.content ?? ""}
+              </p>
+              <div className="flex items-center gap-1 shrink-0">
+                <Popover open={sigPickerOpen} onOpenChange={setSigPickerOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label={t("changeSignature")}
+                      className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+                    >
+                      <ChevronDown className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    side="top"
+                    align="end"
+                    className="w-48 p-1 bg-zinc-900 border-zinc-800"
+                  >
+                    <div className="flex flex-col">
+                      {signatures.map((sig) => (
+                        <button
+                          key={sig.id}
+                          type="button"
+                          onClick={() => {
+                            setActiveSignatureId(sig.id);
+                            setSigPickerOpen(false);
+                          }}
+                          className="flex items-center gap-2 px-3 py-1.5 text-sm text-left rounded hover:bg-zinc-800 transition-colors"
+                        >
+                          <span
+                            className={
+                              sig.id === activeSignatureId
+                                ? "text-zinc-100 font-medium"
+                                : "text-zinc-400"
+                            }
+                          >
+                            {sig.name}
+                          </span>
+                        </button>
+                      ))}
+                      {activeSignatureId && (
+                        <>
+                          <div className="h-px bg-zinc-800 my-1" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveSignatureId(null);
+                              setSigPickerOpen(false);
+                            }}
+                            className="px-3 py-1.5 text-sm text-left text-zinc-500 hover:text-zinc-300 rounded hover:bg-zinc-800 transition-colors"
+                          >
+                            {t("removeSignature")}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                {activeSignatureId && (
+                  <button
+                    type="button"
+                    aria-label={t("removeSignature")}
+                    onClick={() => setActiveSignatureId(null)}
+                    className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Toolbar */}
+          <div
+            className="border-t border-zinc-800 px-3 py-2 flex items-center justify-between shrink-0"
+            style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
           >
-            <Paperclip className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleSaveDraft()}
-            disabled={isSaving}
-            className="px-2 py-1 text-xs text-zinc-400 hover:text-zinc-200 rounded hover:bg-zinc-800 transition-colors disabled:opacity-50"
-          >
-            {isSaving ? t("saving") : t("saveDraft")}
-          </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                aria-label={t("attachFile")}
+                className="flex items-center justify-center min-w-9 min-h-9 rounded text-muted-foreground hover:text-foreground hover:bg-zinc-800 transition-colors"
+              >
+                <Paperclip className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleSaveDraft()}
+                disabled={isSaving}
+                className="px-2 py-1 text-xs text-zinc-400 hover:text-zinc-200 rounded hover:bg-zinc-800 transition-colors disabled:opacity-50"
+              >
+                {isSaving ? t("saving") : t("saveDraft")}
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => void handleSend()}
+              disabled={!canSend || isSending}
+              aria-label={isSending ? t("sending") : t("sendButton")}
+              className="flex items-center justify-center min-w-9 min-h-9 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 transition-colors"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={() => void handleSend()}
-          disabled={!canSend || isSending}
-          aria-label={isSending ? t("sending") : t("sendButton")}
-          className="flex items-center justify-center min-w-9 min-h-9 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 transition-colors"
-        >
-          <Send className="h-3.5 w-3.5" />
-        </button>
-      </div>
+
       </div>
     </div>
   );
