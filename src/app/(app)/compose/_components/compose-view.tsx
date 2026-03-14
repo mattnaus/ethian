@@ -10,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
 import { saveComposeDraftAction, sendNewEmailAction } from "../_actions/compose";
 
 // ---------------------------------------------------------------------------
@@ -83,7 +84,8 @@ export function ComposeView({
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [fromPickerOpen, setFromPickerOpen] = useState(false);
+  const [fromPickerOpenDesktop, setFromPickerOpenDesktop] = useState(false);
+  const [fromPickerOpenMobile, setFromPickerOpenMobile] = useState(false);
   const [sigPickerOpen, setSigPickerOpen] = useState(false);
 
   // To: autocomplete
@@ -139,7 +141,6 @@ export function ComposeView({
     }
   }
 
-  // Cmd/Ctrl+Enter to send
   function handleBodyKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
       e.preventDefault();
@@ -205,87 +206,133 @@ export function ComposeView({
 
   const canSend = body.trim().length > 0 && toRecipients.length > 0;
 
-  return (
-    <div className="flex flex-col h-full bg-background">
-      <div className="flex flex-col flex-1 min-h-0 mx-auto w-full max-w-5xl px-[10px] md:px-6">
-
-        {/* ── Page header: title + close ── */}
-        <div className="flex h-12 shrink-0 items-center justify-between border-b border-border">
-          <h1 className="text-sm font-semibold text-foreground">{t("title")}</h1>
+  function AccountPickerContent({ onClose }: { onClose: () => void }) {
+    return (
+      <>
+        {mailAccounts.map((account) => (
           <button
+            key={account.id}
             type="button"
-            aria-label={t("close")}
-            onClick={() => router.back()}
-            className="flex items-center justify-center min-w-9 min-h-9 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+            onClick={() => {
+              setFromAccountId(account.id);
+              onClose();
+            }}
+            className="flex items-center gap-2.5 w-full px-3 py-2 rounded hover:bg-zinc-800 transition-colors"
           >
-            <X className="h-4 w-4" />
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: account.color }}
+            />
+            <div className="flex flex-col items-start min-w-0 flex-1">
+              <span className="text-sm text-zinc-200 font-medium truncate w-full">
+                {account.name}
+              </span>
+              <span className="text-xs text-zinc-500 truncate w-full">
+                {account.email}
+              </span>
+            </div>
+            {account.id === fromAccountId && (
+              <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+            )}
           </button>
+        ))}
+      </>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full px-[10px] py-5 md:px-6 md:py-8">
+      <div className="mx-auto w-full max-w-5xl flex flex-col flex-1 min-h-0">
+
+        {/* ── Desktop top bar ── */}
+        <div className="hidden md:block mb-4">
+          <div className="relative flex items-center justify-between h-9">
+            <div />
+
+            {/* Center: Mailbox selector */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center">
+              <Popover open={fromPickerOpenDesktop} onOpenChange={setFromPickerOpenDesktop}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 px-3 py-1.5 h-9 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors text-sm"
+                  >
+                    <span className="text-foreground/70">{t("mailboxLabel")}</span>
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: fromAccount?.color ?? "#888" }}
+                    />
+                    <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  side="bottom"
+                  align="center"
+                  className="w-64 p-1 bg-zinc-900 border-zinc-800"
+                >
+                  <AccountPickerContent onClose={() => setFromPickerOpenDesktop(false)} />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Right: Close */}
+            <button
+              type="button"
+              aria-label={t("close")}
+              onClick={() => router.back()}
+              className="flex items-center justify-center min-w-9 min-h-9 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
-        {/* ── Mailbox selector (above card) ── */}
-        <div className="flex items-center gap-3 pt-4 pb-3 shrink-0">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            {t("mailboxLabel")}
-          </span>
-          <Popover open={fromPickerOpen} onOpenChange={setFromPickerOpen}>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-zinc-700 text-sm text-zinc-300 hover:bg-zinc-800 transition-colors"
-              >
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: fromAccount?.color ?? "#888" }}
-                />
-                <span className="max-w-[200px] truncate text-xs">
-                  {fromAccount?.name
-                    ? `${fromAccount.name} — ${fromAccount.email}`
-                    : (fromAccount?.email ?? "")}
-                </span>
-                <ChevronDown className="h-3 w-3 text-zinc-500" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent
-              side="bottom"
-              align="start"
-              className="w-64 p-1 bg-zinc-900 border-zinc-800"
-            >
-              {mailAccounts.map((account) => (
+        {/* ── Mobile top bar ── */}
+        <div className="md:hidden mb-4">
+          <div className="flex items-center gap-2">
+            <MobileMenuButton className="-ml-1 mr-auto" />
+            <Popover open={fromPickerOpenMobile} onOpenChange={setFromPickerOpenMobile}>
+              <PopoverTrigger asChild>
                 <button
-                  key={account.id}
                   type="button"
-                  onClick={() => {
-                    setFromAccountId(account.id);
-                    setFromPickerOpen(false);
-                  }}
-                  className="flex items-center gap-2.5 w-full px-3 py-2 rounded hover:bg-zinc-800 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 h-11 rounded-full border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
                 >
+                  <span className="text-sm text-foreground/70">{t("mailboxLabel")}</span>
                   <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: account.color }}
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: fromAccount?.color ?? "#888" }}
                   />
-                  <div className="flex flex-col items-start min-w-0 flex-1">
-                    <span className="text-sm text-zinc-200 font-medium truncate w-full">
-                      {account.name}
-                    </span>
-                    <span className="text-xs text-zinc-500 truncate w-full">
-                      {account.email}
-                    </span>
-                  </div>
-                  {account.id === fromAccountId && (
-                    <Check className="h-3.5 w-3.5 text-primary shrink-0" />
-                  )}
                 </button>
-              ))}
-            </PopoverContent>
-          </Popover>
+              </PopoverTrigger>
+              <PopoverContent
+                side="bottom"
+                align="start"
+                className="w-[calc(100vw-20px)] p-1 bg-zinc-900 border-zinc-800"
+              >
+                <AccountPickerContent onClose={() => setFromPickerOpenMobile(false)} />
+              </PopoverContent>
+            </Popover>
+            <button
+              type="button"
+              aria-label={t("close")}
+              onClick={() => router.back()}
+              className="flex items-center justify-center min-w-11 min-h-11 rounded-full text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* ── Card container ── */}
-        <div className="flex flex-col flex-1 min-h-0 mb-4 border border-border rounded-2xl bg-zinc-900/40 overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 border border-border rounded-2xl bg-zinc-900/40 overflow-hidden">
+
+          {/* Container header */}
+          <div className="flex items-center px-[10px] md:px-4 py-3 mb-1 shrink-0">
+            <h2 className="text-2xl font-semibold text-foreground">{t("title")}</h2>
+          </div>
 
           {/* To: field */}
-          <div className="relative flex items-start gap-3 px-4 py-3 border-b border-zinc-800 min-h-[48px] shrink-0">
+          <div className="relative flex items-start gap-3 px-4 py-3 border-t border-zinc-800 min-h-[48px] shrink-0">
             <span className="text-sm font-medium text-muted-foreground shrink-0 pt-0.5">
               {t("toLabel")}
             </span>
@@ -318,13 +365,13 @@ export function ComposeView({
 
             {/* Autocomplete dropdown */}
             {suggestions.length > 0 && (
-              <div className="absolute top-full left-0 right-0 z-20 mt-0 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-hidden">
+              <div className="absolute top-full left-0 right-0 z-20 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-hidden">
                 {suggestions.map((s) => (
                   <button
                     key={s.address}
                     type="button"
                     onMouseDown={(e) => {
-                      e.preventDefault(); // prevent input blur
+                      e.preventDefault();
                       addRecipient(s.address);
                     }}
                     className="flex items-center gap-3 w-full px-4 py-2.5 text-left hover:bg-zinc-800 transition-colors"
@@ -342,7 +389,7 @@ export function ComposeView({
           </div>
 
           {/* Subject */}
-          <div className="flex items-center gap-3 px-4 border-b border-zinc-800 shrink-0">
+          <div className="flex items-center gap-3 px-4 border-t border-zinc-800 shrink-0">
             <span className="text-sm font-medium text-muted-foreground shrink-0">
               {t("subjectLabel")}
             </span>
@@ -361,7 +408,7 @@ export function ComposeView({
             onChange={(e) => setBody(e.target.value)}
             onKeyDown={handleBodyKeyDown}
             placeholder={t("bodyPlaceholder")}
-            className="flex-1 min-h-0 w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 resize-none outline-none px-4 py-4 leading-relaxed"
+            className="flex-1 min-h-0 w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 resize-none outline-none px-4 py-4 border-t border-zinc-800 leading-relaxed"
           />
 
           {/* Signature strip */}
