@@ -304,10 +304,19 @@ export function EmailDetailView({
     const el = scrollContainerRef.current;
     if (!el) return;
     if (isFirstRender.current) {
-      el.scrollTop = el.scrollHeight;
       isFirstRender.current = false;
+      // Double rAF: first frame commits layout, second reads the final scrollHeight
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+          }
+        });
+      });
     } else {
-      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      requestAnimationFrame(() => {
+        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      });
     }
   }, [optimisticMessages.length]);
 
