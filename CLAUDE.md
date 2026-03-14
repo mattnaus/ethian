@@ -417,12 +417,13 @@ Every change — no matter how small — is only done when all of the following 
 2. **Run `npm run build`** — the build must pass with zero type errors before committing.
 3. **Run existing e2e tests** (`npm run test:e2e`) — all tests must pass before committing. Fix any regressions.
 4. Code (and any lockfile changes) is committed and pushed.
-5. The **reviewer sub-agent** has been invoked (`/reviewer` or via the Agent tool with `.claude/agents/reviewer.md`).
-6. Review findings are saved to `.claude/reviews/YYYY-MM-DD/[name]-[short-commit-hash].md`.
-7. The review file and any updated `.claude/work/` files are committed and pushed.
-8. **Wait for user approval** before implementing any reviewer suggestions — do not auto-fix Critical, Warning, or Suggestion findings. Present the review summary to the user and implement only what they explicitly approve.
+5. **Restart the dev server** — run `pkill -f "next dev" || true && npm run dev &` to restart `npm run dev` in the background. The running dev server frequently breaks after file changes and requires a restart to reflect the latest code. This is a temporary step until a proper deployment pipeline is in place.
+6. The **reviewer sub-agent** has been invoked (`/reviewer` or via the Agent tool with `.claude/agents/reviewer.md`).
+7. Review findings are saved to `.claude/reviews/YYYY-MM-DD/[name]-[short-commit-hash].md`.
+8. The review file and any updated `.claude/work/` files are committed and pushed.
+9. **Wait for user approval** before implementing any reviewer suggestions — do not auto-fix Critical, Warning, or Suggestion findings. Present the review summary to the user and implement only what they explicitly approve.
 
-**Skip condition:** Steps 5–7 are skipped **only** when the user's prompt explicitly ends with `- no review`.
+**Skip condition:** Steps 6–8 are skipped **only** when the user's prompt explicitly ends with `- no review`.
 
 **Note on new e2e tests:** The reviewer documents what new e2e tests are needed (saved to `.claude/e2e_tests_to_make/`). Do not write new test specs as part of the feature work — these will be implemented in dedicated sessions.
 
