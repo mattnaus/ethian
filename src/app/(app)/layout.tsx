@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { Sidebar } from "./_components/sidebar";
+import { MobileNavProvider } from "./_components/mobile-nav-context";
 
 export default async function AppLayout({
   children,
@@ -14,12 +15,13 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-zinc-950">
-      <Sidebar />
-      {/* pb-16 on mobile reserves space for the fixed bottom tab bar */}
-      <main className="flex flex-1 flex-col overflow-y-auto pb-16 md:pb-0">
-        {children}
-      </main>
-    </div>
+    <MobileNavProvider>
+      <div className="flex h-screen overflow-hidden bg-zinc-950">
+        <Sidebar />
+        <main className="flex flex-1 flex-col overflow-y-auto">
+          {children}
+        </main>
+      </div>
+    </MobileNavProvider>
   );
 }

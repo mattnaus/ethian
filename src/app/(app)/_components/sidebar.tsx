@@ -78,36 +78,7 @@ function DesktopNavItem({
 }
 
 // ---------------------------------------------------------------------------
-// Mobile bottom tab item
-// ---------------------------------------------------------------------------
-
-function TabItem({
-  href,
-  label,
-  icon: Icon,
-}: {
-  href: string;
-  label: string;
-  icon: React.ElementType;
-}) {
-  const active = useIsActive(href);
-
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "flex flex-1 flex-col items-center justify-center gap-1 min-h-11 transition-colors",
-        active ? "text-primary" : "text-zinc-500"
-      )}
-    >
-      <Icon className="h-5 w-5 shrink-0" />
-      <span className="text-[10px] leading-none">{label}</span>
-    </Link>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Sidebar (desktop rail + mobile bottom tab bar)
+// Sidebar (desktop rail only — mobile uses the MobileNavProvider drawer)
 // ---------------------------------------------------------------------------
 
 export function Sidebar() {
@@ -145,13 +116,6 @@ export function Sidebar() {
       ? "bg-zinc-900 text-primary"
       : "text-zinc-500 hover:bg-zinc-800/60 hover:text-zinc-300"
   );
-
-  const mobileItems = [
-    { href: "/inbox", label: t("inbox"), icon: Inbox },
-    { href: "/gatekeeper", label: t("gatekeeper"), icon: ShieldQuestion },
-    { href: "/sent", label: t("sent"), icon: Send },
-    { href: "/settings", label: t("settings"), icon: Settings },
-  ];
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -243,16 +207,6 @@ export function Sidebar() {
           )}
         </div>
       </aside>
-
-      {/* ── Mobile: bottom tab bar (hidden on desktop) ── */}
-      <nav
-        className="fixed bottom-0 inset-x-0 z-50 flex md:hidden border-t border-zinc-800 bg-zinc-950"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      >
-        {mobileItems.map(({ href, label, icon }) => (
-          <TabItem key={href} href={href} label={label} icon={icon} />
-        ))}
-      </nav>
     </TooltipProvider>
   );
 }

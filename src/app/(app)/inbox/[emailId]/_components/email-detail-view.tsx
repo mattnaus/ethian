@@ -7,6 +7,7 @@ import { ArrowLeft, Send, Paperclip, MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { safeColor, getInitials } from "@/lib/email-display";
+import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -309,8 +310,7 @@ export function EmailDetailView({
   const firstUnreadIndex = optimisticMessages.findIndex((m) => !m.isRead);
 
   return (
-    // pb-16 md:pb-0 reserves space for the mobile bottom tab bar
-    <div className="flex flex-col h-full pb-16 md:pb-0">
+    <div className="flex flex-col h-full">
       <div className="flex-1 flex flex-col mx-auto w-full max-w-5xl px-[10px] md:px-6 min-h-0">
 
         {/* Header */}
@@ -342,7 +342,7 @@ export function EmailDetailView({
 
           <div className="flex items-center gap-1 shrink-0">
             <span
-              className="text-xs font-medium px-2.5 py-1 rounded-full border"
+              className="hidden sm:inline-block text-xs font-medium px-2.5 py-1 rounded-full border"
               style={{
                 color: ringColor,
                 borderColor: ringColor + "40",
@@ -354,10 +354,11 @@ export function EmailDetailView({
             <button
               type="button"
               aria-label={t("moreOptions")}
-              className="flex items-center justify-center min-w-11 min-h-11 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+              className="hidden md:flex items-center justify-center min-w-11 min-h-11 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
             >
               <MoreHorizontal className="h-4 w-4" />
             </button>
+            <MobileMenuButton />
           </div>
         </header>
 

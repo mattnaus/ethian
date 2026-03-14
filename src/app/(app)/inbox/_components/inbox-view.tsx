@@ -20,6 +20,7 @@ import { EmailCard, type InboxEmail } from "./email-card";
 import { SearchCommand } from "./search-command";
 import { useTranslations } from "next-intl";
 import { safeColor } from "@/lib/email-display";
+import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
 
 interface MailAccountFilter {
   id: string;
@@ -352,6 +353,7 @@ export function InboxView({
             </button>
           )}
           <div className="flex items-center justify-center gap-2">
+            <MobileMenuButton className="-ml-1 mr-auto" />
             {accounts.length > 0 && (
               <Popover open={filterOpenMobile} onOpenChange={setFilterOpenMobile}>
                 <PopoverTrigger asChild>
@@ -457,7 +459,7 @@ export function InboxView({
         </div>
 
         {/* Mobile FAB — Compose */}
-        <div className="md:hidden fixed bottom-20 right-4 z-50">
+        <div className="md:hidden fixed bottom-6 right-4 z-50">
           <Button className="h-14 w-14 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg flex items-center justify-center p-0">
             <PenLine className="h-5 w-5" />
           </Button>

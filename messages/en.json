@@ -52,7 +52,9 @@
     "brandName": "Ethian",
     "collapseSidebar": "Collapse sidebar",
     "expandSidebar": "Expand sidebar",
-    "expand": "Expand"
+    "expand": "Expand",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "settings": {
     "heading": "Settings",
