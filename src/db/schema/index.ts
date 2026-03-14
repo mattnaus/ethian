@@ -49,6 +49,15 @@ export type {
 } from "./senders";
 
 // ---------------------------------------------------------------------------
+// Signatures
+// ---------------------------------------------------------------------------
+export {
+  signatures,
+  signaturesRelations,
+} from "./signatures";
+export type { Signature, NewSignature } from "./signatures";
+
+// ---------------------------------------------------------------------------
 // Combined schema object (for Drizzle's `db` instance)
 // ---------------------------------------------------------------------------
 import {
@@ -76,6 +85,11 @@ import {
   screenerQueueRelations as _screenerQueueRelations,
 } from "./senders";
 
+import {
+  signatures as _signatures,
+  signaturesRelations as _signaturesRelations,
+} from "./signatures";
+
 export const schema = {
   // Enums
   syncStatusEnum: _syncStatusEnum,
@@ -90,6 +104,7 @@ export const schema = {
   emailAttachments: _emailAttachments,
   senderRules: _senderRules,
   screenerQueue: _screenerQueue,
+  signatures: _signatures,
 
   // Relations
   usersRelations: _usersRelations,
@@ -98,4 +113,5 @@ export const schema = {
   emailAttachmentsRelations: _emailAttachmentsRelations,
   senderRulesRelations: _senderRulesRelations,
   screenerQueueRelations: _screenerQueueRelations,
+  signaturesRelations: _signaturesRelations,
 };

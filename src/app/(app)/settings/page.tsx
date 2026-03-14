@@ -1,9 +1,10 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { db, mailAccounts } from "@/db";
+import { db, mailAccounts, signatures } from "@/db";
 import { eq } from "drizzle-orm";
 import { AccountsList } from "./_components/accounts-list";
+import { SignaturesList } from "./_components/signatures-list";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -11,11 +12,18 @@ export default async function SettingsPage() {
   const userId = session.user.id;
   const t = await getTranslations("settings");
 
-  const accounts = await db
-    .select()
-    .from(mailAccounts)
-    .where(eq(mailAccounts.userId, userId))
-    .orderBy(mailAccounts.createdAt);
+  const [accounts, sigs] = await Promise.all([
+    db
+      .select()
+      .from(mailAccounts)
+      .where(eq(mailAccounts.userId, userId))
+      .orderBy(mailAccounts.createdAt),
+    db
+      .select()
+      .from(signatures)
+      .where(eq(signatures.userId, userId))
+      .orderBy(signatures.createdAt),
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-2xl px-6 py-10">
@@ -25,6 +33,10 @@ export default async function SettingsPage() {
       </div>
 
       <AccountsList accounts={accounts} />
+
+      <div className="mt-10">
+        <SignaturesList signatures={sigs} />
+      </div>
     </div>
   );
 }

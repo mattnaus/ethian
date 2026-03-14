@@ -115,6 +115,28 @@
       "passwordRequired": "Password is required",
       "imapPortInvalid": "IMAP port must be a number between 1 and 65535",
       "smtpPortInvalid": "SMTP port must be a number between 1 and 65535"
+    },
+    "signatures": {
+      "heading": "Signatures",
+      "subheading": "Add a signature that appears below your replies.",
+      "addSignature": "Add signature",
+      "noSignatures": "No signatures yet.",
+      "defaultBadge": "Default",
+      "editAriaLabel": "Edit {name}",
+      "deleteAriaLabel": "Delete {name}",
+      "deleteConfirm": "Delete signature \"{name}\"?"
+    },
+    "signatureForm": {
+      "addTitle": "Add signature",
+      "editTitle": "Edit signature",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Work, Personal",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Best,\nYour Name",
+      "isDefaultLabel": "Set as default",
+      "cancelButton": "Cancel",
+      "saveButton": "Save",
+      "addButton": "Add signature"
     }
   },
   "colors": {
@@ -192,7 +214,16 @@
       "moreOptions": "More options",
       "sending": "Sending\u2026",
       "sendFailed": "Failed to send. Please try again.",
-      "sendPartialWarning": "Sent, but couldn\u2019t be saved locally. It may not appear after reload."
+      "sendPartialWarning": "Sent, but couldn\u2019t be saved locally. It may not appear after reload.",
+      "saveDraft": "Save draft",
+      "saving": "Saving\u2026",
+      "draftLabel": "Draft",
+      "discardDraft": "Discard",
+      "editDraft": "Edit",
+      "sendDraft": "Send",
+      "draftSaved": "Draft saved",
+      "changeSignature": "Change signature",
+      "removeSignature": "Remove signature"
     }
   }
 }

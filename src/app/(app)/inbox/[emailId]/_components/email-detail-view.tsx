@@ -1,13 +1,17 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { sendReplyAction } from "../_actions/reply";
+import { deleteDraftAction, sendDraftAction } from "../_actions/draft";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Send, Paperclip, MoreHorizontal } from "lucide-react";
+import { ArrowLeft, Paperclip, MoreHorizontal, Trash2, Pencil, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { safeColor, getInitials, formatTime, formatFullDate } from "@/lib/email-display";
 import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { ReplyBox } from "./reply-box";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -40,6 +44,14 @@ export type ThreadMessage = {
   isRead: boolean;
   accountColor: string;
   attachments: Array<{ id: string; filename: string; contentType: string; size: number }>;
+  isDraft?: boolean;
+};
+
+type Signature = {
+  id: string;
+  name: string;
+  content: string;
+  isDefault: boolean;
 };
 
 // ---------------------------------------------------------------------------
@@ -188,6 +200,77 @@ function MessageBubble({
 }
 
 // ---------------------------------------------------------------------------
+// DraftBubble
+// ---------------------------------------------------------------------------
+
+function DraftBubble({
+  message,
+  onEdit,
+  onDiscard,
+  onSend,
+}: {
+  message: ThreadMessage;
+  onEdit: () => void;
+  onDiscard: () => Promise<void>;
+  onSend: () => Promise<void>;
+}) {
+  const t = useTranslations("pages.emailDetail");
+  const [isDiscarding, setIsDiscarding] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const body = message.bodyText ?? "";
+
+  return (
+    <div className="flex flex-row-reverse items-end gap-2.5">
+      <div className="flex flex-col gap-1 max-w-[90%] md:max-w-[72%] items-end">
+        <div className="border border-dashed border-zinc-700 rounded-2xl px-4 py-3 bg-zinc-900/50">
+          <span className="text-xs border border-zinc-700 text-zinc-500 rounded-full px-2 py-0.5 inline-block mb-2">
+            {t("draftLabel")}
+          </span>
+          <p className="text-sm whitespace-pre-wrap text-foreground">{body}</p>
+          <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-dashed border-zinc-800">
+            <button
+              type="button"
+              onClick={() => {
+                setIsDiscarding(true);
+                void onDiscard().finally(() => setIsDiscarding(false));
+              }}
+              disabled={isDiscarding}
+              className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-red-400 transition-colors disabled:opacity-50"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {t("discardDraft")}
+            </button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={onEdit}
+              className="h-7 px-2.5 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
+            >
+              <Pencil className="h-3.5 w-3.5 mr-1" />
+              {t("editDraft")}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => {
+                setIsSending(true);
+                void onSend().finally(() => setIsSending(false));
+              }}
+              disabled={isSending}
+              className="h-7 px-2.5 text-xs bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <Send className="h-3.5 w-3.5 mr-1" />
+              {t("sendDraft")}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // EmailDetailView
 // ---------------------------------------------------------------------------
 
@@ -195,24 +278,20 @@ export function EmailDetailView({
   email,
   threadMessages,
   locale,
+  signatures,
 }: {
   email: EmailDetail;
   threadMessages: ThreadMessage[];
   locale: string;
+  signatures: Signature[];
 }) {
   const router = useRouter();
   const t = useTranslations("pages.emailDetail");
   const bottomRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [reply, setReply] = useState("");
-  const [isSending, setIsSending] = useState(false);
   const [feedback, setFeedback] = useState<{ text: string; isError: boolean } | null>(null);
   const [optimisticMessages, setOptimisticMessages] = useState<ThreadMessage[]>(threadMessages);
+  const [editingDraft, setEditingDraft] = useState<{ id: string; bodyText: string } | null>(null);
   const isFirstRender = useRef(true);
-  const isMac = useMemo(() => {
-    if (typeof navigator === "undefined") return false;
-    return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
-  }, []);
 
   // Re-sync optimistic state when the server re-renders with fresh data
   useEffect(() => {
@@ -227,24 +306,7 @@ export function EmailDetailView({
     isFirstRender.current = false;
   }, [optimisticMessages.length]);
 
-  function handleInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    setReply(e.target.value);
-    e.target.style.height = "auto";
-    e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-      e.preventDefault();
-      void handleSend();
-    }
-  }
-
-  async function handleSend() {
-    const text = reply.trim();
-    if (!text || isSending) return;
-
-    // Optimistic update — append a synthetic sent message immediately
+  async function handleSend(text: string) {
     const optimistic: ThreadMessage = {
       id: crypto.randomUUID(),
       fromName: email.accountName,
@@ -258,11 +320,6 @@ export function EmailDetailView({
       attachments: [],
     };
     setOptimisticMessages((prev) => [...prev, optimistic]);
-    setReply("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
-    setIsSending(true);
     setFeedback(null);
 
     const result = await sendReplyAction({
@@ -271,16 +328,63 @@ export function EmailDetailView({
       bodyText: text,
     });
 
-    setIsSending(false);
-
     if (result.success === false) {
-      // SMTP failed — rollback optimistic message and restore draft
       setOptimisticMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
-      setReply(text);
       setFeedback({ text: t("sendFailed"), isError: true });
+      throw new Error("smtp_error");
     } else if (result.success === "partial") {
-      // SMTP sent but DB insert failed — keep optimistic message, warn user
       setFeedback({ text: t("sendPartialWarning"), isError: false });
+    }
+  }
+
+  const handleDraftSaved = useCallback((_draftId: string) => {
+    // revalidatePath in the action will trigger a server re-render
+    // which syncs optimisticMessages via the useEffect above
+  }, []);
+
+  const handleEditingDraftClear = useCallback(() => {
+    setEditingDraft(null);
+  }, []);
+
+  async function handleDiscardDraft(message: ThreadMessage) {
+    const result = await deleteDraftAction({ draftId: message.id, emailId: email.id });
+    if (result.success) {
+      setOptimisticMessages((prev) => prev.filter((m) => m.id !== message.id));
+    } else {
+      toast.error("Failed to discard draft.");
+    }
+  }
+
+  async function handleSendDraft(message: ThreadMessage) {
+    const result = await sendDraftAction({
+      draftId: message.id,
+      mailAccountId: email.mailAccountId,
+      emailId: email.id,
+    });
+
+    if (result.success === true) {
+      // Remove draft + append sent message optimistically
+      setOptimisticMessages((prev) => {
+        const withoutDraft = prev.filter((m) => m.id !== message.id);
+        const sent: ThreadMessage = {
+          id: result.sentEmailId,
+          fromName: email.accountName,
+          fromAddress: email.mailAccountEmail,
+          toAddresses: [{ address: email.fromAddress, name: email.fromName ?? undefined }],
+          bodyHtml: null,
+          bodyText: message.bodyText,
+          sentAt: result.sentAt,
+          isRead: true,
+          accountColor: email.accountColor,
+          attachments: [],
+        };
+        return [...withoutDraft, sent];
+      });
+    } else if (result.success === "partial") {
+      setOptimisticMessages((prev) => prev.filter((m) => m.id !== message.id));
+      setFeedback({ text: t("sendPartialWarning"), isError: false });
+    } else {
+      toast.error(t("sendFailed"));
     }
   }
 
@@ -294,7 +398,7 @@ export function EmailDetailView({
   const ringColor = safeColor(email.accountColor);
 
   // "New" divider before the first unread message (only if it's not the very first)
-  const firstUnreadIndex = optimisticMessages.findIndex((m) => !m.isRead);
+  const firstUnreadIndex = optimisticMessages.findIndex((m) => !m.isRead && !m.isDraft);
 
   return (
     <div className="flex flex-col h-full">
@@ -369,54 +473,40 @@ export function EmailDetailView({
                     <div className="flex-1 h-px bg-primary/40" />
                   </div>
                 )}
-                <MessageBubble message={message} isSelf={isSelf} locale={locale} />
+                {message.isDraft ? (
+                  <DraftBubble
+                    message={message}
+                    onEdit={() =>
+                      setEditingDraft({ id: message.id, bodyText: message.bodyText ?? "" })
+                    }
+                    onDiscard={() => handleDiscardDraft(message)}
+                    onSend={() => handleSendDraft(message)}
+                  />
+                ) : (
+                  <MessageBubble message={message} isSelf={isSelf} locale={locale} />
+                )}
               </div>
             );
           })}
           <div ref={bottomRef} />
         </div>
 
-        {/* Compose bar */}
-        <div className="shrink-0 py-4 border-t border-border">
-          <div className="flex items-end gap-2 bg-secondary/40 border border-border rounded-2xl px-4 py-3">
-            <button
-              type="button"
-              aria-label={t("attachFile")}
-              className="flex items-center justify-center min-w-11 min-h-11 -my-1.5 text-muted-foreground hover:text-foreground transition-colors shrink-0"
-            >
-              <Paperclip className="h-4 w-4" />
-            </button>
-            <textarea
-              ref={textareaRef}
-              value={reply}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              placeholder={t("replyPlaceholder")}
-              aria-label={t("replyPlaceholder")}
-              rows={1}
-              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none leading-relaxed min-h-[24px]"
-            />
-            <button
-              type="button"
-              onClick={() => void handleSend()}
-              disabled={!reply.trim() || isSending}
-              aria-label={isSending ? t("sending") : t("sendButton")}
-              className="flex items-center justify-center min-w-11 min-h-11 -my-1.5 p-0 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 shrink-0 transition-colors"
-            >
-              <Send className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground text-center mt-2">
-            {isMac ? t("cmdEnterToSend") : t("ctrlEnterToSend")}
+        {feedback && (
+          <p className={cn("text-xs text-center pb-2 shrink-0", feedback.isError ? "text-destructive" : "text-muted-foreground")}>
+            {feedback.text}
           </p>
-          {feedback && (
-            <p className={cn("text-xs text-center mt-1", feedback.isError ? "text-destructive" : "text-muted-foreground")}>
-              {feedback.text}
-            </p>
-          )}
-        </div>
-
+        )}
       </div>
+
+      {/* Reply box — outside the max-w container so it spans full width */}
+      <ReplyBox
+        email={email}
+        signatures={signatures}
+        onSend={handleSend}
+        editingDraft={editingDraft}
+        onDraftSaved={handleDraftSaved}
+        onEditingDraftClear={handleEditingDraftClear}
+      />
     </div>
   );
 }

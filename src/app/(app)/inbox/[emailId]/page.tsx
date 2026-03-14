@@ -3,7 +3,7 @@ import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 import { getLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { emailAttachments, emails, mailAccounts } from "@/db/schema";
+import { emailAttachments, emails, mailAccounts, signatures } from "@/db/schema";
 import { EmailDetailView, type ThreadMessage } from "./_components/email-detail-view";
 
 const UUID_RE =
@@ -22,6 +22,18 @@ export default async function EmailDetailPage({
   if (!session?.user?.id) redirect("/login");
 
   const userId = session.user.id;
+
+  // Fetch signatures for the reply box
+  const userSignatures = await db
+    .select({
+      id: signatures.id,
+      name: signatures.name,
+      content: signatures.content,
+      isDefault: signatures.isDefault,
+    })
+    .from(signatures)
+    .where(eq(signatures.userId, userId))
+    .orderBy(signatures.createdAt);
 
   // Fetch email + account color, scoped to the session user
   const [row] = await db
@@ -66,6 +78,7 @@ export default async function EmailDetailPage({
           bodyText: emails.bodyText,
           sentAt: emails.sentAt,
           isRead: emails.isRead,
+          isDraft: emails.isDraft,
           accountColor: mailAccounts.color,
         })
         .from(emails)
@@ -147,6 +160,7 @@ export default async function EmailDetailPage({
     bodyText: r.bodyText,
     sentAt: r.sentAt.toISOString(),
     isRead: r.isRead,
+    isDraft: r.isDraft,
     accountColor: r.accountColor,
     attachments: attachmentsByEmailId.get(r.id) ?? [],
   }));
@@ -171,6 +185,11 @@ export default async function EmailDetailPage({
         ];
 
   return (
-    <EmailDetailView email={email} threadMessages={finalThreadMessages} locale={locale} />
+    <EmailDetailView
+      email={email}
+      threadMessages={finalThreadMessages}
+      locale={locale}
+      signatures={userSignatures}
+    />
   );
 }
