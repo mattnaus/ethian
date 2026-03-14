@@ -59,7 +59,6 @@ export function ReplyBox({
   const [isSending, setIsSending] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [sigPickerOpen, setSigPickerOpen] = useState(false);
-  const [signatureDismissed, setSignatureDismissed] = useState(false);
 
   const defaultSig = signatures.find((s) => s.isDefault) ?? signatures[0] ?? null;
   const [activeSignatureId, setActiveSignatureId] = useState<string | null>(
@@ -127,7 +126,7 @@ export function ReplyBox({
   }
 
   function buildBodyWithSignature(text: string): string {
-    if (!activeSignature || signatureDismissed) return text;
+    if (!activeSignature) return text;
     return `${text}\n\n--\n${activeSignature.content}`;
   }
 
@@ -178,76 +177,78 @@ export function ReplyBox({
           className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 outline-none resize-none leading-relaxed px-4 pt-3 pb-1"
         />
 
-        {/* Signature strip */}
-        {activeSignature && !signatureDismissed && (
+        {/* Signature strip — always visible when signatures exist */}
+        {signatures.length > 0 && (
           <div className="border-t border-zinc-800 px-4 py-2.5 flex items-start gap-2">
             <p className="flex-1 text-xs text-zinc-500 whitespace-pre-wrap line-clamp-3">
-              {activeSignature.content}
+              {activeSignature?.content ?? ""}
             </p>
             <div className="flex items-center gap-1 shrink-0">
-              {signatures.length > 0 && (
-                <Popover open={sigPickerOpen} onOpenChange={setSigPickerOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      aria-label={t("changeSignature")}
-                      className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
-                    >
-                      <ChevronDown className="h-3.5 w-3.5" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    side="top"
-                    align="end"
-                    className="w-48 p-1 bg-zinc-900 border-zinc-800"
+              <Popover open={sigPickerOpen} onOpenChange={setSigPickerOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label={t("changeSignature")}
+                    className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
                   >
-                    <div className="flex flex-col">
-                      {signatures.map((sig) => (
-                        <button
-                          key={sig.id}
-                          type="button"
-                          onClick={() => {
-                            setActiveSignatureId(sig.id);
-                            setSignatureDismissed(false);
-                            setSigPickerOpen(false);
-                          }}
-                          className="flex items-center gap-2 px-3 py-1.5 text-sm text-left rounded hover:bg-zinc-800 transition-colors"
-                        >
-                          <span
-                            className={
-                              sig.id === activeSignatureId
-                                ? "text-zinc-100 font-medium"
-                                : "text-zinc-400"
-                            }
-                          >
-                            {sig.name}
-                          </span>
-                        </button>
-                      ))}
-                      <div className="h-px bg-zinc-800 my-1" />
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  side="top"
+                  align="end"
+                  className="w-48 p-1 bg-zinc-900 border-zinc-800"
+                >
+                  <div className="flex flex-col">
+                    {signatures.map((sig) => (
                       <button
+                        key={sig.id}
                         type="button"
                         onClick={() => {
-                          setActiveSignatureId(null);
-                          setSignatureDismissed(true);
+                          setActiveSignatureId(sig.id);
                           setSigPickerOpen(false);
                         }}
-                        className="px-3 py-1.5 text-sm text-left text-zinc-500 hover:text-zinc-300 rounded hover:bg-zinc-800 transition-colors"
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm text-left rounded hover:bg-zinc-800 transition-colors"
                       >
-                        {t("removeSignature")}
+                        <span
+                          className={
+                            sig.id === activeSignatureId
+                              ? "text-zinc-100 font-medium"
+                              : "text-zinc-400"
+                          }
+                        >
+                          {sig.name}
+                        </span>
                       </button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                    ))}
+                    {activeSignatureId && (
+                      <>
+                        <div className="h-px bg-zinc-800 my-1" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveSignatureId(null);
+                            setSigPickerOpen(false);
+                          }}
+                          className="px-3 py-1.5 text-sm text-left text-zinc-500 hover:text-zinc-300 rounded hover:bg-zinc-800 transition-colors"
+                        >
+                          {t("removeSignature")}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+              {activeSignatureId && (
+                <button
+                  type="button"
+                  aria-label={t("removeSignature")}
+                  onClick={() => setActiveSignatureId(null)}
+                  className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
               )}
-              <button
-                type="button"
-                aria-label={t("removeSignature")}
-                onClick={() => setSignatureDismissed(true)}
-                className="flex items-center justify-center min-w-9 min-h-9 rounded text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
             </div>
           </div>
         )}
