@@ -75,16 +75,11 @@ export default async function GatekeeperPage() {
       : null;
 
   return (
-    <div className="flex flex-col h-full">
-      <header className="flex h-12 items-center border-b border-zinc-800 px-6 shrink-0">
-        <h1 className="text-base font-semibold text-zinc-100">{t("title")}</h1>
-      </header>
-      <GatekeeperList
-        entries={entries}
-        emptyMessage={t("empty")}
-        showingMessage={showingMessage}
-        locale={locale}
-      />
-    </div>
+    <GatekeeperList
+      entries={entries}
+      emptyMessage={t("empty")}
+      showingMessage={showingMessage}
+      locale={locale}
+    />
   );
 }

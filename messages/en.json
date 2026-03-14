@@ -157,7 +157,13 @@
       "title": "Gatekeeper",
       "empty": "No unknown senders. Everyone here is either approved or blocked.",
       "showingOf": "Showing {shown} of {total} senders",
-      "messageCount": "{count, plural, one {# email} other {# emails}}"
+      "senderCount": "{count, plural, one {# sender} other {# senders}}",
+      "messageCount": "{count, plural, one {# email} other {# emails}}",
+      "approve": "Approve",
+      "block": "Block",
+      "feed": "Feed",
+      "paperTrail": "Paper Trail",
+      "more": "More"
     },
     "saved": {
       "comingSoon": "Saved \u2014 coming soon"
