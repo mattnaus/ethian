@@ -49,9 +49,7 @@ export function GatekeeperCard({
         "flex-1 min-w-0 bg-muted/70 border-2",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
         "md:flex-row md:items-center md:gap-4",
-        !email.isRead
-          ? "border-l-primary border-r-transparent border-t-transparent border-b-transparent"
-          : "border-transparent",
+        "border-transparent",
       )}
     >
       {/* Avatar + sender name inline (mobile) */}

@@ -336,6 +336,19 @@ Globally styled (outside any `@layer`):
 - No hover-only interactions — every affordance must work on tap.
 - Safe area: apply `env(safe-area-inset-bottom)` where relevant (drawer footer, modals).
 
+### Mobile UX verification (required)
+
+Making a screen responsive is necessary but not sufficient. Before any new page, feature, or significant UI change is considered done, **critically review it on a small screen** (375px width, simulating iPhone) and ask:
+
+- Does the layout make sense at this width, or is it just a squashed version of the desktop?
+- Are all tap targets at least 44×44px?
+- Is any content cut off or horizontally scrolling?
+- Are elements that sit side-by-side on desktop better stacked on mobile?
+- Are action buttons reachable with a thumb (bottom half of screen preferred)?
+- Does reducing screen width expose any awkward truncation, overlap, or empty space?
+
+If the desktop layout produces an awkward mobile experience, apply a **creative mobile-specific solution** — e.g. stacking buttons below their target element, using a full-width action row, or collapsing secondary controls into a sheet. Don't just apply `flex-col` and call it done.
+
 ---
 
 ## Iconography

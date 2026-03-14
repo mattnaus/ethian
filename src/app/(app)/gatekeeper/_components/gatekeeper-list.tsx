@@ -216,7 +216,7 @@ export function GatekeeperList({
 
         {/* ── Desktop top bar ── */}
         <div className="hidden md:block mb-4">
-          <div className="relative flex items-center justify-between">
+          <div className="relative flex items-center justify-between h-9">
             <div />
 
             {/* Center: Mailbox filter */}
@@ -324,23 +324,25 @@ export function GatekeeperList({
                     <div
                       key={email.id}
                       className={cn(
-                        "flex items-stretch gap-2",
+                        "flex flex-col gap-2 md:flex-row md:items-stretch",
                         pendingIds.has(email.id) && "opacity-40 pointer-events-none",
                       )}
                     >
                       <GatekeeperCard email={email} locale={locale} />
-                      <button
-                        onClick={() => handleDecision(email.id, "approved")}
-                        className="rounded-xl px-5 flex items-center justify-center bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/35 transition-colors text-sm font-medium"
-                      >
-                        {t("approve")}
-                      </button>
-                      <button
-                        onClick={() => handleDecision(email.id, "blocked")}
-                        className="rounded-xl px-5 flex items-center justify-center bg-red-600/20 text-red-400 hover:bg-red-600/35 transition-colors text-sm font-medium"
-                      >
-                        {t("block")}
-                      </button>
+                      <div className="flex gap-2 md:contents">
+                        <button
+                          onClick={() => handleDecision(email.id, "approved")}
+                          className="flex-1 md:flex-none rounded-xl px-5 min-h-[44px] md:min-h-0 flex items-center justify-center bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/35 transition-colors text-sm font-medium"
+                        >
+                          {t("approve")}
+                        </button>
+                        <button
+                          onClick={() => handleDecision(email.id, "blocked")}
+                          className="flex-1 md:flex-none rounded-xl px-5 min-h-[44px] md:min-h-0 flex items-center justify-center bg-red-600/20 text-red-400 hover:bg-red-600/35 transition-colors text-sm font-medium"
+                        >
+                          {t("block")}
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
