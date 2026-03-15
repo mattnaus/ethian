@@ -43,6 +43,7 @@
   },
   "nav": {
     "inbox": "Inbox",
+    "feed": "Feed",
     "drafts": "Drafts",
     "saved": "Saved",
     "snoozed": "Snoozed",
@@ -176,10 +177,7 @@
       "folders": {
         "inbox": "Inbox",
         "feed": "Feed",
-        "paperTrail": "Paper Trail",
-        "gatekeeper": "Gatekeeper",
-        "setAside": "Set Aside",
-        "replyLater": "Reply Later"
+        "saved": "Saved"
       }
     },
     "gatekeeper": {
@@ -190,9 +188,6 @@
       "messageCount": "{count, plural, one {# email} other {# emails}}",
       "approve": "Approve",
       "block": "Block",
-      "feed": "Feed",
-      "paperTrail": "Paper Trail",
-      "more": "More",
       "decisionFailed": "Something went wrong. Please try again."
     },
     "gatekept": {
@@ -223,7 +218,22 @@
       "showingOf": "Showing {shown} of {total} rules"
     },
     "saved": {
-      "comingSoon": "Saved \u2014 coming soon"
+      "title": "Saved",
+      "empty": "No saved emails yet.",
+      "noSubject": "(no subject)",
+      "noSender": "(unknown sender)",
+      "messageCount": "{count, plural, one {# email} other {# emails}}",
+      "searchPlaceholder": "Search saved\u2026",
+      "showingOf": "Showing {shown} of {total}"
+    },
+    "feed": {
+      "title": "Feed",
+      "empty": "No feed emails yet. Newsletters and digests will appear here.",
+      "noSubject": "(no subject)",
+      "noSender": "(unknown sender)",
+      "messageCount": "{count, plural, one {# email} other {# emails}}",
+      "searchPlaceholder": "Search feed\u2026",
+      "showingOf": "Showing {shown} of {total}"
     },
     "snoozed": {
       "comingSoon": "Snoozed \u2014 coming soon"
@@ -239,6 +249,25 @@
     },
     "trash": {
       "comingSoon": "Trash \u2014 coming soon"
+    },
+    "readOnlyDetail": {
+      "back": "Back",
+      "noBody": "No message body.",
+      "to": "To:",
+      "attachments": "{count, plural, one {# attachment} other {# attachments}}"
+    },
+    "moveTo": {
+      "label": "Move to",
+      "inbox": "Move to Inbox",
+      "feed": "Move to Feed",
+      "saved": "Move to Saved",
+      "trash": "Move to Trash",
+      "applyToFuture": "Apply to future emails?",
+      "applyToFutureDescription": "Also apply this decision to all future emails from this sender.",
+      "justThisMessage": "Just this message",
+      "alsoFuture": "Also future emails",
+      "moved": "Email moved",
+      "moveFailed": "Failed to move email. Please try again."
     },
     "drafts": {
       "title": "Drafts",

@@ -5,16 +5,16 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { emailAttachments, emails, mailAccounts } from "@/db/schema";
-import { SavedView } from "./_components/saved-view";
+import { FeedView } from "./_components/feed-view";
 
-const SAVED_LIMIT = 100;
+const FEED_LIMIT = 100;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("pages.saved");
+  const t = await getTranslations("pages.feed");
   return { title: t("title") };
 }
 
-export default async function SavedPage() {
+export default async function FeedPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
@@ -47,17 +47,17 @@ export default async function SavedPage() {
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
       .where(
-        and(eq(mailAccounts.userId, userId), eq(emails.category, "paper_trail")),
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "feed")),
       )
       .orderBy(desc(emails.sentAt))
-      .limit(SAVED_LIMIT),
+      .limit(FEED_LIMIT),
 
     db
       .select({ total: count() })
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
       .where(
-        and(eq(mailAccounts.userId, userId), eq(emails.category, "paper_trail")),
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "feed")),
       ),
 
     db
@@ -76,7 +76,7 @@ export default async function SavedPage() {
   }));
 
   return (
-    <SavedView
+    <FeedView
       emails={entries}
       accounts={allAccounts}
       locale={locale}

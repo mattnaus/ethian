@@ -4,14 +4,16 @@ import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { sendReplyAction } from "../_actions/reply";
 import { deleteDraftAction, sendDraftAction } from "../_actions/draft";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Paperclip, MoreHorizontal, Trash2, Pencil, Send } from "lucide-react";
+import { ArrowLeft, Paperclip, Trash2, Pencil, Send, ChevronDown, Inbox, Newspaper, Bookmark } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { safeColor, getInitials, formatTime, formatFullDate } from "@/lib/email-display";
 import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ReplyBox } from "./reply-box";
+import { moveEmailAction } from "@/app/(app)/_actions/move-email";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -272,6 +274,90 @@ function DraftBubble({
 }
 
 // ---------------------------------------------------------------------------
+// InboxMoveToMenu
+// ---------------------------------------------------------------------------
+
+type TargetCategory = "inbox" | "feed" | "paper_trail" | "trash";
+
+const MOVE_OPTIONS: { id: TargetCategory; icon: React.ElementType; labelKey: string }[] = [
+  { id: "feed", icon: Newspaper, labelKey: "feed" },
+  { id: "paper_trail", icon: Bookmark, labelKey: "saved" },
+  { id: "trash", icon: Trash2, labelKey: "trash" },
+];
+
+function InboxMoveToMenu({ emailId }: { emailId: string }) {
+  const tMove = useTranslations("pages.moveTo");
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState<TargetCategory | null>(null);
+
+  function handleMove(target: TargetCategory, createRule: boolean) {
+    setOpen(false);
+    setConfirmTarget(null);
+    void (async () => {
+      try {
+        const result = await moveEmailAction({ emailId, targetCategory: target, createRule });
+        if (result.success) {
+          toast.success(tMove("moved"));
+          router.push("/inbox");
+        } else {
+          toast.error(tMove("moveFailed"));
+        }
+      } catch {
+        toast.error(tMove("moveFailed"));
+      }
+    })();
+  }
+
+  return (
+    <Popover open={open} onOpenChange={(v) => { setOpen(v); if (!v) setConfirmTarget(null); }}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="hidden md:flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+        >
+          {tMove("label")}
+          <ChevronDown className="h-3.5 w-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-56 p-1.5" align="end">
+        {confirmTarget ? (
+          <div className="p-3 space-y-3">
+            <p className="text-sm font-medium text-foreground">{tMove("applyToFuture")}</p>
+            <p className="text-xs text-muted-foreground">{tMove("applyToFutureDescription")}</p>
+            <div className="flex flex-col gap-1.5">
+              <button
+                onClick={() => handleMove(confirmTarget, true)}
+                className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-secondary transition-colors text-foreground"
+              >
+                {tMove("alsoFuture")}
+              </button>
+              <button
+                onClick={() => handleMove(confirmTarget, false)}
+                className="w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-secondary transition-colors text-muted-foreground"
+              >
+                {tMove("justThisMessage")}
+              </button>
+            </div>
+          </div>
+        ) : (
+          MOVE_OPTIONS.map(({ id, icon: Icon, labelKey }) => (
+            <button
+              key={id}
+              onClick={() => setConfirmTarget(id)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors"
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              {tMove(labelKey as "inbox" | "feed" | "saved" | "trash")}
+            </button>
+          ))
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // EmailDetailView
 // ---------------------------------------------------------------------------
 
@@ -469,13 +555,7 @@ export function EmailDetailView({
             >
               {email.accountName}
             </span>
-            <button
-              type="button"
-              aria-label={t("moreOptions")}
-              className="hidden md:flex items-center justify-center min-w-11 min-h-11 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </button>
+            <InboxMoveToMenu emailId={email.id} />
             <MobileMenuButton />
           </div>
         </header>

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Inbox,
+  Newspaper,
   Bookmark,
   Clock,
   Send,
@@ -100,6 +101,7 @@ export function Sidebar() {
 
   const navItems = [
     { href: "/inbox", label: t("inbox"), icon: Inbox },
+    { href: "/feed", label: t("feed"), icon: Newspaper },
     { href: "/drafts", label: t("drafts"), icon: FileText },
     { href: "/saved", label: t("saved"), icon: Bookmark },
     { href: "/snoozed", label: t("snoozed"), icon: Clock },

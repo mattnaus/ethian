@@ -7,13 +7,11 @@ import { db } from "@/db";
 import { emails, mailAccounts, screenerQueue, senderRules } from "@/db/schema";
 import type { EmailCategory } from "@/types";
 
-export type GatekeeperDecision = "approved" | "blocked" | "feed" | "paper_trail";
+export type GatekeeperDecision = "approved" | "blocked";
 
 const decisionToCategory: Record<GatekeeperDecision, EmailCategory> = {
   approved: "inbox",
   blocked: "trash",
-  feed: "feed",
-  paper_trail: "paper_trail",
 };
 
 export async function makeGatekeeperDecision(

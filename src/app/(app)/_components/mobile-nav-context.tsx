@@ -8,6 +8,7 @@ import {
   Menu,
   X,
   Inbox,
+  Newspaper,
   Bookmark,
   Clock,
   Send,
@@ -88,6 +89,7 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: "/inbox", label: t("inbox"), icon: Inbox },
+    { href: "/feed", label: t("feed"), icon: Newspaper },
     { href: "/drafts", label: t("drafts"), icon: FileText },
     { href: "/saved", label: t("saved"), icon: Bookmark },
     { href: "/snoozed", label: t("snoozed"), icon: Clock },
@@ -108,8 +110,12 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
   const hasOwnButton =
     pathname === "/inbox" ||
     pathname.startsWith("/inbox/") ||
+    pathname === "/feed" ||
+    pathname.startsWith("/feed/") ||
     pathname === "/drafts" ||
     pathname.startsWith("/drafts/") ||
+    pathname === "/saved" ||
+    pathname.startsWith("/saved/") ||
     pathname === "/gatekeeper" ||
     pathname.startsWith("/gatekeeper/") ||
     pathname === "/gatekept" ||
