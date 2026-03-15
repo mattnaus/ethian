@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { and, count, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
@@ -99,7 +99,7 @@ export default async function SnoozedPage() {
       emails={entries}
       accounts={allAccounts}
       locale={locale}
-      total={total}
+      total={entries.length}
     />
   );
 }

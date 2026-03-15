@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { ReplyBox } from "./reply-box";
 import { moveEmailAction } from "@/app/(app)/_actions/move-email";
 import { snoozeEmailAction } from "@/app/(app)/_actions/snooze-email";
-import { getSnoozePresets, formatSnoozeDate, type SnoozePresetKey } from "@/lib/snooze";
+import { getSnoozePresets, formatSnoozeDate } from "@/lib/snooze";
 
 // ---------------------------------------------------------------------------
 // Types
