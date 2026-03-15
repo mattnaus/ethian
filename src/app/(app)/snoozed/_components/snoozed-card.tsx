@@ -98,7 +98,7 @@ export function SnoozedCard({
         href={detailHref}
         tabIndex={0}
         className={cn(
-          "group relative flex-1 flex flex-col gap-3 rounded-xl p-4 transition-all cursor-pointer",
+          "group relative flex-1 min-w-0 flex flex-col gap-3 rounded-xl p-4 transition-all cursor-pointer",
           "bg-muted/70 border-2 border-transparent",
           "hover:border-primary/50",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50",
@@ -160,7 +160,7 @@ export function SnoozedCard({
       {/* Unsnooze button */}
       <button
         onClick={handleUnsnooze}
-        className="rounded-xl px-4 min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 transition-colors text-sm font-medium"
+        className="shrink-0 rounded-xl px-4 min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200 transition-colors text-sm font-medium whitespace-nowrap"
       >
         <X className="h-4 w-4 shrink-0" />
         {t("unsnooze")}
