@@ -9,6 +9,11 @@ import type { EmailCategory } from "@/types";
 
 type SenderDecision = "approved" | "blocked" | "feed" | "paper_trail";
 
+/** Escape SQL LIKE wildcards so they match literally. */
+function escapeLike(value: string): string {
+  return value.replace(/[%_\\]/g, "\\$&");
+}
+
 const decisionToCategory: Record<SenderDecision, EmailCategory> = {
   approved: "inbox",
   blocked: "trash",
@@ -36,46 +41,50 @@ export async function updateSenderRuleDecision(
   const oldCategory = decisionToCategory[rule.decision as SenderDecision];
   const newCategory = decisionToCategory[newDecision];
 
-  await db.transaction(async (tx) => {
-    await tx
-      .update(senderRules)
-      .set({ decision: newDecision })
-      .where(eq(senderRules.id, ruleId));
+  try {
+    await db.transaction(async (tx) => {
+      await tx
+        .update(senderRules)
+        .set({ decision: newDecision })
+        .where(eq(senderRules.id, ruleId));
 
-    // Re-categorize matching emails across all user accounts
-    const userAccounts = await tx
-      .select({ id: mailAccounts.id })
-      .from(mailAccounts)
-      .where(eq(mailAccounts.userId, userId));
+      // Re-categorize matching emails across all user accounts
+      const userAccounts = await tx
+        .select({ id: mailAccounts.id })
+        .from(mailAccounts)
+        .where(eq(mailAccounts.userId, userId));
 
-    const accountIds = userAccounts.map((a) => a.id);
+      const accountIds = userAccounts.map((a) => a.id);
 
-    if (accountIds.length > 0) {
-      if (rule.appliesTo === "address" && rule.fromAddress) {
-        await tx
-          .update(emails)
-          .set({ category: newCategory })
-          .where(
-            and(
-              eq(emails.fromAddress, rule.fromAddress),
-              eq(emails.category, oldCategory),
-              inArray(emails.mailAccountId, accountIds),
-            ),
-          );
-      } else if (rule.appliesTo === "domain" && rule.fromDomain) {
-        await tx
-          .update(emails)
-          .set({ category: newCategory })
-          .where(
-            and(
-              like(emails.fromAddress, `%@${rule.fromDomain}`),
-              eq(emails.category, oldCategory),
-              inArray(emails.mailAccountId, accountIds),
-            ),
-          );
+      if (accountIds.length > 0) {
+        if (rule.appliesTo === "address" && rule.fromAddress) {
+          await tx
+            .update(emails)
+            .set({ category: newCategory })
+            .where(
+              and(
+                eq(emails.fromAddress, rule.fromAddress),
+                eq(emails.category, oldCategory),
+                inArray(emails.mailAccountId, accountIds),
+              ),
+            );
+        } else if (rule.appliesTo === "domain" && rule.fromDomain) {
+          await tx
+            .update(emails)
+            .set({ category: newCategory })
+            .where(
+              and(
+                like(emails.fromAddress, `%@${escapeLike(rule.fromDomain)}`),
+                eq(emails.category, oldCategory),
+                inArray(emails.mailAccountId, accountIds),
+              ),
+            );
+        }
       }
-    }
-  });
+    });
+  } catch {
+    return { success: false, error: "Failed to update rule" };
+  }
 
   revalidatePath("/gatekept");
   revalidatePath("/inbox");
@@ -100,7 +109,11 @@ export async function deleteSenderRule(
 
   if (!rule) return { success: false, error: "Not found" };
 
-  await db.delete(senderRules).where(eq(senderRules.id, ruleId));
+  try {
+    await db.delete(senderRules).where(eq(senderRules.id, ruleId));
+  } catch {
+    return { success: false, error: "Failed to delete rule" };
+  }
 
   revalidatePath("/gatekept");
 

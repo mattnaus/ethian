@@ -221,7 +221,8 @@
       "actionFailed": "Something went wrong. Please try again.",
       "addressBadge": "Address",
       "domainBadge": "Domain",
-      "searchPlaceholder": "Search senders\u2026"
+      "searchPlaceholder": "Search senders\u2026",
+      "showingOf": "Showing {shown} of {total} rules"
     },
     "saved": {
       "comingSoon": "Saved \u2014 coming soon"

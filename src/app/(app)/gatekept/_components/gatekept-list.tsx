@@ -298,7 +298,7 @@ export function GatekeptList({ rules, total, locale }: GatekeptListProps) {
           {/* Showing X of Y footer */}
           {total > rules.length && (
             <p className="text-xs text-muted-foreground text-center py-3 mt-1">
-              Showing {rules.length} of {total}
+              {t("showingOf", { shown: rules.length, total })}
             </p>
           )}
         </div>
