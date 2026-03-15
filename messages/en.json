@@ -253,7 +253,7 @@
       "tomorrowMorning": "Tomorrow morning",
       "nextWeek": "Next week",
       "pickDateTime": "Pick date & time",
-      "snoozed": "Email snoozed",
+      "snoozed": "Snoozed until {date}",
       "snoozeFailed": "Failed to snooze. Please try again."
     },
     "sent": {

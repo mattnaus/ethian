@@ -193,13 +193,23 @@ function SnoozeMenu({
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
+  function formatSnoozeDate(date: Date): string {
+    return new Intl.DateTimeFormat("default", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }).format(date);
+  }
+
   function handleSnooze(until: Date) {
     setOpen(false);
     startTransition(async () => {
       try {
         const result = await snoozeEmailAction({ emailId, until: until.toISOString() });
         if (result.success) {
-          toast.success(t("snoozed"));
+          toast.success(t("snoozed", { date: formatSnoozeDate(until) }));
           router.push(backPath);
         } else {
           toast.error(t("snoozeFailed"));
