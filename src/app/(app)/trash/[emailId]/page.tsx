@@ -44,6 +44,7 @@ export default async function TrashDetailPage({
       and(
         eq(emails.id, emailId),
         eq(mailAccounts.userId, userId),
+        eq(emails.category, "trash"),
       ),
     )
     .limit(1);

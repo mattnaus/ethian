@@ -33,10 +33,19 @@ export async function snoozeEmailAction({
 
   if (!row) return { success: false, error: "Not found" };
 
+  // Validate the snooze date
+  const snoozedUntil = new Date(until);
+  if (isNaN(snoozedUntil.getTime())) {
+    return { success: false, error: "Invalid date" };
+  }
+  if (snoozedUntil.getTime() <= Date.now()) {
+    return { success: false, error: "Snooze date must be in the future" };
+  }
+
   try {
     await db
       .update(emails)
-      .set({ snoozedUntil: new Date(until) })
+      .set({ snoozedUntil })
       .where(eq(emails.id, emailId));
   } catch {
     return { success: false, error: "Failed to snooze email" };

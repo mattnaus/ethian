@@ -1,0 +1,1 @@
+CREATE INDEX "idx_emails_snoozed_until" ON "emails" USING btree ("snoozed_until");

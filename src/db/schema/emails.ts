@@ -111,6 +111,7 @@ export const emails = pgTable("emails", {
 }, (t) => [
   index("idx_emails_thread_id").on(t.threadId),
   index("idx_emails_mail_account_message_id").on(t.mailAccountId, t.messageId),
+  index("idx_emails_snoozed_until").on(t.snoozedUntil),
 ]);
 
 export type Email = typeof emails.$inferSelect;

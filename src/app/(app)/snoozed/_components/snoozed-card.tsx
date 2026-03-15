@@ -77,6 +77,8 @@ export function SnoozedCard({
         }
       } catch {
         toast.error(t("unsnoozeFailed"));
+      } finally {
+        // isPending is automatically cleared by useTransition
       }
     });
   }

@@ -489,7 +489,7 @@ processWorker.on("failed", (job, err) => {
 
 async function clearExpiredSnoozes(): Promise<void> {
   try {
-    const result = await db
+    const cleared = await db
       .update(emails)
       .set({ snoozedUntil: null })
       .where(
@@ -497,10 +497,11 @@ async function clearExpiredSnoozes(): Promise<void> {
           isNotNull(emails.snoozedUntil),
           lte(emails.snoozedUntil, new Date()),
         ),
-      );
-    // The update returns an array; length > 0 means rows were changed
-    if (Array.isArray(result) && result.length > 0) {
-      console.log(`[unsnooze] Cleared ${result.length} expired snooze(s)`);
+      )
+      .returning({ id: emails.id });
+
+    if (cleared.length > 0) {
+      console.log(`[unsnooze] Cleared ${cleared.length} expired snooze(s)`);
     }
   } catch (err) {
     console.error("[unsnooze] Failed to clear expired snoozes:", err);

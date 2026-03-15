@@ -137,7 +137,7 @@ export function TrashCard({
 
       <button
         onClick={handleRestore}
-        className="rounded-xl px-4 min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/35 transition-colors text-sm font-medium"
+        className="rounded-xl px-4 min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 bg-primary/20 text-primary hover:bg-primary/35 transition-colors text-sm font-medium"
       >
         <RotateCcw className="h-4 w-4 shrink-0" />
         {t("restore")}

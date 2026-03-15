@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -98,6 +98,8 @@ function MoveToMenu({
         }
       } catch {
         toast.error(t("moveFailed"));
+      } finally {
+        // isPending is automatically cleared by useTransition
       }
     });
   }
@@ -203,11 +205,13 @@ function SnoozeMenu({
         }
       } catch {
         toast.error(t("snoozeFailed"));
+      } finally {
+        // isPending is automatically cleared by useTransition
       }
     });
   }
 
-  const presets = getSnoozePresets();
+  const presets = useMemo(() => getSnoozePresets(), []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
