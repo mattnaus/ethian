@@ -50,7 +50,7 @@ export function SentCard({
 
   return (
     <Link
-      href={`/inbox/${email.id}`}
+      href={`/sent/${email.id}`}
       tabIndex={0}
       className={cn(
         "group relative flex flex-col gap-3 rounded-xl p-4 transition-all cursor-pointer",
