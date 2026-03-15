@@ -9,6 +9,7 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { emails, mailAccounts } from "@/db/schema";
 import { sendEmail } from "@/lib/smtp/client";
+import { validateSignatureOwnership } from "@/lib/signatures";
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -71,6 +72,8 @@ export async function saveComposeDraftAction(
 
   if (!account) return { success: false, error: "not_found" };
 
+  const validatedSignatureId = await validateSignatureOwnership(signatureId, userId);
+
   const toJson = toAddresses.map((a) => ({ address: a }));
   const snippet = bodyText.slice(0, 200);
   const now = new Date();
@@ -104,7 +107,7 @@ export async function saveComposeDraftAction(
           subject,
           bodyText,
           snippet,
-          signatureId: signatureId ?? null,
+          signatureId: validatedSignatureId,
           updatedAt: now,
         })
         .where(eq(emails.id, draftId));
@@ -129,7 +132,7 @@ export async function saveComposeDraftAction(
         bodyText,
         bodyHtml: null,
         snippet,
-        signatureId: signatureId ?? null,
+        signatureId: validatedSignatureId,
         sentAt: now,
         receivedAt: now,
         isRead: true,

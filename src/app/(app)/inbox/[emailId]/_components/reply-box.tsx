@@ -72,9 +72,7 @@ export function ReplyBox({
     if (editingDraft) {
       setReply(editingDraft.bodyText);
       setCurrentDraftId(editingDraft.id);
-      if (editingDraft.signatureId !== null) {
-        setActiveSignatureId(editingDraft.signatureId);
-      }
+      setActiveSignatureId(editingDraft.signatureId);
       onEditingDraftClear();
       setTimeout(() => textareaRef.current?.focus(), 0);
     }

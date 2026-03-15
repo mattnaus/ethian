@@ -5,9 +5,10 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { emails, mailAccounts, signatures } from "@/db/schema";
+import { emails, mailAccounts } from "@/db/schema";
 import { sendEmail } from "@/lib/smtp/client";
 import { normalizeMessageId } from "@/lib/utils";
+import { appendSignatureToBody, validateSignatureOwnership } from "@/lib/signatures";
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -84,6 +85,8 @@ export async function saveDraftAction(payload: unknown): Promise<SaveDraftResult
 
   if (!parent) return { success: false, error: "not_found" };
 
+  const validatedSignatureId = await validateSignatureOwnership(signatureId, userId);
+
   const now = new Date();
   const snippet = bodyText.slice(0, 200);
 
@@ -91,7 +94,7 @@ export async function saveDraftAction(payload: unknown): Promise<SaveDraftResult
     // Update existing draft (ownership already implied by mailAccountId + userId check)
     const [updated] = await db
       .update(emails)
-      .set({ bodyText, snippet, signatureId: signatureId ?? null, updatedAt: now })
+      .set({ bodyText, snippet, signatureId: validatedSignatureId, updatedAt: now })
       .where(
         and(
           eq(emails.id, draftId),
@@ -120,7 +123,7 @@ export async function saveDraftAction(payload: unknown): Promise<SaveDraftResult
       bodyText,
       bodyHtml: null,
       snippet,
-      signatureId: signatureId ?? null,
+      signatureId: validatedSignatureId,
       sentAt: now,
       receivedAt: now,
       isRead: true,
@@ -228,19 +231,7 @@ export async function sendDraftAction(payload: unknown): Promise<SendDraftResult
 
   if (!parent) return { success: false, error: "not_found" };
 
-  let bodyText = draft.bodyText ?? "";
-
-  // Append stored signature if one was chosen
-  if (draft.signatureId) {
-    const [sig] = await db
-      .select({ content: signatures.content })
-      .from(signatures)
-      .where(eq(signatures.id, draft.signatureId))
-      .limit(1);
-    if (sig) {
-      bodyText = `${bodyText}\n\n--\n${sig.content}`;
-    }
-  }
+  const bodyText = await appendSignatureToBody(draft.bodyText ?? "", draft.signatureId, userId);
 
   const replySubject = /^re:/i.test(parent.subject) ? parent.subject : `Re: ${parent.subject}`;
   const replyReferences = [...(parent.references ?? []), parent.messageId];
