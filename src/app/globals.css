@@ -1,15 +1,19 @@
 @import "tailwindcss";
 
 /* =============================================================================
+   Cursor: pointer for all interactive elements.
+   Placed outside @layer so it overrides Tailwind's preflight reset.
+   ============================================================================= */
+button, [role="button"], a, input[type="submit"], select, summary {
+  cursor: pointer;
+}
+
+/* =============================================================================
    Ethian Design System — OKLCH color tokens
    Dark mode only.
    ============================================================================= */
 
 @layer base {
-  button, [role="button"], a, input[type="submit"], select, summary {
-    cursor: pointer;
-  }
-
   :root {
     /* Backgrounds */
     --background: oklch(0.13 0.005 285);   /* deep dark */
