@@ -6,6 +6,10 @@
    ============================================================================= */
 
 @layer base {
+  button, [role="button"], a, input[type="submit"], select, summary {
+    cursor: pointer;
+  }
+
   :root {
     /* Backgrounds */
     --background: oklch(0.13 0.005 285);   /* deep dark */
