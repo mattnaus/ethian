@@ -192,7 +192,7 @@ export function ComposeView({
         draftId: currentDraftId ?? undefined,
       });
       if (result.success === true) {
-        router.back();
+        router.push(`/inbox/${result.sentEmailId}`);
       } else if (result.success === "partial") {
         toast.success(t("sendPartialWarning"));
         router.back();

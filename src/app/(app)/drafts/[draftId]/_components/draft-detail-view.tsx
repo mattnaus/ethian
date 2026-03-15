@@ -85,7 +85,7 @@ export function DraftDetailView({
         mailAccountId: draft.mailAccountId,
       });
       if (result.success === true) {
-        router.push("/drafts");
+        router.push(`/inbox/${result.sentEmailId}`);
       } else if (result.success === "partial") {
         toast.success(t("sendPartialWarning"));
         router.push("/drafts");
