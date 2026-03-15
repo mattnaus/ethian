@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, useCallback } from "react";
+import { useRef, useEffect, useState, useMemo, useCallback, useTransition } from "react";
 import { sendReplyAction } from "../_actions/reply";
 import { deleteDraftAction, sendDraftAction } from "../_actions/draft";
 import { useRouter } from "next/navigation";
@@ -290,11 +290,12 @@ function InboxMoveToMenu({ emailId }: { emailId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [confirmTarget, setConfirmTarget] = useState<TargetCategory | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   function handleMove(target: TargetCategory, createRule: boolean) {
     setOpen(false);
     setConfirmTarget(null);
-    void (async () => {
+    startTransition(async () => {
       try {
         const result = await moveEmailAction({ emailId, targetCategory: target, createRule });
         if (result.success) {
@@ -306,7 +307,7 @@ function InboxMoveToMenu({ emailId }: { emailId: string }) {
       } catch {
         toast.error(tMove("moveFailed"));
       }
-    })();
+    });
   }
 
   return (
@@ -314,9 +315,13 @@ function InboxMoveToMenu({ emailId }: { emailId: string }) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="hidden md:flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          disabled={isPending}
+          className={cn(
+            "hidden md:flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors",
+            isPending && "opacity-50 pointer-events-none",
+          )}
         >
-          {tMove("label")}
+          {isPending ? "..." : tMove("label")}
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
       </PopoverTrigger>

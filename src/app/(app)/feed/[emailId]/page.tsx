@@ -67,7 +67,6 @@ export default async function FeedDetailPage({
     );
 
   // Mark as read (fire-and-forget)
-  if (!row) notFound();
   db.update(emails)
     .set({ isRead: true })
     .where(eq(emails.id, emailId))

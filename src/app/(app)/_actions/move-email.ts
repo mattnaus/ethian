@@ -53,32 +53,36 @@ export async function moveEmailAction({
     return { success: true };
   }
 
-  await db.transaction(async (tx) => {
-    // Update email category
-    await tx
-      .update(emails)
-      .set({ category: targetCategory as EmailCategory })
-      .where(eq(emails.id, emailId));
+  try {
+    await db.transaction(async (tx) => {
+      // Update email category
+      await tx
+        .update(emails)
+        .set({ category: targetCategory as EmailCategory })
+        .where(eq(emails.id, emailId));
 
-    // Optionally create/update sender rule
-    if (createRule && row.fromAddress) {
-      const decision = categoryToDecision[targetCategory];
-      if (decision) {
-        await tx
-          .insert(senderRules)
-          .values({
-            userId,
-            fromAddress: row.fromAddress.toLowerCase(),
-            decision,
-            appliesTo: "address",
-          })
-          .onConflictDoUpdate({
-            target: [senderRules.userId, senderRules.fromAddress],
-            set: { decision },
-          });
+      // Optionally create/update sender rule
+      if (createRule && row.fromAddress) {
+        const decision = categoryToDecision[targetCategory];
+        if (decision) {
+          await tx
+            .insert(senderRules)
+            .values({
+              userId,
+              fromAddress: row.fromAddress.toLowerCase(),
+              decision,
+              appliesTo: "address",
+            })
+            .onConflictDoUpdate({
+              target: [senderRules.userId, senderRules.fromAddress],
+              set: { decision },
+            });
+        }
       }
-    }
-  });
+    });
+  } catch {
+    return { success: false, error: "Failed to move email" };
+  }
 
   revalidatePath("/inbox");
   revalidatePath("/feed");

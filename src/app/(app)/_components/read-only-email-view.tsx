@@ -12,6 +12,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import DOMPurify from "isomorphic-dompurify";
 import { cn } from "@/lib/utils";
 import { safeColor, getInitials, formatFullDate } from "@/lib/email-display";
 import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
@@ -75,7 +76,7 @@ function MoveToMenu({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [confirmTarget, setConfirmTarget] = useState<TargetCategory | null>(null);
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   function handleMove(target: TargetCategory, createRule: boolean) {
     setOpen(false);
@@ -104,9 +105,13 @@ function MoveToMenu({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+          disabled={isPending}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors",
+            isPending && "opacity-50 pointer-events-none",
+          )}
         >
-          {t("label")}
+          {isPending ? "..." : t("label")}
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
       </PopoverTrigger>
@@ -249,7 +254,7 @@ export function ReadOnlyEmailView({
             isHtml ? (
               <div
                 className="prose prose-invert prose-sm max-w-none text-foreground/90 [&_a]:text-primary"
-                dangerouslySetInnerHTML={{ __html: bodyContent }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(bodyContent) }}
               />
             ) : (
               <pre className="text-sm text-foreground/90 whitespace-pre-wrap font-sans leading-relaxed">
