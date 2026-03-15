@@ -361,7 +361,8 @@ export function GatekeeperList({
                     <div
                       key={email.id}
                       className={cn(
-                        "flex flex-col gap-2 md:flex-row md:items-stretch",
+                        "flex flex-col gap-2 md:flex-row",
+                        expandedId === email.id ? "md:items-start" : "md:items-stretch",
                         pendingIds.has(email.id) && "opacity-40 pointer-events-none",
                       )}
                     >
