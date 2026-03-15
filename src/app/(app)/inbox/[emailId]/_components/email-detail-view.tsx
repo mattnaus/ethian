@@ -4,7 +4,7 @@ import { useRef, useEffect, useState, useMemo, useCallback, useTransition } from
 import { sendReplyAction } from "../_actions/reply";
 import { deleteDraftAction, sendDraftAction } from "../_actions/draft";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Paperclip, Trash2, Pencil, Send, ChevronDown, Inbox, Newspaper, Bookmark } from "lucide-react";
+import { ArrowLeft, Paperclip, Trash2, Pencil, Send, ChevronDown, Inbox, Newspaper, Bookmark, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { safeColor, getInitials, formatTime, formatFullDate } from "@/lib/email-display";
@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ReplyBox } from "./reply-box";
 import { moveEmailAction } from "@/app/(app)/_actions/move-email";
+import { snoozeEmailAction } from "@/app/(app)/_actions/snooze-email";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -270,6 +271,85 @@ function DraftBubble({
         </div>
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// InboxSnoozeMenu
+// ---------------------------------------------------------------------------
+
+function getSnoozePresets(): { labelKey: string; date: Date }[] {
+  const now = new Date();
+  const laterToday = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(9, 0, 0, 0);
+
+  const nextMonday = new Date(now);
+  const daysUntilMonday = (8 - nextMonday.getDay()) % 7 || 7;
+  nextMonday.setDate(nextMonday.getDate() + daysUntilMonday);
+  nextMonday.setHours(9, 0, 0, 0);
+
+  return [
+    { labelKey: "laterToday", date: laterToday },
+    { labelKey: "tomorrowMorning", date: tomorrow },
+    { labelKey: "nextWeek", date: nextMonday },
+  ];
+}
+
+function InboxSnoozeMenu({ emailId }: { emailId: string }) {
+  const t = useTranslations("pages.snooze");
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const presets = useMemo(() => getSnoozePresets(), []);
+
+  function handleSnooze(until: Date) {
+    setOpen(false);
+    startTransition(async () => {
+      try {
+        const result = await snoozeEmailAction({ emailId, until: until.toISOString() });
+        if (result.success) {
+          toast.success(t("snoozed"));
+          router.push("/inbox");
+        } else {
+          toast.error(t("snoozeFailed"));
+        }
+      } catch {
+        toast.error(t("snoozeFailed"));
+      } finally {
+        // isPending is automatically cleared by useTransition
+      }
+    });
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          disabled={isPending}
+          className={cn(
+            "hidden md:flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors",
+            isPending && "opacity-50 pointer-events-none",
+          )}
+        >
+          <Clock className="h-3.5 w-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-1.5" align="end">
+        {presets.map(({ labelKey, date }) => (
+          <button
+            key={labelKey}
+            onClick={() => handleSnooze(date)}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors"
+          >
+            {t(labelKey as "laterToday")}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -560,6 +640,7 @@ export function EmailDetailView({
             >
               {email.accountName}
             </span>
+            <InboxSnoozeMenu emailId={email.id} />
             <InboxMoveToMenu emailId={email.id} />
             <MobileMenuButton />
           </div>
