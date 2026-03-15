@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, isNotNull, ne, sql } from "drizzle-orm";
 import { getLocale, getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { db } from "@/db";
@@ -30,9 +30,11 @@ export default async function SnoozedPage() {
       ),
     );
 
+  // Only show non-sent snoozed emails (sent emails are part of conversations)
   const snoozedFilter = and(
     eq(mailAccounts.userId, userId),
     isNotNull(emails.snoozedUntil),
+    eq(emails.isSent, false),
   );
 
   const [rows, [{ total }], allAccounts] = await Promise.all([
@@ -50,6 +52,7 @@ export default async function SnoozedPage() {
         mailAccountId: mailAccounts.id,
         mailAccountName: mailAccounts.name,
         hasAttachments: sql<boolean>`EXISTS (${attachmentSubquery})`,
+        threadId: emails.threadId,
       })
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
@@ -71,13 +74,25 @@ export default async function SnoozedPage() {
 
   const locale = await getLocale();
 
-  const entries = rows.map((row) => ({
+  // Thread-group: deduplicate by threadId, keeping the latest entry per thread
+  const allEntries = rows.map((row) => ({
     ...row,
     subject: row.subject ?? "",
     snippet: row.snippet ?? "",
     sentAt: row.sentAt.toISOString(),
     snoozedUntil: row.snoozedUntil!.toISOString(),
   }));
+
+  const seen = new Set<string>();
+  const entries: typeof allEntries = [];
+  for (const entry of allEntries) {
+    const key = entry.threadId
+      ? `${entry.threadId}:${entry.mailAccountId}`
+      : entry.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    entries.push(entry);
+  }
 
   return (
     <SnoozedView
