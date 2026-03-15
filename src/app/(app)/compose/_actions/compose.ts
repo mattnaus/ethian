@@ -22,6 +22,7 @@ const SaveDraftSchema = z.object({
   subject: z.string().max(1000),
   bodyText: z.string().max(100_000),
   draftId: z.string().regex(UUID_RE).optional(),
+  signatureId: z.string().regex(UUID_RE).nullable().optional(),
 });
 
 const SendSchema = z.object({
@@ -58,7 +59,7 @@ export async function saveComposeDraftAction(
   const parsed = SaveDraftSchema.safeParse(payload);
   if (!parsed.success) return { success: false, error: "invalid_input" };
 
-  const { mailAccountId, toAddresses, subject, bodyText, draftId } = parsed.data;
+  const { mailAccountId, toAddresses, subject, bodyText, draftId, signatureId } = parsed.data;
   const userId = session.user.id;
 
   // Verify account ownership and fetch display fields for draft storage
@@ -103,6 +104,7 @@ export async function saveComposeDraftAction(
           subject,
           bodyText,
           snippet,
+          signatureId: signatureId ?? null,
           updatedAt: now,
         })
         .where(eq(emails.id, draftId));
@@ -127,6 +129,7 @@ export async function saveComposeDraftAction(
         bodyText,
         bodyHtml: null,
         snippet,
+        signatureId: signatureId ?? null,
         sentAt: now,
         receivedAt: now,
         isRead: true,

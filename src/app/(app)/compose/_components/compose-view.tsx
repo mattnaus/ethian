@@ -42,6 +42,7 @@ interface DraftData {
   toAddresses: Array<{ address: string; name?: string }>;
   subject: string;
   bodyText: string | null;
+  signatureId: string | null;
 }
 
 interface ComposeViewProps {
@@ -80,7 +81,7 @@ export function ComposeView({
   const [body, setBody] = useState(draft?.bodyText ?? "");
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(draft?.id ?? null);
   const [activeSignatureId, setActiveSignatureId] = useState<string | null>(
-    defaultSig?.id ?? null,
+    draft?.signatureId ?? defaultSig?.id ?? null,
   );
   const [isSaving, setIsSaving] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -163,6 +164,7 @@ export function ComposeView({
         subject,
         bodyText: body,
         draftId: currentDraftId ?? undefined,
+        signatureId: activeSignatureId,
       });
       if (result.success) {
         toast.success(t("draftSaved"));

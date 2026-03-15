@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { emails, mailAccounts } from "@/db/schema";
+import { emails, mailAccounts, signatures } from "@/db/schema";
 import { sendEmail } from "@/lib/smtp/client";
 import { normalizeMessageId } from "@/lib/utils";
 
@@ -20,6 +20,7 @@ const SaveDraftSchema = z.object({
   emailId: z.string().regex(UUID_RE),
   bodyText: z.string().max(100_000),
   draftId: z.string().regex(UUID_RE).optional(),
+  signatureId: z.string().regex(UUID_RE).nullable().optional(),
 });
 
 const DeleteDraftSchema = z.object({
@@ -59,7 +60,7 @@ export async function saveDraftAction(payload: unknown): Promise<SaveDraftResult
   const parsed = SaveDraftSchema.safeParse(payload);
   if (!parsed.success) return { success: false, error: "invalid_input" };
 
-  const { mailAccountId, emailId, bodyText, draftId } = parsed.data;
+  const { mailAccountId, emailId, bodyText, draftId, signatureId } = parsed.data;
   const userId = session.user.id;
 
   // Verify the parent email belongs to this user
@@ -90,7 +91,7 @@ export async function saveDraftAction(payload: unknown): Promise<SaveDraftResult
     // Update existing draft (ownership already implied by mailAccountId + userId check)
     const [updated] = await db
       .update(emails)
-      .set({ bodyText, snippet, updatedAt: now })
+      .set({ bodyText, snippet, signatureId: signatureId ?? null, updatedAt: now })
       .where(
         and(
           eq(emails.id, draftId),
@@ -119,6 +120,7 @@ export async function saveDraftAction(payload: unknown): Promise<SaveDraftResult
       bodyText,
       bodyHtml: null,
       snippet,
+      signatureId: signatureId ?? null,
       sentAt: now,
       receivedAt: now,
       isRead: true,
@@ -188,7 +190,7 @@ export async function sendDraftAction(payload: unknown): Promise<SendDraftResult
 
   // Fetch draft + parent email + account in one go
   const [draft] = await db
-    .select({ id: emails.id, bodyText: emails.bodyText })
+    .select({ id: emails.id, bodyText: emails.bodyText, signatureId: emails.signatureId })
     .from(emails)
     .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
     .where(
@@ -226,7 +228,20 @@ export async function sendDraftAction(payload: unknown): Promise<SendDraftResult
 
   if (!parent) return { success: false, error: "not_found" };
 
-  const bodyText = draft.bodyText ?? "";
+  let bodyText = draft.bodyText ?? "";
+
+  // Append stored signature if one was chosen
+  if (draft.signatureId) {
+    const [sig] = await db
+      .select({ content: signatures.content })
+      .from(signatures)
+      .where(eq(signatures.id, draft.signatureId))
+      .limit(1);
+    if (sig) {
+      bodyText = `${bodyText}\n\n--\n${sig.content}`;
+    }
+  }
+
   const replySubject = /^re:/i.test(parent.subject) ? parent.subject : `Re: ${parent.subject}`;
   const replyReferences = [...(parent.references ?? []), parent.messageId];
 

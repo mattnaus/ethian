@@ -79,6 +79,7 @@ export default async function EmailDetailPage({
           sentAt: emails.sentAt,
           isRead: emails.isRead,
           isDraft: emails.isDraft,
+          signatureId: emails.signatureId,
           accountColor: mailAccounts.color,
         })
         .from(emails)
@@ -161,6 +162,7 @@ export default async function EmailDetailPage({
     sentAt: r.sentAt.toISOString(),
     isRead: r.isRead,
     isDraft: r.isDraft,
+    signatureId: r.signatureId,
     accountColor: r.accountColor,
     attachments: attachmentsByEmailId.get(r.id) ?? [],
   }));

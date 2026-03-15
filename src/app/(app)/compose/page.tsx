@@ -75,6 +75,7 @@ export default async function ComposePage({
         toAddresses: emails.toAddresses,
         subject: emails.subject,
         bodyText: emails.bodyText,
+        signatureId: emails.signatureId,
       })
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
@@ -95,6 +96,7 @@ export default async function ComposePage({
         toAddresses: Array.isArray(draftRow.toAddresses) ? draftRow.toAddresses as Array<{ address: string; name?: string }> : [],
         subject: draftRow.subject ?? "",
         bodyText: draftRow.bodyText,
+        signatureId: draftRow.signatureId,
       };
     }
   }

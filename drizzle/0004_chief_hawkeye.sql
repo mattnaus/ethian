@@ -1,0 +1,2 @@
+ALTER TABLE "emails" ADD COLUMN "signature_id" uuid;--> statement-breakpoint
+ALTER TABLE "emails" ADD CONSTRAINT "emails_signature_id_signatures_id_fk" FOREIGN KEY ("signature_id") REFERENCES "public"."signatures"("id") ON DELETE set null ON UPDATE no action;

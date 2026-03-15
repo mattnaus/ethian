@@ -45,6 +45,7 @@ export type ThreadMessage = {
   accountColor: string;
   attachments: Array<{ id: string; filename: string; contentType: string; size: number }>;
   isDraft?: boolean;
+  signatureId?: string | null;
 };
 
 type Signature = {
@@ -291,7 +292,7 @@ export function EmailDetailView({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [feedback, setFeedback] = useState<{ text: string; isError: boolean } | null>(null);
   const [optimisticMessages, setOptimisticMessages] = useState<ThreadMessage[]>(threadMessages);
-  const [editingDraft, setEditingDraft] = useState<{ id: string; bodyText: string } | null>(null);
+  const [editingDraft, setEditingDraft] = useState<{ id: string; bodyText: string; signatureId: string | null } | null>(null);
   const isFirstRender = useRef(true);
 
   // Re-sync optimistic state when the server re-renders with fresh data
@@ -503,7 +504,7 @@ export function EmailDetailView({
                   <DraftBubble
                     message={message}
                     onEdit={() =>
-                      setEditingDraft({ id: message.id, bodyText: message.bodyText ?? "" })
+                      setEditingDraft({ id: message.id, bodyText: message.bodyText ?? "", signatureId: message.signatureId ?? null })
                     }
                     onDiscard={() => handleDiscardDraft(message)}
                     onSend={() => handleSendDraft(message)}

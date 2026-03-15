@@ -31,7 +31,7 @@ interface ReplyBoxProps {
   email: EmailDetail;
   signatures: Signature[];
   onSend: (text: string) => Promise<void>;
-  editingDraft: { id: string; bodyText: string } | null;
+  editingDraft: { id: string; bodyText: string; signatureId: string | null } | null;
   onDraftSaved: (draftId: string) => void;
   onEditingDraftClear: () => void;
 }
@@ -72,6 +72,9 @@ export function ReplyBox({
     if (editingDraft) {
       setReply(editingDraft.bodyText);
       setCurrentDraftId(editingDraft.id);
+      if (editingDraft.signatureId !== null) {
+        setActiveSignatureId(editingDraft.signatureId);
+      }
       onEditingDraftClear();
       setTimeout(() => textareaRef.current?.focus(), 0);
     }
@@ -110,6 +113,7 @@ export function ReplyBox({
         emailId: email.id,
         bodyText: reply,
         draftId: currentDraftId ?? undefined,
+        signatureId: activeSignatureId,
       });
       if (result.success) {
         setCurrentDraftId(result.draftId);

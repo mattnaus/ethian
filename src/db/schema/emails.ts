@@ -11,6 +11,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { mailAccounts } from "./accounts";
+import { signatures } from "./signatures";
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -93,6 +94,9 @@ export const emails = pgTable("emails", {
 
   // Ethian category (Hey-inspired)
   category: emailCategoryEnum("category").notNull().default("screener"),
+
+  // Signature chosen for this draft (nullable; only relevant for drafts)
+  signatureId: uuid("signature_id").references(() => signatures.id, { onDelete: "set null" }),
 
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()

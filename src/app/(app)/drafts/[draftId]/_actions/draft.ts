@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { emails, mailAccounts } from "@/db/schema";
+import { emails, mailAccounts, signatures } from "@/db/schema";
 import { sendEmail } from "@/lib/smtp/client";
 import { normalizeMessageId } from "@/lib/utils";
 
@@ -98,6 +98,7 @@ export async function sendStandaloneDraftAction(
       toAddresses: emails.toAddresses,
       fromAddress: emails.fromAddress,
       fromName: emails.fromName,
+      signatureId: emails.signatureId,
     })
     .from(emails)
     .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
@@ -125,7 +126,19 @@ export async function sendStandaloneDraftAction(
   const toAddresses = Array.isArray(draft.toAddresses) ? draft.toAddresses : [];
   if (toAddresses.length === 0) return { success: false, error: "no_recipients" };
 
-  const bodyText = draft.bodyText ?? "";
+  let bodyText = draft.bodyText ?? "";
+
+  // Append stored signature if one was chosen
+  if (draft.signatureId) {
+    const [sig] = await db
+      .select({ content: signatures.content })
+      .from(signatures)
+      .where(eq(signatures.id, draft.signatureId))
+      .limit(1);
+    if (sig) {
+      bodyText = `${bodyText}\n\n--\n${sig.content}`;
+    }
+  }
 
   // Send via SMTP
   let sendResult: Awaited<ReturnType<typeof sendEmail>>;
