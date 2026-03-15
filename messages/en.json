@@ -219,8 +219,6 @@
       "deleteConfirmButton": "Delete",
       "deleteCancelButton": "Cancel",
       "actionFailed": "Something went wrong. Please try again.",
-      "addressBadge": "Address",
-      "domainBadge": "Domain",
       "searchPlaceholder": "Search senders\u2026",
       "showingOf": "Showing {shown} of {total} rules"
     },

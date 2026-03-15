@@ -101,21 +101,11 @@ export function GatekeptCard({
         )}
       </div>
 
-      {/* Applies-to badge */}
-      <span className="hidden md:inline-flex text-xs text-muted-foreground px-2 py-0.5 rounded-full border border-border shrink-0">
-        {rule.appliesTo === "domain" ? t("domainBadge") : t("addressBadge")}
-      </span>
-
       {/* Spacer */}
       <div className="flex-1 min-w-0" />
 
       {/* Decision badge + actions */}
       <div className="flex items-center gap-2 md:shrink-0">
-        {/* Mobile applies-to badge */}
-        <span className="md:hidden text-xs text-muted-foreground px-2 py-0.5 rounded-full border border-border shrink-0">
-          {rule.appliesTo === "domain" ? t("domainBadge") : t("addressBadge")}
-        </span>
-
         {/* Decision badge (clickable → Popover) */}
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <PopoverTrigger asChild>
