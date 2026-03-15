@@ -361,8 +361,7 @@ export function GatekeeperList({
                     <div
                       key={email.id}
                       className={cn(
-                        "flex flex-col gap-2 md:flex-row",
-                        expandedId === email.id ? "md:items-start" : "md:items-stretch",
+                        "flex flex-col gap-2 md:flex-row md:items-stretch",
                         pendingIds.has(email.id) && "opacity-40 pointer-events-none",
                       )}
                     >
@@ -375,7 +374,12 @@ export function GatekeeperList({
                         previewError={errorId === email.id}
                         onToggleExpand={() => toggleExpand(email.id)}
                       />
-                      <div className="flex gap-2 md:contents">
+                      <div className={cn(
+                        "flex gap-2",
+                        expandedId === email.id
+                          ? "md:flex-col md:shrink-0"
+                          : "md:contents",
+                      )}>
                         <button
                           onClick={() => handleDecision(email.id, "approved")}
                           className="flex-1 md:flex-none rounded-xl px-5 min-h-[44px] md:min-h-0 flex items-center justify-center gap-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/35 transition-colors text-sm font-medium"
