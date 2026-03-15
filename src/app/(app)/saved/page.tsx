@@ -47,7 +47,7 @@ export default async function SavedPage() {
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
       .where(
-        and(eq(mailAccounts.userId, userId), eq(emails.category, "paper_trail")),
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "paper_trail"), isNull(emails.snoozedUntil)),
       )
       .orderBy(desc(emails.sentAt))
       .limit(SAVED_LIMIT),
@@ -57,7 +57,7 @@ export default async function SavedPage() {
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
       .where(
-        and(eq(mailAccounts.userId, userId), eq(emails.category, "paper_trail")),
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "paper_trail"), isNull(emails.snoozedUntil)),
       ),
 
     db

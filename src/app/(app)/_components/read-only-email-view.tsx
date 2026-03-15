@@ -10,6 +10,7 @@ import {
   Bookmark,
   Trash2,
   ChevronDown,
+  Clock,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import DOMPurify from "isomorphic-dompurify";
@@ -19,6 +20,7 @@ import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { moveEmailAction } from "@/app/(app)/_actions/move-email";
+import { snoozeEmailAction } from "@/app/(app)/_actions/snooze-email";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -153,6 +155,90 @@ function MoveToMenu({
 }
 
 // ---------------------------------------------------------------------------
+// SnoozeMenu
+// ---------------------------------------------------------------------------
+
+function getSnoozePresets(): { labelKey: string; date: Date }[] {
+  const now = new Date();
+  const laterToday = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(9, 0, 0, 0);
+
+  const nextMonday = new Date(now);
+  const daysUntilMonday = (8 - nextMonday.getDay()) % 7 || 7;
+  nextMonday.setDate(nextMonday.getDate() + daysUntilMonday);
+  nextMonday.setHours(9, 0, 0, 0);
+
+  return [
+    { labelKey: "laterToday", date: laterToday },
+    { labelKey: "tomorrowMorning", date: tomorrow },
+    { labelKey: "nextWeek", date: nextMonday },
+  ];
+}
+
+function SnoozeMenu({
+  emailId,
+  backPath,
+}: {
+  emailId: string;
+  backPath: string;
+}) {
+  const t = useTranslations("pages.snooze");
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  function handleSnooze(until: Date) {
+    setOpen(false);
+    startTransition(async () => {
+      try {
+        const result = await snoozeEmailAction({ emailId, until: until.toISOString() });
+        if (result.success) {
+          toast.success(t("snoozed"));
+          router.push(backPath);
+        } else {
+          toast.error(t("snoozeFailed"));
+        }
+      } catch {
+        toast.error(t("snoozeFailed"));
+      }
+    });
+  }
+
+  const presets = getSnoozePresets();
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          disabled={isPending}
+          className={cn(
+            "flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors",
+            isPending && "opacity-50 pointer-events-none",
+          )}
+        >
+          <Clock className="h-3.5 w-3.5" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-1.5" align="end">
+        {presets.map(({ labelKey, date }) => (
+          <button
+            key={labelKey}
+            onClick={() => handleSnooze(date)}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors"
+          >
+            {t(labelKey as "laterToday")}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // ReadOnlyEmailView
 // ---------------------------------------------------------------------------
 
@@ -223,6 +309,7 @@ export function ReadOnlyEmailView({
             >
               {email.accountName}
             </span>
+            <SnoozeMenu emailId={email.id} backPath={backPath} />
             <MoveToMenu
               emailId={email.id}
               currentCategory={email.category}

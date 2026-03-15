@@ -47,7 +47,7 @@ export default async function FeedPage() {
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
       .where(
-        and(eq(mailAccounts.userId, userId), eq(emails.category, "feed")),
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "feed"), isNull(emails.snoozedUntil)),
       )
       .orderBy(desc(emails.sentAt))
       .limit(FEED_LIMIT),
@@ -57,7 +57,7 @@ export default async function FeedPage() {
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
       .where(
-        and(eq(mailAccounts.userId, userId), eq(emails.category, "feed")),
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "feed"), isNull(emails.snoozedUntil)),
       ),
 
     db

@@ -95,6 +95,9 @@ export const emails = pgTable("emails", {
   // Ethian category (Hey-inspired)
   category: emailCategoryEnum("category").notNull().default("screener"),
 
+  // Snooze: when set, the email is hidden from its section until this time
+  snoozedUntil: timestamp("snoozed_until", { withTimezone: true }),
+
   // Signature chosen for this draft (nullable; only relevant for drafts)
   signatureId: uuid("signature_id").references(() => signatures.id, { onDelete: "set null" }),
 

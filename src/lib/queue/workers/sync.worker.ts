@@ -10,7 +10,7 @@
  */
 
 import { Worker, type Job } from "bullmq";
-import { eq, and, inArray, asc } from "drizzle-orm";
+import { eq, and, inArray, asc, lte, isNotNull } from "drizzle-orm";
 import { db } from "@/db";
 import {
   mailAccounts,
@@ -484,11 +484,41 @@ processWorker.on("failed", (job, err) => {
 });
 
 // ---------------------------------------------------------------------------
+// Un-snooze checker (runs every 60 seconds)
+// ---------------------------------------------------------------------------
+
+async function clearExpiredSnoozes(): Promise<void> {
+  try {
+    const result = await db
+      .update(emails)
+      .set({ snoozedUntil: null })
+      .where(
+        and(
+          isNotNull(emails.snoozedUntil),
+          lte(emails.snoozedUntil, new Date()),
+        ),
+      );
+    // The update returns an array; length > 0 means rows were changed
+    if (Array.isArray(result) && result.length > 0) {
+      console.log(`[unsnooze] Cleared ${result.length} expired snooze(s)`);
+    }
+  } catch (err) {
+    console.error("[unsnooze] Failed to clear expired snoozes:", err);
+  }
+}
+
+// Run every 60 seconds
+const unsnoozeInterval = setInterval(clearExpiredSnoozes, 60_000);
+// Also run immediately on startup
+void clearExpiredSnoozes();
+
+// ---------------------------------------------------------------------------
 // Graceful shutdown
 // ---------------------------------------------------------------------------
 
 async function shutdown() {
   console.log("Shutting down workers...");
+  clearInterval(unsnoozeInterval);
   await syncWorker.close();
   await processWorker.close();
   await redis.quit();

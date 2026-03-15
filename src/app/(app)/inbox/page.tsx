@@ -55,7 +55,7 @@ export default async function InboxPage() {
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
       .where(
-        and(eq(mailAccounts.userId, userId), eq(emails.category, "inbox")),
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "inbox"), isNull(emails.snoozedUntil)),
       )
       .orderBy(desc(emails.sentAt))
       .limit(INBOX_LIMIT),
@@ -65,7 +65,7 @@ export default async function InboxPage() {
       .from(emails)
       .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
       .where(
-        and(eq(mailAccounts.userId, userId), eq(emails.category, "inbox")),
+        and(eq(mailAccounts.userId, userId), eq(emails.category, "inbox"), isNull(emails.snoozedUntil)),
       ),
 
     db

@@ -120,8 +120,12 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/gatekeeper/") ||
     pathname === "/gatekept" ||
     pathname.startsWith("/gatekept/") ||
+    pathname === "/snoozed" ||
+    pathname.startsWith("/snoozed/") ||
     pathname === "/sent" ||
     pathname.startsWith("/sent/") ||
+    pathname === "/trash" ||
+    pathname.startsWith("/trash/") ||
     pathname === "/compose" ||
     pathname.startsWith("/compose/");
 

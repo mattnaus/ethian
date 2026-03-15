@@ -236,7 +236,25 @@
       "showingOf": "Showing {shown} of {total}"
     },
     "snoozed": {
-      "comingSoon": "Snoozed \u2014 coming soon"
+      "title": "Snoozed",
+      "empty": "No snoozed emails.",
+      "noSubject": "(no subject)",
+      "noSender": "(unknown sender)",
+      "messageCount": "{count, plural, one {# email} other {# emails}}",
+      "searchPlaceholder": "Search snoozed\u2026",
+      "showingOf": "Showing {shown} of {total}",
+      "wakesUp": "Wakes up {date}",
+      "unsnooze": "Unsnooze",
+      "unsnoozeFailed": "Failed to unsnooze. Please try again."
+    },
+    "snooze": {
+      "label": "Snooze",
+      "laterToday": "Later today",
+      "tomorrowMorning": "Tomorrow morning",
+      "nextWeek": "Next week",
+      "pickDateTime": "Pick date & time",
+      "snoozed": "Email snoozed",
+      "snoozeFailed": "Failed to snooze. Please try again."
     },
     "sent": {
       "title": "Sent",
@@ -248,7 +266,16 @@
       "showingOf": "Showing {shown} of {total}"
     },
     "trash": {
-      "comingSoon": "Trash \u2014 coming soon"
+      "title": "Trash",
+      "empty": "Trash is empty.",
+      "noSubject": "(no subject)",
+      "noSender": "(unknown sender)",
+      "messageCount": "{count, plural, one {# email} other {# emails}}",
+      "searchPlaceholder": "Search trash\u2026",
+      "showingOf": "Showing {shown} of {total}",
+      "restore": "Restore to Inbox",
+      "restored": "Email restored",
+      "restoreFailed": "Failed to restore. Please try again."
     },
     "readOnlyDetail": {
       "back": "Back",
