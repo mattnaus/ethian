@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import {
   safeColor,
   getInitials,
-  formatRelativeDate,
 } from "@/lib/email-display";
 import { useTranslations } from "next-intl";
 import { unsnoozeEmailAction } from "@/app/(app)/_actions/snooze-email";
@@ -46,10 +45,8 @@ export function SnoozedCard({
   const initials = getInitials(email.fromName, email.fromAddress);
   const ringColor = safeColor(email.accountColor);
 
-  const [formattedDate, setFormattedDate] = useState("");
   const [wakeDate, setWakeDate] = useState("");
   useEffect(() => {
-    setFormattedDate(formatRelativeDate(email.sentAt, locale));
     const wake = new Date(email.snoozedUntil);
     setWakeDate(
       new Intl.DateTimeFormat(locale, {
@@ -60,7 +57,7 @@ export function SnoozedCard({
         minute: "2-digit",
       }).format(wake),
     );
-  }, [email.sentAt, email.snoozedUntil, locale]);
+  }, [email.snoozedUntil, locale]);
 
   const [isPending, startTransition] = useTransition();
 
@@ -147,20 +144,15 @@ export function SnoozedCard({
           )}
         </div>
 
-        {/* Wake time + attachments + date */}
+        {/* Attachments + wake time */}
         <div className="flex items-center gap-3 md:shrink-0">
-          {wakeDate && (
-            <span className="text-xs text-primary/80 whitespace-nowrap">
-              {wakeDate}
-            </span>
-          )}
           {email.hasAttachments && (
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-secondary border border-border">
               <Paperclip className="h-3 w-3 text-foreground/70" />
             </div>
           )}
-          <span className="text-xs text-muted-foreground whitespace-nowrap ml-auto md:ml-0 md:w-16 md:text-right">
-            {formattedDate}
+          <span className="text-xs text-primary/80 whitespace-nowrap ml-auto md:ml-0">
+            {wakeDate}
           </span>
         </div>
       </Link>

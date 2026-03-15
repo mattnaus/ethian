@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { emails, mailAccounts } from "@/db/schema";
@@ -18,9 +18,13 @@ export async function snoozeEmailAction({
 
   const userId = session.user.id;
 
-  // Verify ownership
+  // Verify ownership and get thread info
   const [row] = await db
-    .select({ id: emails.id })
+    .select({
+      id: emails.id,
+      threadId: emails.threadId,
+      mailAccountId: emails.mailAccountId,
+    })
     .from(emails)
     .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
     .where(
@@ -43,10 +47,23 @@ export async function snoozeEmailAction({
   }
 
   try {
-    await db
-      .update(emails)
-      .set({ snoozedUntil })
-      .where(eq(emails.id, emailId));
+    // Snooze all emails in the same thread (or just the single email if no threadId)
+    if (row.threadId) {
+      await db
+        .update(emails)
+        .set({ snoozedUntil })
+        .where(
+          and(
+            eq(emails.threadId, row.threadId),
+            eq(emails.mailAccountId, row.mailAccountId),
+          ),
+        );
+    } else {
+      await db
+        .update(emails)
+        .set({ snoozedUntil })
+        .where(eq(emails.id, emailId));
+    }
   } catch {
     return { success: false, error: "Failed to snooze email" };
   }
@@ -69,9 +86,13 @@ export async function unsnoozeEmailAction({
 
   const userId = session.user.id;
 
-  // Verify ownership
+  // Verify ownership and get thread info
   const [row] = await db
-    .select({ id: emails.id })
+    .select({
+      id: emails.id,
+      threadId: emails.threadId,
+      mailAccountId: emails.mailAccountId,
+    })
     .from(emails)
     .innerJoin(mailAccounts, eq(emails.mailAccountId, mailAccounts.id))
     .where(
@@ -85,10 +106,24 @@ export async function unsnoozeEmailAction({
   if (!row) return { success: false, error: "Not found" };
 
   try {
-    await db
-      .update(emails)
-      .set({ snoozedUntil: null })
-      .where(eq(emails.id, emailId));
+    // Unsnooze all emails in the same thread
+    if (row.threadId) {
+      await db
+        .update(emails)
+        .set({ snoozedUntil: null })
+        .where(
+          and(
+            eq(emails.threadId, row.threadId),
+            eq(emails.mailAccountId, row.mailAccountId),
+            isNotNull(emails.snoozedUntil),
+          ),
+        );
+    } else {
+      await db
+        .update(emails)
+        .set({ snoozedUntil: null })
+        .where(eq(emails.id, emailId));
+    }
   } catch {
     return { success: false, error: "Failed to unsnooze email" };
   }
