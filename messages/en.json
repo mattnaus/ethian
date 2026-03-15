@@ -277,7 +277,8 @@
       "discardFailed": "Failed to discard draft. Please try again.",
       "sendFailed": "Failed to send. Please try again.",
       "sendPartialWarning": "Sent, but couldn't be saved locally.",
-      "moreOptions": "More options"
+      "moreOptions": "More options",
+      "noBody": "No message body."
     },
     "emailDetail": {
       "back": "Back",

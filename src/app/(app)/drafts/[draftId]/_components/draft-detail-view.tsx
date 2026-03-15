@@ -166,14 +166,14 @@ export function DraftDetailView({
                   {t("draftLabel")}
                 </span>
                 <p className="text-sm whitespace-pre-wrap text-foreground">
-                  {body || <span className="italic opacity-60">No message body.</span>}
+                  {body || <span className="italic opacity-60">{t("noBody")}</span>}
                 </p>
                 <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t-2 border-dashed border-zinc-600">
                   <button
                     type="button"
                     onClick={() => void handleDiscard()}
                     disabled={isDiscarding}
-                    className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-red-400 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-red-400 transition-colors disabled:opacity-50 min-h-11 min-w-11 justify-center md:min-h-0 md:min-w-0"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     {t("discardDraft")}
