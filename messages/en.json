@@ -252,7 +252,6 @@
       "laterToday": "Later today",
       "tomorrowMorning": "Tomorrow morning",
       "nextWeek": "Next week",
-      "pickDateTime": "Pick date & time",
       "snoozed": "Snoozed until {date}",
       "snoozeFailed": "Failed to snooze. Please try again."
     },

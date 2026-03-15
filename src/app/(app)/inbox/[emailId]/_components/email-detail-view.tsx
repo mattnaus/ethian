@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, useMemo, useCallback, useTransition } from "react";
+import { useRef, useEffect, useState, useCallback, useTransition } from "react";
 import { sendReplyAction } from "../_actions/reply";
 import { deleteDraftAction, sendDraftAction } from "../_actions/draft";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { ReplyBox } from "./reply-box";
 import { moveEmailAction } from "@/app/(app)/_actions/move-email";
 import { snoozeEmailAction } from "@/app/(app)/_actions/snooze-email";
+import { getSnoozePresets, formatSnoozeDate, type SnoozePresetKey } from "@/lib/snooze";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -279,42 +280,12 @@ function DraftBubble({
 // InboxSnoozeMenu
 // ---------------------------------------------------------------------------
 
-function getSnoozePresets(): { labelKey: string; date: Date }[] {
-  const now = new Date();
-  const laterToday = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(9, 0, 0, 0);
-
-  const nextMonday = new Date(now);
-  const daysUntilMonday = (8 - nextMonday.getDay()) % 7 || 7;
-  nextMonday.setDate(nextMonday.getDate() + daysUntilMonday);
-  nextMonday.setHours(9, 0, 0, 0);
-
-  return [
-    { labelKey: "laterToday", date: laterToday },
-    { labelKey: "tomorrowMorning", date: tomorrow },
-    { labelKey: "nextWeek", date: nextMonday },
-  ];
-}
-
 function InboxSnoozeMenu({ emailId }: { emailId: string }) {
   const t = useTranslations("pages.snooze");
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [presets, setPresets] = useState(getSnoozePresets);
   const [isPending, startTransition] = useTransition();
-  const presets = useMemo(() => getSnoozePresets(), []);
-
-  function formatSnoozeDate(date: Date): string {
-    return new Intl.DateTimeFormat("default", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(date);
-  }
 
   function handleSnooze(until: Date) {
     setOpen(false);
@@ -337,7 +308,7 @@ function InboxSnoozeMenu({ emailId }: { emailId: string }) {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={(v) => { setOpen(v); if (v) setPresets(getSnoozePresets()); }}>
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
@@ -345,7 +316,7 @@ function InboxSnoozeMenu({ emailId }: { emailId: string }) {
                 type="button"
                 disabled={isPending}
                 className={cn(
-                  "hidden md:flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors",
+                  "flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors",
                   isPending && "opacity-50 pointer-events-none",
                 )}
               >
@@ -362,7 +333,7 @@ function InboxSnoozeMenu({ emailId }: { emailId: string }) {
               onClick={() => handleSnooze(date)}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors"
             >
-              {t(labelKey as "laterToday")}
+              {t(labelKey)}
             </button>
           ))}
         </PopoverContent>
@@ -415,7 +386,7 @@ function InboxMoveToMenu({ emailId }: { emailId: string }) {
           type="button"
           disabled={isPending}
           className={cn(
-            "hidden md:flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors",
+            "flex items-center gap-1.5 px-3 py-2 h-9 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors",
             isPending && "opacity-50 pointer-events-none",
           )}
         >

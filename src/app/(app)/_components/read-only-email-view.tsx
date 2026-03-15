@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -22,6 +22,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { toast } from "sonner";
 import { moveEmailAction } from "@/app/(app)/_actions/move-email";
 import { snoozeEmailAction } from "@/app/(app)/_actions/snooze-email";
+import { getSnoozePresets, formatSnoozeDate, type SnoozePresetKey } from "@/lib/snooze";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -161,26 +162,6 @@ function MoveToMenu({
 // SnoozeMenu
 // ---------------------------------------------------------------------------
 
-function getSnoozePresets(): { labelKey: string; date: Date }[] {
-  const now = new Date();
-  const laterToday = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(9, 0, 0, 0);
-
-  const nextMonday = new Date(now);
-  const daysUntilMonday = (8 - nextMonday.getDay()) % 7 || 7;
-  nextMonday.setDate(nextMonday.getDate() + daysUntilMonday);
-  nextMonday.setHours(9, 0, 0, 0);
-
-  return [
-    { labelKey: "laterToday", date: laterToday },
-    { labelKey: "tomorrowMorning", date: tomorrow },
-    { labelKey: "nextWeek", date: nextMonday },
-  ];
-}
-
 function SnoozeMenu({
   emailId,
   backPath,
@@ -191,17 +172,8 @@ function SnoozeMenu({
   const t = useTranslations("pages.snooze");
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [presets, setPresets] = useState(getSnoozePresets);
   const [isPending, startTransition] = useTransition();
-
-  function formatSnoozeDate(date: Date): string {
-    return new Intl.DateTimeFormat("default", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(date);
-  }
 
   function handleSnooze(until: Date) {
     setOpen(false);
@@ -222,11 +194,9 @@ function SnoozeMenu({
     });
   }
 
-  const presets = useMemo(() => getSnoozePresets(), []);
-
   return (
     <TooltipProvider delayDuration={300}>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={(v) => { setOpen(v); if (v) setPresets(getSnoozePresets()); }}>
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger asChild>
@@ -251,7 +221,7 @@ function SnoozeMenu({
               onClick={() => handleSnooze(date)}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-foreground/70 hover:bg-secondary hover:text-foreground transition-colors"
             >
-              {t(labelKey as "laterToday")}
+              {t(labelKey)}
             </button>
           ))}
         </PopoverContent>
