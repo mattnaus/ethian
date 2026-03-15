@@ -108,6 +108,8 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
   const hasOwnButton =
     pathname === "/inbox" ||
     pathname.startsWith("/inbox/") ||
+    pathname === "/drafts" ||
+    pathname.startsWith("/drafts/") ||
     pathname === "/gatekeeper" ||
     pathname.startsWith("/gatekeeper/") ||
     pathname === "/gatekept" ||
