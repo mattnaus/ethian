@@ -10,7 +10,7 @@ import {
   Clock,
   Send,
   Trash2,
-  ShieldQuestion,
+  ShieldCheck,
   Settings,
   PanelLeftOpen,
   PanelLeftClose,
@@ -105,7 +105,7 @@ export function Sidebar() {
     { href: "/snoozed", label: t("snoozed"), icon: Clock },
     { href: "/sent", label: t("sent"), icon: Send },
     { href: "/trash", label: t("trash"), icon: Trash2 },
-    { href: "/gatekeeper", label: t("gatekeeper"), icon: ShieldQuestion, dividerBefore: true },
+    { href: "/gatekept", label: t("gatekept"), icon: ShieldCheck, dividerBefore: true },
   ];
 
   const settingsActive =

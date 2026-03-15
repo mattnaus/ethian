@@ -12,7 +12,7 @@ import {
   Clock,
   Send,
   Trash2,
-  ShieldQuestion,
+  ShieldCheck,
   Settings,
   FileText,
 } from "lucide-react";
@@ -93,7 +93,7 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
     { href: "/snoozed", label: t("snoozed"), icon: Clock },
     { href: "/sent", label: t("sent"), icon: Send },
     { href: "/trash", label: t("trash"), icon: Trash2 },
-    { href: "/gatekeeper", label: t("gatekeeper"), icon: ShieldQuestion, dividerBefore: true },
+    { href: "/gatekept", label: t("gatekept"), icon: ShieldCheck, dividerBefore: true },
   ];
 
   function open() {
@@ -110,6 +110,8 @@ export function MobileNavProvider({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/inbox/") ||
     pathname === "/gatekeeper" ||
     pathname.startsWith("/gatekeeper/") ||
+    pathname === "/gatekept" ||
+    pathname.startsWith("/gatekept/") ||
     pathname === "/compose" ||
     pathname.startsWith("/compose/");
 
