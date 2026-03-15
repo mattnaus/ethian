@@ -179,7 +179,10 @@ export function GatekeeperCard({
               isHtml ? (
                 <div
                   className="prose prose-invert prose-sm max-w-none text-foreground/90 [&_a]:text-primary max-h-80 overflow-y-auto scrollbar-none"
-                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(bodyContent) }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(bodyContent, {
+                    FORBID_TAGS: ["form", "style", "meta", "script", "iframe", "object", "embed"],
+                    FORBID_ATTR: ["action", "formaction", "http-equiv", "xlink:href"],
+                  }) }}
                 />
               ) : (
                 <pre className="text-sm text-foreground/90 whitespace-pre-wrap font-sans leading-relaxed max-h-80 overflow-y-auto scrollbar-none">

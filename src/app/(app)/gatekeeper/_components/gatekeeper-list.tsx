@@ -148,8 +148,8 @@ export function GatekeeperList({
   // Expandable preview state
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const previewCache = useRef<Map<string, PreviewData>>(new Map());
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const [previewError, setPreviewError] = useState(false);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [errorId, setErrorId] = useState<string | null>(null);
 
   const toggleExpand = useCallback(async (id: string) => {
     if (expandedId === id) {
@@ -157,11 +157,11 @@ export function GatekeeperList({
       return;
     }
     setExpandedId(id);
-    setPreviewError(false);
+    setErrorId(null);
 
     if (previewCache.current.has(id)) return;
 
-    setPreviewLoading(true);
+    setLoadingId(id);
     try {
       const result = await fetchGatekeeperPreview(id);
       if (result.success) {
@@ -170,14 +170,16 @@ export function GatekeeperList({
           bodyText: result.bodyText ?? null,
         });
       } else {
-        setPreviewError(true);
+        setErrorId(id);
+        toast.error(t("previewError"));
       }
     } catch {
-      setPreviewError(true);
+      setErrorId(id);
+      toast.error(t("previewError"));
     } finally {
-      setPreviewLoading(false);
+      setLoadingId((prev) => (prev === id ? null : prev));
     }
-  }, [expandedId]);
+  }, [expandedId, t]);
 
   const [activeAccounts, setActiveAccounts] = useState<Set<string>>(
     new Set(accounts.map((a) => a.id)),
@@ -368,8 +370,8 @@ export function GatekeeperList({
                         locale={locale}
                         expanded={expandedId === email.id}
                         preview={previewCache.current.get(email.id) ?? null}
-                        previewLoading={expandedId === email.id && previewLoading}
-                        previewError={expandedId === email.id && previewError}
+                        previewLoading={loadingId === email.id}
+                        previewError={errorId === email.id}
                         onToggleExpand={() => toggleExpand(email.id)}
                       />
                       <div className="flex gap-2 md:contents">
