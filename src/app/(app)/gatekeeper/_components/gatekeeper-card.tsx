@@ -40,6 +40,7 @@ export function GatekeeperCard({
   previewLoading,
   previewError,
   onToggleExpand,
+  actions,
 }: {
   email: GatekeeperEmail;
   locale: string;
@@ -48,6 +49,7 @@ export function GatekeeperCard({
   previewLoading: boolean;
   previewError: boolean;
   onToggleExpand: () => void;
+  actions?: React.ReactNode;
 }) {
   const t = useTranslations("pages.gatekeeper");
   const initials = getInitials(email.fromName, email.fromAddress);
@@ -192,6 +194,11 @@ export function GatekeeperCard({
             ) : (
               <p className="text-sm text-muted-foreground italic">{t("previewNoBody")}</p>
             )
+          )}
+          {actions && (
+            <div className="flex gap-2 mt-4">
+              {actions}
+            </div>
           )}
         </div>
       )}
