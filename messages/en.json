@@ -229,7 +229,13 @@
       "comingSoon": "Snoozed \u2014 coming soon"
     },
     "sent": {
-      "comingSoon": "Sent \u2014 coming soon"
+      "title": "Sent",
+      "empty": "No sent messages yet",
+      "noSubject": "(no subject)",
+      "noRecipient": "(no recipient)",
+      "sentCount": "{count, plural, one {# message} other {# messages}}",
+      "searchPlaceholder": "Search sent...",
+      "showingOf": "Showing {shown} of {total}"
     },
     "trash": {
       "comingSoon": "Trash \u2014 coming soon"
