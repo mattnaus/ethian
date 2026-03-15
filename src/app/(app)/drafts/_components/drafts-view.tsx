@@ -337,7 +337,13 @@ export function DraftsView({
                 <GroupDivider label={getGroupDisplayLabel(key)} />
                 <div className="flex flex-col gap-[4px] mb-2">
                   {groupDrafts.map((draft) => (
-                    <DraftCard key={draft.id} draft={draft} locale={locale} />
+                    <DraftCard
+                      key={draft.id}
+                      draft={draft}
+                      locale={locale}
+                      noSubjectLabel={t("noSubject")}
+                      noRecipientLabel={t("noRecipient")}
+                    />
                   ))}
                 </div>
               </div>

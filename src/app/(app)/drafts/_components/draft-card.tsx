@@ -25,14 +25,18 @@ export type DraftEmail = {
 export function DraftCard({
   draft,
   locale,
+  noSubjectLabel,
+  noRecipientLabel,
 }: {
   draft: DraftEmail;
   locale: string;
+  noSubjectLabel: string;
+  noRecipientLabel: string;
 }) {
   const recipients = draft.toAddresses
     .map((r) => r.name?.trim() || r.address)
     .join(", ");
-  const displayName = recipients || "Draft";
+  const displayName = recipients || noRecipientLabel;
   const initials = getInitials(recipients ? draft.toAddresses[0]?.name ?? null : null, draft.toAddresses[0]?.address ?? "D");
   const ringColor = safeColor(draft.accountColor);
 
@@ -80,7 +84,7 @@ export function DraftCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2 min-w-0 text-sm">
           <span className="shrink min-w-0 truncate max-w-full md:max-w-[66%] text-foreground/80">
-            {draft.subject || "(no subject)"}
+            {draft.subject || noSubjectLabel}
           </span>
           {draft.snippet && (
             <span className="hidden md:inline flex-1 min-w-0 truncate text-muted-foreground">

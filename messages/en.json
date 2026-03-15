@@ -238,6 +238,7 @@
       "title": "Drafts",
       "empty": "No drafts yet.",
       "noSubject": "(no subject)",
+      "noRecipient": "Draft",
       "to": "To:",
       "draftCount": "{count, plural, one {# draft} other {# drafts}}",
       "searchPlaceholder": "Search drafts\u2026",
