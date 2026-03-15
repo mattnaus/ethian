@@ -165,8 +165,8 @@ export function ComposeView({
         draftId: currentDraftId ?? undefined,
       });
       if (result.success) {
-        setCurrentDraftId(result.draftId);
         toast.success(t("draftSaved"));
+        router.push(`/drafts/${result.draftId}`);
       } else {
         toast.error(t("draftSaveFailed"));
       }

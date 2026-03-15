@@ -47,7 +47,7 @@ export function DraftCard({
 
   return (
     <Link
-      href={`/compose?draft=${draft.id}`}
+      href={`/drafts/${draft.id}`}
       tabIndex={0}
       className={cn(
         "group relative flex flex-col gap-3 rounded-xl p-4 transition-all cursor-pointer",

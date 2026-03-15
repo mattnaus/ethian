@@ -265,6 +265,20 @@
       "changeSignature": "Change signature",
       "removeSignature": "Remove signature"
     },
+    "draftDetail": {
+      "back": "Back",
+      "noSubject": "(no subject)",
+      "noRecipient": "(no recipient)",
+      "toLabel": "To:",
+      "draftLabel": "Draft",
+      "editDraft": "Edit",
+      "discardDraft": "Discard",
+      "sendDraft": "Send",
+      "discardFailed": "Failed to discard draft. Please try again.",
+      "sendFailed": "Failed to send. Please try again.",
+      "sendPartialWarning": "Sent, but couldn't be saved locally.",
+      "moreOptions": "More options"
+    },
     "emailDetail": {
       "back": "Back",
       "to": "To:",
