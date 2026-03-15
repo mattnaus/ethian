@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useState, useMemo, useTransition, useCallback, useRef } from "react";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { GatekeeperCard, type GatekeeperEmail } from "./gatekeeper-card";
+import { GatekeeperCard, type GatekeeperEmail, type PreviewData } from "./gatekeeper-card";
 import { useTranslations } from "next-intl";
 import { safeColor } from "@/lib/email-display";
 import { MobileMenuButton } from "@/app/(app)/_components/mobile-nav-context";
-import { makeGatekeeperDecision } from "../_actions/decisions";
+import { makeGatekeeperDecision, fetchGatekeeperPreview } from "../_actions/decisions";
 
 interface MailAccountFilter {
   id: string;
@@ -144,6 +144,40 @@ export function GatekeeperList({
   const [entries, setEntries] = useState(emails);
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
+
+  // Expandable preview state
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const previewCache = useRef<Map<string, PreviewData>>(new Map());
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState(false);
+
+  const toggleExpand = useCallback(async (id: string) => {
+    if (expandedId === id) {
+      setExpandedId(null);
+      return;
+    }
+    setExpandedId(id);
+    setPreviewError(false);
+
+    if (previewCache.current.has(id)) return;
+
+    setPreviewLoading(true);
+    try {
+      const result = await fetchGatekeeperPreview(id);
+      if (result.success) {
+        previewCache.current.set(id, {
+          bodyHtml: result.bodyHtml ?? null,
+          bodyText: result.bodyText ?? null,
+        });
+      } else {
+        setPreviewError(true);
+      }
+    } catch {
+      setPreviewError(true);
+    } finally {
+      setPreviewLoading(false);
+    }
+  }, [expandedId]);
 
   const [activeAccounts, setActiveAccounts] = useState<Set<string>>(
     new Set(accounts.map((a) => a.id)),
@@ -329,7 +363,15 @@ export function GatekeeperList({
                         pendingIds.has(email.id) && "opacity-40 pointer-events-none",
                       )}
                     >
-                      <GatekeeperCard email={email} locale={locale} />
+                      <GatekeeperCard
+                        email={email}
+                        locale={locale}
+                        expanded={expandedId === email.id}
+                        preview={previewCache.current.get(email.id) ?? null}
+                        previewLoading={expandedId === email.id && previewLoading}
+                        previewError={expandedId === email.id && previewError}
+                        onToggleExpand={() => toggleExpand(email.id)}
+                      />
                       <div className="flex gap-2 md:contents">
                         <button
                           onClick={() => handleDecision(email.id, "approved")}

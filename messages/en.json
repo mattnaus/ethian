@@ -188,7 +188,10 @@
       "messageCount": "{count, plural, one {# email} other {# emails}}",
       "approve": "Approve",
       "block": "Block",
-      "decisionFailed": "Something went wrong. Please try again."
+      "decisionFailed": "Something went wrong. Please try again.",
+      "previewLoading": "Loading preview…",
+      "previewError": "Could not load preview.",
+      "previewNoBody": "No message body available."
     },
     "gatekept": {
       "title": "Gatekept",

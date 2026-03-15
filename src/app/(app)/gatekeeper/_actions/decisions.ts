@@ -14,6 +14,32 @@ const decisionToCategory: Record<GatekeeperDecision, EmailCategory> = {
   blocked: "trash",
 };
 
+export async function fetchGatekeeperPreview(
+  screenerQueueId: string,
+): Promise<{ success: boolean; bodyHtml?: string | null; bodyText?: string | null; error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+
+  const [row] = await db
+    .select({
+      bodyHtml: emails.bodyHtml,
+      bodyText: emails.bodyText,
+    })
+    .from(screenerQueue)
+    .innerJoin(emails, eq(screenerQueue.emailId, emails.id))
+    .where(
+      and(
+        eq(screenerQueue.id, screenerQueueId),
+        eq(screenerQueue.userId, session.user.id),
+      ),
+    )
+    .limit(1);
+
+  if (!row) return { success: false, error: "Not found" };
+
+  return { success: true, bodyHtml: row.bodyHtml, bodyText: row.bodyText };
+}
+
 export async function makeGatekeeperDecision(
   screenerQueueId: string,
   decision: GatekeeperDecision,
