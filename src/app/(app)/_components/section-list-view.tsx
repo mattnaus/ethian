@@ -226,7 +226,7 @@ export function SectionListView<T extends SectionEmail>({
 
         {/* -- Desktop top bar -- */}
         <div className="hidden md:block mb-4">
-          <div className="relative flex items-center justify-between">
+          <div className="relative flex items-center justify-between h-9">
             {leftSlot ?? <div />}
 
             {/* Center: Mailbox filter + Search */}
