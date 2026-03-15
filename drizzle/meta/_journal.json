@@ -36,6 +36,20 @@
       "when": 1773555903901,
       "tag": "0004_chief_hawkeye",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1773582193096,
+      "tag": "0005_nostalgic_green_goblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1773583085081,
+      "tag": "0006_brainy_arclight",
+      "breakpoints": true
     }
   ]
 }
